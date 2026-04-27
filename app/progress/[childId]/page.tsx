@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProgressTracker from "@/components/ProgressTracker";
 import { isRepeatedStruggle, summarize } from "@/lib/progressEngine";
-import { getServerSupabase } from "@/lib/supabaseServer";
+import { getServerSupabase } from "@/lib/supabase/server";
 import type { ProgressRecord } from "@/types/progress";
 
 export const dynamic = "force-dynamic";

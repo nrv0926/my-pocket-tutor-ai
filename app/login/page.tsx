@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { getBrowserSupabase } from "@/lib/supabaseBrowser";
+import { getBrowserSupabase } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const params = useSearchParams();

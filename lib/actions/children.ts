@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { ensureUserRow, getServerSupabase } from "@/lib/supabaseServer";
+import { ensureUserRow, getServerSupabase } from "@/lib/supabase/server";
 import type { ChildInput } from "@/types/child";
 
 const ChildInputSchema = z.object({

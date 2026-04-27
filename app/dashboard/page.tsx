@@ -1,6 +1,6 @@
 import Link from "next/link";
 import ProgressTracker from "@/components/ProgressTracker";
-import { getServerSupabase } from "@/lib/supabaseServer";
+import { getServerSupabase } from "@/lib/supabase/server";
 import { summarize } from "@/lib/progressEngine";
 import type { ProgressRecord } from "@/types/progress";
 

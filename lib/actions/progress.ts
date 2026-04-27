@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { getServerSupabase } from "@/lib/supabaseServer";
+import { getServerSupabase } from "@/lib/supabase/server";
 import type { ParentFeedback, SkillStatus } from "@/types/progress";
 import type { Difficulty } from "@/types/session";
 

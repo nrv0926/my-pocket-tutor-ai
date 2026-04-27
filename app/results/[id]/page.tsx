@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AnalysisResultCard from "@/components/AnalysisResultCard";
 import WorksheetClient from "@/app/worksheet/[id]/WorksheetClient";
-import { getServerSupabase } from "@/lib/supabaseServer";
+import { getServerSupabase } from "@/lib/supabase/server";
 import type { AnalysisResult, Worksheet } from "@/types/session";
 
 export const dynamic = "force-dynamic";

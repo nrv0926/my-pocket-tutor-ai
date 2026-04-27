@@ -1,4 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+import "server-only";
+
+import { getAdminSupabase } from "@/lib/supabase/admin";
 
 /**
  * Server-only upload helpers. The browser never imports this file.
@@ -24,16 +26,6 @@ const ALLOWED_MIME = new Set([
   "text/plain",
 ]);
 
-/** Server-side admin client. ONLY used inside server actions / API routes. */
-function admin() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) {
-    throw new Error("Supabase service role env vars are not set.");
-  }
-  return createClient(url, key, { auth: { persistSession: false } });
-}
-
 export interface CreateUploadInput {
   userId: string;
   childId: string;
@@ -57,7 +49,7 @@ export async function createSignedUploadUrl(input: CreateUploadInput) {
   // (see supabase/policies.sql) permits it.
   const path = `${input.userId}/${input.childId}/${crypto.randomUUID()}-${safeName}`;
 
-  const { data, error } = await admin().storage
+  const { data, error } = await getAdminSupabase().storage
     .from(BUCKET)
     .createSignedUploadUrl(path);
 
@@ -66,7 +58,7 @@ export async function createSignedUploadUrl(input: CreateUploadInput) {
 }
 
 export async function deleteUpload(path: string) {
-  const { error } = await admin().storage.from(BUCKET).remove([path]);
+  const { error } = await getAdminSupabase().storage.from(BUCKET).remove([path]);
   if (error) throw error;
 }
 
