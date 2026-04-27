@@ -101,6 +101,11 @@ function safeJsonParse<T>(text: string, version: string): T {
   // Some prompts still leak ```json fences despite the instruction; strip.
   const cleaned = text.replace(/^```(?:json)?|```$/gim, "").trim();
   try {
+    // TODO (post-MVP): replace this manual parse with Zod schema validation
+    // (or Anthropic's `output_config.format` + `client.messages.parse`) so
+    // the response is guaranteed to match the prompt's contract — and
+    // bad shapes fail loudly with field-level errors instead of silently
+    // type-asserting downstream.
     return JSON.parse(cleaned) as T;
   } catch {
     throw new Error(

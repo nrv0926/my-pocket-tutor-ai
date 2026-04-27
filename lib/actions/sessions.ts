@@ -1,5 +1,6 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { generate } from "@/lib/aiService";
@@ -9,6 +10,19 @@ import { getServerSupabase } from "@/lib/supabaseClient";
 import type { Grade, LearningNeed, Subject } from "@/types/child";
 import type { AnalysisResult, SessionInputType } from "@/types/session";
 
+/**
+ * Single end-to-end MVP path:
+ *
+ *   paste text  →  call generate()  →  save the session  →  /results/[id]
+ *
+ * Inputs validated. RLS scopes child reads to the parent. Uploaded files
+ * are not handled here — the input is plain text only at MVP.
+ *
+ * TODO (post-MVP): replace the manual JSON.parse in aiService.generate()
+ * with a Zod-validated structured output (output_config.format /
+ * client.messages.parse). Also turn this AnalysisResultSchema into the
+ * source of truth for the prompt's expected shape.
+ */
 const InputSchema = z.object({
   childId: z.string().uuid(),
   inputType: z.enum(["paste", "upload", "description", "plan"]),
@@ -21,7 +35,7 @@ export async function createLearningSession(input: {
   inputType: SessionInputType;
   subject: Subject;
   text: string;
-}): Promise<{ id: string }> {
+}) {
   const parsed = InputSchema.parse(input);
 
   const supabase = getServerSupabase();
@@ -30,8 +44,8 @@ export async function createLearningSession(input: {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not signed in.");
 
-  // Load the child via RLS — this fails (no row) if the child doesn't belong
-  // to this parent, so we don't need a separate ownership check.
+  // RLS: this select returns no rows if the child isn't this parent's, so
+  // we don't need a separate ownership check.
   const { data: child, error: childErr } = await supabase
     .from("children")
     .select("grade, age, curriculum, learning_needs, strengths, weaknesses, parent_goal")
@@ -58,6 +72,8 @@ export async function createLearningSession(input: {
           parentInput: parsed.text,
         });
 
+  // TODO (post-MVP): pass a Zod schema here so generate() returns a
+  // type-safe AnalysisResult instead of the manual cast below.
   const result = await generate<AnalysisResult>({
     system: prompt.system,
     user: prompt.user,
@@ -88,5 +104,8 @@ export async function createLearningSession(input: {
 
   revalidatePath("/dashboard");
   revalidatePath(`/progress/${parsed.childId}`);
-  return { id: inserted.id };
+
+  // redirect() throws an internal NEXT_REDIRECT signal — the calling
+  // client component must rethrow it (see NewSessionForm catch block).
+  redirect(`/results/${inserted.id}`);
 }

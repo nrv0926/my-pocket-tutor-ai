@@ -1,11 +1,21 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import LoadingState from "@/components/LoadingState";
 import { createLearningSession } from "@/lib/actions/sessions";
 import type { Subject } from "@/types/child";
 import type { SessionInputType } from "@/types/session";
+
+/** Server actions throw this internal signal when they call redirect(). */
+function isRedirectSignal(err: unknown): boolean {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "digest" in err &&
+    typeof (err as { digest: unknown }).digest === "string" &&
+    (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+  );
+}
 
 type ChildOption = { id: string; nickname: string; grade: string };
 
@@ -25,7 +35,6 @@ const MODES: { id: SessionInputType; title: string; desc: string; placeholder: s
 ];
 
 export default function NewSessionForm({ children }: { children: ChildOption[] }) {
-  const router = useRouter();
   const [childId, setChildId] = useState(children[0]?.id ?? "");
   const [mode, setMode] = useState<SessionInputType>("paste");
   const [subject, setSubject] = useState<Subject>("reading");
@@ -43,15 +52,15 @@ export default function NewSessionForm({ children }: { children: ChildOption[] }
         setSubmitting(true);
         setError(null);
         try {
-          const { id } = await createLearningSession({
+          await createLearningSession({
             childId,
             inputType: mode,
             subject,
             text: text.trim(),
           });
-          router.push(`/results/${id}`);
-          router.refresh();
+          // createLearningSession redirects to /results/[id] internally.
         } catch (err) {
+          if (isRedirectSignal(err)) throw err;
           setError(err instanceof Error ? err.message : "Could not create session.");
         } finally {
           setSubmitting(false);
