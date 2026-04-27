@@ -48,8 +48,8 @@ already trying their best.
 - **Next.js 14** (App Router) + **React 18** + **TypeScript**
 - **Tailwind CSS**
 - **Supabase** — Postgres, Auth, Storage, Row-Level Security
-- **AI provider abstraction** — `lib/aiService.ts` swaps between Anthropic and
-  OpenAI via env var
+- **Claude** (Anthropic) via the official `@anthropic-ai/sdk`. All model
+  calls go through `lib/aiService.ts`; default model is `claude-opus-4-7`.
 - **Stripe** — placeholder only at MVP
 
 ## Project structure
@@ -102,8 +102,8 @@ See `.env.example` for the complete list. The minimum to run the UI is:
 | `NEXT_PUBLIC_SUPABASE_URL`        | Supabase project URL               |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY`   | Browser-safe anon key              |
 | `SUPABASE_SERVICE_ROLE_KEY`       | Server-only — never expose         |
-| `AI_PROVIDER`                     | `anthropic` or `openai`            |
-| `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | One of the two                |
+| `ANTHROPIC_API_KEY`               | Claude API key (omit → stub mode)  |
+| `ANTHROPIC_MODEL`                 | Defaults to `claude-opus-4-7`      |
 
 ## Database setup
 

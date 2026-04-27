@@ -82,14 +82,14 @@ be stored even by accident through our forms.
 
 ## AI provider boundary
 
-- All model calls go through `lib/aiService.ts`. Page code never imports a
-  provider SDK directly.
+- All model calls go through `lib/aiService.ts`. Page code never imports the
+  Anthropic SDK directly.
+- We use Claude (Anthropic) only. Anthropic's API does not train on
+  customer data by default — see Anthropic's commercial terms.
 - Prompts include an explicit instruction to **ignore and never repeat**
   personal identifiers.
-- We send the **provider** the minimum context needed: the child's
-  age/grade/needs/goal, plus the document text or parent's description.
-- We set provider flags that disable training on customer data
-  (Anthropic + OpenAI both expose this; see `lib/aiService.ts`).
+- We send Claude the minimum context needed: the child's age, grade,
+  learning needs, parent goal, plus the document text or parent's description.
 - We do not send the parent's email or auth token to the model.
 
 ## Logging

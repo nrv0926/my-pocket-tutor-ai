@@ -65,8 +65,8 @@ this in the database) and you can delete it at any time from Settings.
   data.
 - We tell the AI to ignore and never repeat any personal identifier it might
   see anyway.
-- We use providers (Anthropic / OpenAI) with a "do not train on customer
-  data" setting turned on.
+- We use Claude (made by Anthropic). Anthropic does not train on customer
+  data submitted through the API.
 
 ## Who can see your data
 
