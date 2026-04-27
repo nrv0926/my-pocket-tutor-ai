@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import WorksheetClient from "./WorksheetClient";
-import { getServerSupabase } from "@/lib/supabaseClient";
+import { getServerSupabase } from "@/lib/supabaseServer";
 import type { Worksheet } from "@/types/session";
 
 export const dynamic = "force-dynamic";

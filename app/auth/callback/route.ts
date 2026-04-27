@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { ensureUserRow, getServerSupabase } from "@/lib/supabaseClient";
+import { ensureUserRow, getServerSupabase } from "@/lib/supabaseServer";
 
 /**
  * Magic-link landing route.

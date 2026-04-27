@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/supabaseClient";
+import { getCurrentUser } from "@/lib/supabaseServer";
 
 export default async function Header() {
   const user = await getCurrentUser();

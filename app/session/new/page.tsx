@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import NewSessionForm from "./NewSessionForm";
-import { getServerSupabase } from "@/lib/supabaseClient";
+import { getServerSupabase } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
 

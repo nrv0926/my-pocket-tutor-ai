@@ -1,16 +1,7 @@
-import { createBrowserClient, createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import "server-only";
 
-/**
- * Browser-side Supabase client (anon key only). RLS is the source of truth.
- * Use inside `"use client"` components.
- */
-export function getBrowserSupabase() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-}
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 /**
  * Server-side Supabase client scoped to the LOGGED-IN USER's session cookie.
@@ -20,6 +11,9 @@ export function getBrowserSupabase() {
  *  - Server Actions and Route Handlers (set/remove succeed)
  *
  * Never imports the service role key. RLS enforces per-row access.
+ *
+ * `import "server-only"` at the top makes Next throw a build-time error if
+ * any client component accidentally imports this file.
  */
 export function getServerSupabase() {
   const cookieStore = cookies();

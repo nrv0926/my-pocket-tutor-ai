@@ -6,7 +6,7 @@ import { z } from "zod";
 import { generate } from "@/lib/aiService";
 import { buildAnalysisPrompt, buildReportCardPrompt } from "@/lib/prompts";
 import { mapToSkillIds } from "@/lib/skillGapEngine";
-import { getServerSupabase } from "@/lib/supabaseClient";
+import { getServerSupabase } from "@/lib/supabaseServer";
 import type { Grade, LearningNeed, Subject } from "@/types/child";
 import type { AnalysisResult, SessionInputType } from "@/types/session";
 
