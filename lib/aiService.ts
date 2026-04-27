@@ -18,13 +18,14 @@ import type { AnalysisResult } from "@/types/session";
  *
  * Per the Claude API guidance for Opus 4.7:
  * - No `temperature`, `top_p`, `top_k` (the API rejects them).
- * - No `budget_tokens` (removed; thinking is adaptive only and off by default).
  * - We default to thinking OFF for low latency on parent-facing analysis;
  *   route operators can flip it on per request via `enableThinking: true`.
+ *   When enabled, we send a fixed budget (must be < max_tokens).
  */
 
 const DEFAULT_MODEL = "claude-opus-4-7";
 const DEFAULT_MAX_TOKENS = 16_000;
+const DEFAULT_THINKING_BUDGET = 8_000;
 
 let _client: Anthropic | null = null;
 function client(): Anthropic {
@@ -74,7 +75,7 @@ async function callClaude<T>(req: AIRequest): Promise<T> {
       ],
       messages: [{ role: "user", content: req.user }],
       ...(req.enableThinking
-        ? { thinking: { type: "adaptive" as const } }
+        ? { thinking: { type: "enabled" as const, budget_tokens: DEFAULT_THINKING_BUDGET } }
         : {}),
     });
 
