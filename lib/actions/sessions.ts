@@ -1,0 +1,92 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { generate } from "@/lib/aiService";
+import { buildAnalysisPrompt, buildReportCardPrompt } from "@/lib/prompts";
+import { mapToSkillIds } from "@/lib/skillGapEngine";
+import { getServerSupabase } from "@/lib/supabaseClient";
+import type { Grade, LearningNeed, Subject } from "@/types/child";
+import type { AnalysisResult, SessionInputType } from "@/types/session";
+
+const InputSchema = z.object({
+  childId: z.string().uuid(),
+  inputType: z.enum(["paste", "upload", "description", "plan"]),
+  subject: z.enum(["language", "reading", "writing", "math"]),
+  text: z.string().min(5).max(8000),
+});
+
+export async function createLearningSession(input: {
+  childId: string;
+  inputType: SessionInputType;
+  subject: Subject;
+  text: string;
+}): Promise<{ id: string }> {
+  const parsed = InputSchema.parse(input);
+
+  const supabase = getServerSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in.");
+
+  // Load the child via RLS — this fails (no row) if the child doesn't belong
+  // to this parent, so we don't need a separate ownership check.
+  const { data: child, error: childErr } = await supabase
+    .from("children")
+    .select("grade, age, curriculum, learning_needs, strengths, weaknesses, parent_goal")
+    .eq("id", parsed.childId)
+    .single();
+  if (childErr || !child) throw new Error("Child not found.");
+
+  const childForPrompt = {
+    grade: child.grade as Grade,
+    age: child.age ?? null,
+    curriculum: child.curriculum as "ontario" | "common-core" | "other",
+    learningNeeds: (child.learning_needs ?? []) as LearningNeed[],
+    strengths: child.strengths ?? null,
+    weaknesses: child.weaknesses ?? null,
+    parentGoal: child.parent_goal ?? null,
+  };
+
+  const prompt =
+    parsed.inputType === "paste"
+      ? buildReportCardPrompt({ child: childForPrompt, reportText: parsed.text })
+      : buildAnalysisPrompt({
+          child: childForPrompt,
+          subject: parsed.subject,
+          parentInput: parsed.text,
+        });
+
+  const result = await generate<AnalysisResult>({
+    system: prompt.system,
+    user: prompt.user,
+    promptVersion: prompt.version,
+  });
+
+  const skillIds = mapToSkillIds(result);
+
+  const { data: inserted, error: insertErr } = await supabase
+    .from("learning_sessions")
+    .insert({
+      child_id: parsed.childId,
+      input_type: parsed.inputType,
+      subject: parsed.subject,
+      raw_input: parsed.text,
+      analysis_result: result,
+      top_skill_gaps: skillIds.length > 0 ? skillIds : result.whatToTeachNext,
+      worksheet: result.practiceWorksheet,
+      answer_key: result.answerKey,
+      difficulty: result.practiceWorksheet.difficulty,
+    })
+    .select("id")
+    .single();
+
+  if (insertErr || !inserted) {
+    throw new Error(`Could not save session: ${insertErr?.message ?? "unknown error"}`);
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/progress/${parsed.childId}`);
+  return { id: inserted.id };
+}

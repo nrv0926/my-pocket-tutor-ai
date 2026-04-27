@@ -52,6 +52,18 @@ export default function SettingsPage() {
         </Link>
       </section>
 
+      <section className="mb-6 rounded-2xl border border-cream-300 bg-white p-5 shadow-card">
+        <h2 className="font-serif text-lg text-ink">Sign out</h2>
+        <form action="/auth/signout" method="post" className="mt-3">
+          <button
+            type="submit"
+            className="rounded-full border border-cream-300 px-4 py-2 text-sm font-medium text-ink hover:bg-cream-50"
+          >
+            Sign out of this device
+          </button>
+        </form>
+      </section>
+
       <section className="rounded-2xl border border-amber-300 bg-amber-50 p-5">
         <h2 className="font-serif text-lg text-ink">Delete account</h2>
         <p className="mt-2 text-sm text-ink-soft">

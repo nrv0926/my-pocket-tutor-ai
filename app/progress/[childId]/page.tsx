@@ -1,15 +1,47 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import ProgressTracker from "@/components/ProgressTracker";
 import { summarize } from "@/lib/progressEngine";
+import { getServerSupabase } from "@/lib/supabaseClient";
 import type { ProgressRecord } from "@/types/progress";
 
-export default function ChildProgressPage({
+export const dynamic = "force-dynamic";
+
+export default async function ChildProgressPage({
   params,
 }: {
   params: { childId: string };
 }) {
-  // TODO: load from progress_records WHERE child_id = params.childId (RLS)
-  const records: ProgressRecord[] = MOCK_RECORDS;
+  const supabase = getServerSupabase();
+
+  const [childRes, recordsRes] = await Promise.all([
+    supabase
+      .from("children")
+      .select("id, nickname, grade, location")
+      .eq("id", params.childId)
+      .single(),
+    supabase
+      .from("progress_records")
+      .select("id, child_id, session_id, skill, status, difficulty, parent_feedback, completed_independently, notes, created_at")
+      .eq("child_id", params.childId)
+      .order("created_at", { ascending: false }),
+  ]);
+
+  if (childRes.error || !childRes.data) notFound();
+  const child = childRes.data;
+
+  const records: ProgressRecord[] = (recordsRes.data ?? []).map((r) => ({
+    id: r.id,
+    childId: r.child_id,
+    sessionId: r.session_id,
+    skill: r.skill,
+    status: r.status,
+    difficulty: r.difficulty,
+    parentFeedback: r.parent_feedback,
+    completedIndependently: r.completed_independently,
+    notes: r.notes,
+    createdAt: r.created_at,
+  }));
   const summary = summarize(records);
 
   return (
@@ -17,9 +49,12 @@ export default function ChildProgressPage({
       <header className="mb-6 flex items-end justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-forest-600">
-            Progress · child {params.childId}
+            Progress · {child.nickname}
           </p>
           <h1 className="mt-1 font-serif text-3xl text-ink">How things are going.</h1>
+          <p className="mt-1 text-sm text-ink-muted">
+            Grade {child.grade} · {child.location}
+          </p>
         </div>
         <Link
           href="/session/new"
@@ -47,6 +82,11 @@ export default function ChildProgressPage({
                       {r.parentFeedback.replaceAll("_", " ")}
                     </span>
                   )}
+                  {r.completedIndependently === true && (
+                    <span className="rounded-full bg-forest-50 px-2 py-0.5 text-xs text-forest-600">
+                      independent
+                    </span>
+                  )}
                 </span>
               </li>
             ))}
@@ -56,24 +96,3 @@ export default function ChildProgressPage({
     </div>
   );
 }
-
-const MOCK_RECORDS: ProgressRecord[] = [
-  {
-    id: "p1", childId: "demo-1", sessionId: "s1",
-    skill: "phonics.blends", status: "practiced",
-    difficulty: "easy", parentFeedback: "just_right",
-    completedIndependently: true, notes: null, createdAt: "2026-04-26",
-  },
-  {
-    id: "p2", childId: "demo-1", sessionId: "s2",
-    skill: "phonics.cvc", status: "mastered",
-    difficulty: "easy", parentFeedback: "too_easy",
-    completedIndependently: true, notes: null, createdAt: "2026-04-25",
-  },
-  {
-    id: "p3", childId: "demo-1", sessionId: "s3",
-    skill: "math.place_value_100", status: "struggling",
-    difficulty: "medium", parentFeedback: "too_hard",
-    completedIndependently: false, notes: null, createdAt: "2026-04-24",
-  },
-];

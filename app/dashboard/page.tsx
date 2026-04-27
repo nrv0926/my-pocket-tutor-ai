@@ -1,15 +1,53 @@
 import Link from "next/link";
 import ProgressTracker from "@/components/ProgressTracker";
-import type { ProgressSummary } from "@/types/progress";
+import { getServerSupabase } from "@/lib/supabaseClient";
+import { summarize } from "@/lib/progressEngine";
+import type { ProgressRecord } from "@/types/progress";
 
-/**
- * Server component shell. Real data wiring (Supabase) lands in Phase 1.5.
- * Today it renders empty/mock state so the layout is reviewable.
- */
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
-  const children = MOCK_CHILDREN;
-  const recent = MOCK_RECENT;
-  const summary = MOCK_SUMMARY;
+  const supabase = getServerSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  // Middleware already redirected unauthenticated users; keep this for safety.
+  if (!user) return null;
+
+  // Pull the parent's children, recent sessions, and progress records in
+  // parallel. RLS scopes everything to this auth.uid().
+  const [childrenRes, sessionsRes, progressRes] = await Promise.all([
+    supabase
+      .from("children")
+      .select("id, nickname, grade, location")
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("learning_sessions")
+      .select("id, child_id, subject, created_at, analysis_result")
+      .order("created_at", { ascending: false })
+      .limit(8),
+    supabase
+      .from("progress_records")
+      .select("id, child_id, session_id, skill, status, difficulty, parent_feedback, completed_independently, notes, created_at")
+      .order("created_at", { ascending: false })
+      .limit(50),
+  ]);
+
+  const children = childrenRes.data ?? [];
+  const sessions = sessionsRes.data ?? [];
+  const progressRows: ProgressRecord[] = (progressRes.data ?? []).map((r) => ({
+    id: r.id,
+    childId: r.child_id,
+    sessionId: r.session_id,
+    skill: r.skill,
+    status: r.status,
+    difficulty: r.difficulty,
+    parentFeedback: r.parent_feedback,
+    completedIndependently: r.completed_independently,
+    notes: r.notes,
+    createdAt: r.created_at,
+  }));
+  const summary = summarize(progressRows);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
@@ -19,6 +57,7 @@ export default async function DashboardPage() {
             Your dashboard
           </p>
           <h1 className="mt-1 font-serif text-3xl text-ink">Welcome back.</h1>
+          <p className="mt-1 text-sm text-ink-muted">{user.email}</p>
         </div>
         <Link
           href="/session/new"
@@ -58,33 +97,43 @@ export default async function DashboardPage() {
                   </Link>
                 </li>
               ))}
+              <li className="flex items-center justify-center rounded-2xl border border-dashed border-cream-300 bg-cream-50 p-5 text-sm text-ink-soft hover:border-forest-500">
+                <Link href="/children/new">+ Add another child</Link>
+              </li>
             </ul>
           )}
 
           <h2 className="mb-3 mt-8 font-serif text-xl text-ink">Recent sessions</h2>
-          {recent.length === 0 ? (
-            <p className="text-sm text-ink-muted">Your recent sessions will appear here.</p>
+          {sessions.length === 0 ? (
+            <p className="text-sm text-ink-muted">
+              Your recent sessions will appear here.
+            </p>
           ) : (
             <ul className="space-y-2">
-              {recent.map((s) => (
-                <li
-                  key={s.id}
-                  className="flex items-center justify-between rounded-xl border border-cream-300 bg-white p-4 text-sm shadow-card"
-                >
-                  <div>
-                    <p className="font-medium text-ink">{s.title}</p>
-                    <p className="text-xs text-ink-muted">
-                      {s.subject} · {s.createdAt}
-                    </p>
-                  </div>
-                  <Link
-                    href={`/results/${s.id}`}
-                    className="text-forest-500 hover:underline"
+              {sessions.map((s) => {
+                const title =
+                  (s.analysis_result as { whatINotice?: string } | null)?.whatINotice?.slice(0, 80) ??
+                  `${s.subject} session`;
+                return (
+                  <li
+                    key={s.id}
+                    className="flex items-center justify-between rounded-xl border border-cream-300 bg-white p-4 text-sm shadow-card"
                   >
-                    Open
-                  </Link>
-                </li>
-              ))}
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-ink">{title}</p>
+                      <p className="text-xs text-ink-muted">
+                        {s.subject} · {new Date(s.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                    <Link
+                      href={`/results/${s.id}`}
+                      className="ml-4 shrink-0 text-forest-500 hover:underline"
+                    >
+                      Open
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>
@@ -119,25 +168,3 @@ function EmptyState({
     </div>
   );
 }
-
-// Mock data — will be replaced with Supabase reads.
-const MOCK_CHILDREN = [
-  { id: "demo-1", nickname: "Bean", grade: "1", location: "ON-CA" },
-  { id: "demo-2", nickname: "R.",   grade: "3", location: "ON-CA" },
-];
-
-const MOCK_RECENT = [
-  { id: "sess-1", title: "Reading: blends + CVC warm-up", subject: "Reading", createdAt: "today" },
-  { id: "sess-2", title: "Math: place value to 100",      subject: "Math",    createdAt: "yesterday" },
-];
-
-const MOCK_SUMMARY: ProgressSummary = {
-  practicedCount: 7,
-  masteredCount: 2,
-  strugglingCount: 1,
-  recentSkills: [
-    { skill: "phonics.blends",  status: "practiced", lastSeen: "2026-04-26" },
-    { skill: "phonics.cvc",     status: "mastered",  lastSeen: "2026-04-25" },
-    { skill: "math.place_value_100", status: "struggling", lastSeen: "2026-04-24" },
-  ],
-};

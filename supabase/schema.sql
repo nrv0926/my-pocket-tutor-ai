@@ -29,6 +29,7 @@ create table if not exists public.children (
   location        text not null default 'ON-CA', -- e.g. 'ON-CA' (Ontario, Canada)
   curriculum      text not null default 'ontario',
   learning_needs  text[] not null default '{}',  -- e.g. {'adhd','dyslexia','anxiety'}
+  main_concern    text,
   strengths       text,
   weaknesses      text,
   parent_goal     text,

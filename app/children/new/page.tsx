@@ -1,10 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import ChildProfileForm from "@/components/ChildProfileForm";
+import { createChild } from "@/lib/actions/children";
 
 export default function NewChildPage() {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
@@ -19,11 +22,22 @@ export default function NewChildPage() {
         </p>
       </header>
 
+      {error && (
+        <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-700">
+          {error}
+        </div>
+      )}
+
       <ChildProfileForm
         onSubmit={async (data) => {
-          // TODO: server action to insert into `children` (RLS-scoped client).
-          console.log("[children/new] would insert:", data);
-          router.push("/dashboard");
+          setError(null);
+          try {
+            const { id } = await createChild(data);
+            router.push(`/progress/${id}`);
+            router.refresh();
+          } catch (err) {
+            setError(err instanceof Error ? err.message : "Could not save profile.");
+          }
         }}
       />
     </div>

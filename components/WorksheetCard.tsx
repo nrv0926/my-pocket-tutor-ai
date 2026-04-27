@@ -6,8 +6,8 @@ import type { Worksheet } from "@/types/session";
 
 /**
  * Printable worksheet view with an answer-key toggle and the post-session
- * "too easy / just right / too hard" feedback step. Calls the optional
- * onFeedback so the dashboard can update progress.
+ * feedback step. Calls onFeedback with both the difficulty signal and
+ * whether the child completed it independently.
  */
 export default function WorksheetCard({
   worksheet,
@@ -16,10 +16,18 @@ export default function WorksheetCard({
 }: {
   worksheet: Worksheet;
   answerKey: { questionId: string; answer: string }[];
-  onFeedback?: (f: ParentFeedback) => Promise<void> | void;
+  onFeedback?: (data: {
+    feedback: ParentFeedback;
+    completedIndependently: boolean;
+  }) => Promise<void> | void;
 }) {
   const [showKey, setShowKey] = useState(false);
-  const [submitted, setSubmitted] = useState<ParentFeedback | null>(null);
+  const [feedback, setFeedback] = useState<ParentFeedback | null>(null);
+  const [independent, setIndependent] = useState<boolean | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const canSubmit = feedback !== null && independent !== null && !submitted && !submitting;
 
   return (
     <div className="space-y-6 rounded-2xl border border-cream-300 bg-white p-6 shadow-card print:border-0 print:p-0 print:shadow-none">
@@ -65,35 +73,75 @@ export default function WorksheetCard({
         })}
       </ol>
 
-      <footer className="rounded-xl bg-cream-50 p-4 print:hidden">
-        <p className="mb-2 text-sm font-medium text-ink">
-          Was this too easy, just right, or too hard?
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {(["too_easy", "just_right", "too_hard"] as ParentFeedback[]).map((f) => (
-            <button
-              key={f}
-              disabled={Boolean(submitted)}
-              onClick={async () => {
-                setSubmitted(f);
-                await onFeedback?.(f);
-              }}
-              className={[
-                "rounded-full border px-4 py-2 text-sm",
-                submitted === f
-                  ? "border-forest-500 bg-forest-50 text-forest-600"
-                  : "border-cream-300 hover:border-forest-500",
-              ].join(" ")}
-            >
-              {f.replaceAll("_", " ")}
-            </button>
-          ))}
-        </div>
-        {submitted && (
-          <p className="mt-2 text-xs text-ink-muted">
-            Thanks — we'll use this to pick the next session's difficulty.
+      <footer className="space-y-4 rounded-xl bg-cream-50 p-4 print:hidden">
+        <div>
+          <p className="mb-2 text-sm font-medium text-ink">
+            Was this too easy, just right, or too hard?
           </p>
-        )}
+          <div className="flex flex-wrap gap-2">
+            {(["too_easy", "just_right", "too_hard"] as ParentFeedback[]).map((f) => (
+              <button
+                key={f}
+                disabled={submitted}
+                onClick={() => setFeedback(f)}
+                className={[
+                  "rounded-full border px-4 py-2 text-sm",
+                  feedback === f
+                    ? "border-forest-500 bg-forest-50 text-forest-600"
+                    : "border-cream-300 hover:border-forest-500",
+                ].join(" ")}
+              >
+                {f.replaceAll("_", " ")}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-2 text-sm font-medium text-ink">
+            Did your child complete this independently?
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {([
+              { val: true, label: "Yes, on their own" },
+              { val: false, label: "No, with help" },
+            ] as { val: boolean; label: string }[]).map((opt) => (
+              <button
+                key={String(opt.val)}
+                disabled={submitted}
+                onClick={() => setIndependent(opt.val)}
+                className={[
+                  "rounded-full border px-4 py-2 text-sm",
+                  independent === opt.val
+                    ? "border-forest-500 bg-forest-50 text-forest-600"
+                    : "border-cream-300 hover:border-forest-500",
+                ].join(" ")}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <button
+          disabled={!canSubmit}
+          onClick={async () => {
+            if (!canSubmit || feedback === null || independent === null) return;
+            setSubmitting(true);
+            try {
+              await onFeedback?.({
+                feedback,
+                completedIndependently: independent,
+              });
+              setSubmitted(true);
+            } finally {
+              setSubmitting(false);
+            }
+          }}
+          className="rounded-full bg-forest-500 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-forest-600 disabled:opacity-50"
+        >
+          {submitted ? "Saved ✓" : submitting ? "Saving..." : "Save feedback"}
+        </button>
       </footer>
     </div>
   );
