@@ -1,0 +1,107 @@
+{
+  "version": "0.1.0",
+  "source": "Ontario Ministry of Education — paraphrased expectations for MVP indexing.",
+  "note": "This is a starter map for Phase 1. Phase 2 will replace it with a fully indexed expectation graph.",
+  "grades": {
+    "K": {
+      "language": [
+        "Identifies letters of the alphabet and their sounds",
+        "Recognizes own name and familiar words",
+        "Listens to and retells simple stories"
+      ],
+      "math": [
+        "Counts to 30 by ones",
+        "Recognizes numerals 0–10",
+        "Identifies basic 2D shapes"
+      ]
+    },
+    "1": {
+      "reading": [
+        "Decodes CVC words",
+        "Reads common high-frequency words",
+        "Retells beginning, middle, end of a short text"
+      ],
+      "writing": [
+        "Writes a complete sentence with capital and period",
+        "Spells phonetically regular words"
+      ],
+      "math": [
+        "Adds and subtracts within 20",
+        "Counts to 100 by 1s, 5s, 10s",
+        "Identifies coins (penny, nickel, dime, quarter)"
+      ]
+    },
+    "2": {
+      "reading": [
+        "Decodes words with digraphs and blends",
+        "Reads grade-2 texts with appropriate fluency",
+        "Identifies main idea of a paragraph"
+      ],
+      "writing": [
+        "Writes a 3–5 sentence paragraph on a topic",
+        "Uses descriptive words"
+      ],
+      "math": [
+        "Adds and subtracts within 100",
+        "Skip counts by 2s, 5s, 10s",
+        "Tells time to the half hour"
+      ]
+    },
+    "3": {
+      "reading": [
+        "Decodes multisyllabic words",
+        "Uses context to determine word meaning",
+        "Makes inferences in narrative text"
+      ],
+      "writing": [
+        "Writes a paragraph with a topic and supporting sentences",
+        "Edits for capitals, periods, and spelling"
+      ],
+      "math": [
+        "Multiplies within 100 (2s, 5s, 10s by Gr. 3 end)",
+        "Place value to 1000",
+        "Identifies fractions of a whole"
+      ]
+    },
+    "4": {
+      "reading": [
+        "Reads grade-level fiction and non-fiction with fluency",
+        "Summarizes main ideas and supporting details"
+      ],
+      "writing": [
+        "Writes a multi-paragraph response with an introduction and conclusion"
+      ],
+      "math": [
+        "Multi-digit multiplication and division",
+        "Equivalent fractions",
+        "Area and perimeter of rectangles"
+      ]
+    },
+    "5": {
+      "reading": [
+        "Analyzes character motivation and theme"
+      ],
+      "writing": [
+        "Writes an opinion piece with reasons and evidence"
+      ],
+      "math": [
+        "Operations with decimals",
+        "Fraction addition and subtraction with like denominators",
+        "Volume of rectangular prisms"
+      ]
+    },
+    "6": {
+      "reading": [
+        "Compares texts on the same theme"
+      ],
+      "writing": [
+        "Writes an organized essay with a clear thesis"
+      ],
+      "math": [
+        "Ratios and rates",
+        "Percentages",
+        "Order of operations (BEDMAS)"
+      ]
+    }
+  }
+}

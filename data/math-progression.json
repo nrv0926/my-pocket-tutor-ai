@@ -1,0 +1,21 @@
+{
+  "version": "0.1.0",
+  "strands": ["number", "operations", "fractions", "measurement", "geometry", "data"],
+  "progression": [
+    { "grade": "K", "strand": "number",      "skill": "Counting to 30 by 1s" },
+    { "grade": "K", "strand": "geometry",    "skill": "Naming 2D shapes" },
+    { "grade": "1", "strand": "operations",  "skill": "Add/subtract within 20" },
+    { "grade": "1", "strand": "number",      "skill": "Place value to 100" },
+    { "grade": "2", "strand": "operations",  "skill": "Add/subtract within 100" },
+    { "grade": "2", "strand": "measurement", "skill": "Tell time to half hour" },
+    { "grade": "3", "strand": "operations",  "skill": "Multiplication facts up to 10x10" },
+    { "grade": "3", "strand": "fractions",   "skill": "Identify and compare unit fractions" },
+    { "grade": "4", "strand": "operations",  "skill": "Multi-digit multiplication and division" },
+    { "grade": "4", "strand": "measurement", "skill": "Area and perimeter of rectangles" },
+    { "grade": "5", "strand": "fractions",   "skill": "Add/subtract fractions with like denominators" },
+    { "grade": "5", "strand": "number",      "skill": "Decimals to thousandths" },
+    { "grade": "6", "strand": "number",      "skill": "Ratios, rates, and percentages" },
+    { "grade": "6", "strand": "operations",  "skill": "Order of operations (BEDMAS)" }
+  ],
+  "rule": "If a student is behind, step down one grade level on the same strand and rebuild before moving up."
+}

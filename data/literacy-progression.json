@@ -1,0 +1,63 @@
+{
+  "version": "0.1.0",
+  "framework": "Science of Reading",
+  "pillars": [
+    "phonemic_awareness",
+    "phonics",
+    "fluency",
+    "vocabulary",
+    "comprehension"
+  ],
+  "rule": "Do not assign comprehension-heavy work if decoding or phonics is weak.",
+  "ufli_session_structure": [
+    "sound_drill",
+    "blend_practice",
+    "word_reading",
+    "sentence_reading",
+    "dictation"
+  ],
+  "phonics_progression": [
+    {
+      "stage": 1,
+      "name": "CVC",
+      "examples": ["cat", "sit", "log"],
+      "skills": ["short vowel sounds", "consonant blending"]
+    },
+    {
+      "stage": 2,
+      "name": "Digraphs",
+      "examples": ["ship", "chop", "thin"],
+      "skills": ["sh", "ch", "th", "wh"]
+    },
+    {
+      "stage": 3,
+      "name": "Blends",
+      "examples": ["stop", "frog", "blend"],
+      "skills": ["initial blends", "final blends"]
+    },
+    {
+      "stage": 4,
+      "name": "Silent e",
+      "examples": ["cake", "ride", "hope"],
+      "skills": ["VCe pattern", "long vowel sounds"]
+    },
+    {
+      "stage": 5,
+      "name": "Vowel teams",
+      "examples": ["rain", "read", "boat"],
+      "skills": ["ai/ay", "ee/ea", "oa/ow"]
+    },
+    {
+      "stage": 6,
+      "name": "R-controlled vowels",
+      "examples": ["car", "her", "sir"],
+      "skills": ["ar", "er", "ir", "or", "ur"]
+    },
+    {
+      "stage": 7,
+      "name": "Multisyllabic words",
+      "examples": ["picnic", "rabbit", "fantastic"],
+      "skills": ["syllable division", "schwa awareness"]
+    }
+  ]
+}
