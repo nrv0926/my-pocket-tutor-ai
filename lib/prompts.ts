@@ -12,6 +12,8 @@
  */
 
 import type { Child } from "@/types/child";
+import type { ParentFeedback } from "@/types/progress";
+import type { Difficulty } from "@/types/session";
 
 /** Bumped any time SYSTEM_PROMPT changes. Used in eval logs. */
 export const SYSTEM_PROMPT_VERSION = "system@2026-04-27.1";
@@ -116,6 +118,59 @@ The JSON object MUST match this TypeScript type EXACTLY:
   "feedbackQuestion": "Was this too easy, just right, or too hard?"
 }
 `.trim();
+
+/**
+ * One row of recent parent feedback, shaped for the prompt.
+ * Lives here (not in /types) because its job is purely to render into the
+ * user message — it is not part of the storage schema.
+ */
+export interface RecentFeedbackEntry {
+  createdAt: string;
+  skill: string;
+  difficulty: Difficulty | null;
+  parentFeedback: ParentFeedback | null;
+  completedIndependently: boolean | null;
+}
+
+/**
+ * Render the last few feedback rows as a calibration block for the model.
+ * Goes in the USER message (not system) so it doesn't bust the system-prompt
+ * cache breakpoint pinned in aiService.ts.
+ *
+ * Returns "" when there is nothing useful to say (no rows, or no ratings),
+ * so the caller can simply concatenate without a conditional.
+ */
+export function recentFeedbackContext(
+  entries: RecentFeedbackEntry[],
+  now: Date = new Date(),
+): string {
+  const rated = entries.filter((e) => e.parentFeedback !== null);
+  if (rated.length === 0) return "";
+
+  const lines = rated.map((e) => {
+    const ageMs = now.getTime() - new Date(e.createdAt).getTime();
+    const days = Math.max(0, Math.round(ageMs / 86_400_000));
+    const when = days === 0 ? "today" : days === 1 ? "1 day ago" : `${days} days ago`;
+    const diff = e.difficulty ?? "unspecified";
+    const indep =
+      e.completedIndependently === null || e.completedIndependently === undefined
+        ? ""
+        : e.completedIndependently
+          ? ", done independently"
+          : ", needed help";
+    return `- ${when} — "${e.skill}" (difficulty: ${diff}) → ${e.parentFeedback}${indep}`;
+  });
+
+  return [
+    "RECENT PARENT FEEDBACK (newest first)",
+    ...lines,
+    "",
+    "Use this trend to calibrate today's session:",
+    "- If 'too_hard' or 'needed help' dominates → step DOWN one stage in the phonics/skill progression and shrink the worksheet.",
+    "- If 'too_easy' AND 'done independently' dominate → step UP one stage within the same family. Never skip a stage.",
+    "- If mixed or 'just_right' → hold the current level and vary the practice.",
+  ].join("\n");
+}
 
 /** Compact, model-readable child profile block. */
 export function childContext(

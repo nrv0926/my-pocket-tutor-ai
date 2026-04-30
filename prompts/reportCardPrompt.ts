@@ -2,10 +2,12 @@ import {
   NINE_SECTION_OUTPUT_SCHEMA,
   SYSTEM_PROMPT,
   childContext,
+  recentFeedbackContext,
+  type RecentFeedbackEntry,
 } from "@/lib/prompts";
 import type { Child } from "@/types/child";
 
-export const REPORT_CARD_PROMPT_VERSION = "report-card@2026-04-27.2";
+export const REPORT_CARD_PROMPT_VERSION = "report-card@2026-04-30.1";
 
 /**
  * Specialised analysis for a school report card comment / teacher note.
@@ -23,8 +25,10 @@ export function buildReportCardPrompt(args: {
     | "parentGoal"
   >;
   reportText: string;
+  recentFeedback?: RecentFeedbackEntry[];
 }): { system: string; user: string; version: string } {
-  const { child, reportText } = args;
+  const { child, reportText, recentFeedback = [] } = args;
+  const feedbackBlock = recentFeedbackContext(recentFeedback);
 
   const taskAddendum = `
 TASK
@@ -49,7 +53,7 @@ ${NINE_SECTION_OUTPUT_SCHEMA}
   const user = `
 CHILD PROFILE
 ${childContext(child)}
-
+${feedbackBlock ? `\n${feedbackBlock}\n` : ""}
 REPORT CARD COMMENT
 """
 ${reportText}
