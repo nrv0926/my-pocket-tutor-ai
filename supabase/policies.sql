@@ -14,8 +14,9 @@ alter table public.ai_call_quota       enable row level security;
 alter table public.ai_calls            enable row level security;
 
 -- --------- users ---------
-drop policy if exists "users self read"  on public.users;
-drop policy if exists "users self write" on public.users;
+drop policy if exists "users self read"   on public.users;
+drop policy if exists "users self write"  on public.users;
+drop policy if exists "users self update" on public.users;
 
 create policy "users self read"
   on public.users for select using (auth.uid() = id);
