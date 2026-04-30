@@ -10,6 +10,7 @@ alter table public.learning_sessions   enable row level security;
 alter table public.progress_records    enable row level security;
 alter table public.uploads             enable row level security;
 alter table public.subscriptions       enable row level security;
+alter table public.ai_call_quota       enable row level security;
 
 -- --------- users ---------
 drop policy if exists "users self read"  on public.users;
@@ -80,6 +81,15 @@ create policy "uploads owner all"
             where c.id = uploads.child_id
               and c.user_id = auth.uid())
   );
+
+-- --------- ai_call_quota ---------
+-- The user can read their own counter (e.g. for a "you've used X/Y today"
+-- UI). All mutations go through the consume_ai_quota RPC, which runs
+-- SECURITY DEFINER, so no INSERT / UPDATE / DELETE policies are granted.
+drop policy if exists "ai_call_quota self read" on public.ai_call_quota;
+
+create policy "ai_call_quota self read"
+  on public.ai_call_quota for select using (auth.uid() = user_id);
 
 -- --------- subscriptions ---------
 -- Read is owner; writes happen via Stripe webhook (service role only).

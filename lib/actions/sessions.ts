@@ -9,6 +9,7 @@ import {
   buildReportCardPrompt,
   type RecentFeedbackEntry,
 } from "@/lib/prompts";
+import { consumeAIQuota } from "@/lib/quota";
 import { mapToSkillIds } from "@/lib/skillGapEngine";
 import { getServerSupabase } from "@/lib/supabaseServer";
 import type { Grade, LearningNeed, Subject } from "@/types/child";
@@ -103,6 +104,10 @@ export async function createLearningSession(input: {
           parentInput: parsed.text,
           recentFeedback,
         });
+
+  // Per-user daily cap. Throws QuotaExceededError with a friendly message
+  // that the form already surfaces via err.message — no UI changes needed.
+  await consumeAIQuota();
 
   // TODO (post-MVP): pass a Zod schema here so generate() returns a
   // type-safe AnalysisResult instead of the manual cast below.
