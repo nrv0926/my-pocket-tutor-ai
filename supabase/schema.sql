@@ -149,6 +149,30 @@ $$;
 grant execute on function public.consume_ai_quota(int) to authenticated;
 
 -- ---------------------------------------------------------------------
+-- ai_calls  (one row per AI invocation — observability + cost analysis)
+-- IMPORTANT: never store the prompt or the response here. Per CLAUDE.md
+-- §3, log IDs and counts only. error_class is the SDK class name (e.g.
+-- 'RateLimitError'), never the message — that could leak parent input.
+-- ---------------------------------------------------------------------
+create table if not exists public.ai_calls (
+  id                       uuid primary key default uuid_generate_v4(),
+  user_id                  uuid not null references public.users(id) on delete cascade,
+  child_id                 uuid references public.children(id) on delete set null,
+  prompt_version           text not null,
+  model                    text not null,
+  status                   text not null check (status in ('ok','error','quota_exceeded')),
+  error_class              text,
+  latency_ms               int  not null check (latency_ms >= 0),
+  input_tokens             int,
+  output_tokens            int,
+  cache_read_tokens        int,
+  cache_creation_tokens    int,
+  created_at               timestamptz not null default now()
+);
+create index if not exists ai_calls_user_created_idx
+  on public.ai_calls(user_id, created_at desc);
+
+-- ---------------------------------------------------------------------
 -- subscriptions  (Stripe placeholder for MVP)
 -- ---------------------------------------------------------------------
 create table if not exists public.subscriptions (

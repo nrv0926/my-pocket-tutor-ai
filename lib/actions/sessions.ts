@@ -3,13 +3,14 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { generate } from "@/lib/aiService";
+import { generate, currentModel } from "@/lib/aiService";
+import { classifyError, logAICall } from "@/lib/observability";
 import {
   buildAnalysisPrompt,
   buildReportCardPrompt,
   type RecentFeedbackEntry,
 } from "@/lib/prompts";
-import { consumeAIQuota } from "@/lib/quota";
+import { QuotaExceededError, consumeAIQuota } from "@/lib/quota";
 import { mapToSkillIds } from "@/lib/skillGapEngine";
 import { getServerSupabase } from "@/lib/supabaseServer";
 import type { Grade, LearningNeed, Subject } from "@/types/child";
@@ -107,16 +108,54 @@ export async function createLearningSession(input: {
 
   // Per-user daily cap. Throws QuotaExceededError with a friendly message
   // that the form already surfaces via err.message — no UI changes needed.
-  await consumeAIQuota();
+  try {
+    await consumeAIQuota();
+  } catch (err) {
+    if (err instanceof QuotaExceededError) {
+      await logAICall({
+        childId: parsed.childId,
+        promptVersion: prompt.version,
+        model: currentModel(),
+        status: "quota_exceeded",
+        errorClass: "QuotaExceededError",
+        latencyMs: 0,
+      });
+    }
+    throw err;
+  }
 
   // TODO (post-MVP): pass a Zod schema here so generate() returns a
   // type-safe AnalysisResult instead of the manual cast below.
-  const result = await generate<AnalysisResult>({
-    system: prompt.system,
-    user: prompt.user,
+  const startedAt = Date.now();
+  let aiResponse;
+  try {
+    aiResponse = await generate<AnalysisResult>({
+      system: prompt.system,
+      user: prompt.user,
+      promptVersion: prompt.version,
+    });
+  } catch (err) {
+    await logAICall({
+      childId: parsed.childId,
+      promptVersion: prompt.version,
+      model: currentModel(),
+      status: "error",
+      errorClass: classifyError(err),
+      latencyMs: Date.now() - startedAt,
+    });
+    throw err;
+  }
+
+  await logAICall({
+    childId: parsed.childId,
     promptVersion: prompt.version,
+    model: aiResponse.model,
+    status: "ok",
+    latencyMs: Date.now() - startedAt,
+    usage: aiResponse.usage,
   });
 
+  const result = aiResponse.result;
   const skillIds = mapToSkillIds(result);
 
   const { data: inserted, error: insertErr } = await supabase

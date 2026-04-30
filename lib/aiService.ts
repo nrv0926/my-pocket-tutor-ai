@@ -51,14 +51,31 @@ export interface AIRequest {
   maxTokens?: number;
 }
 
-export async function generate<T>(req: AIRequest): Promise<T> {
-  if (!hasKey()) return stubResponse<T>(req);
-  return callClaude<T>(req);
+export interface AIUsage {
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheCreationTokens: number;
 }
 
-async function callClaude<T>(req: AIRequest): Promise<T> {
-  const model = process.env.ANTHROPIC_MODEL || DEFAULT_MODEL;
+export interface AIResponse<T> {
+  result: T;
+  usage: AIUsage | null;
+  model: string;
+}
 
+/** Returns the model name a generate() call would currently target. */
+export function currentModel(): string {
+  return process.env.ANTHROPIC_MODEL || DEFAULT_MODEL;
+}
+
+export async function generate<T>(req: AIRequest): Promise<AIResponse<T>> {
+  const model = currentModel();
+  if (!hasKey()) return { result: stubResponse<T>(req), usage: null, model };
+  return callClaude<T>(req, model);
+}
+
+async function callClaude<T>(req: AIRequest, model: string): Promise<AIResponse<T>> {
   try {
     const response = await client().messages.create({
       model,
@@ -90,7 +107,14 @@ async function callClaude<T>(req: AIRequest): Promise<T> {
       .map((b) => b.text)
       .join("");
 
-    return safeJsonParse<T>(text, req.promptVersion);
+    const result = safeJsonParse<T>(text, req.promptVersion);
+    const usage: AIUsage = {
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+      cacheReadTokens: response.usage.cache_read_input_tokens ?? 0,
+      cacheCreationTokens: response.usage.cache_creation_input_tokens ?? 0,
+    };
+    return { result, usage, model };
   } catch (err) {
     if (err instanceof Anthropic.RateLimitError) {
       throw new Error(`Claude rate-limited (prompt: ${req.promptVersion})`);

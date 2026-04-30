@@ -11,6 +11,7 @@ alter table public.progress_records    enable row level security;
 alter table public.uploads             enable row level security;
 alter table public.subscriptions       enable row level security;
 alter table public.ai_call_quota       enable row level security;
+alter table public.ai_calls            enable row level security;
 
 -- --------- users ---------
 drop policy if exists "users self read"  on public.users;
@@ -90,6 +91,19 @@ drop policy if exists "ai_call_quota self read" on public.ai_call_quota;
 
 create policy "ai_call_quota self read"
   on public.ai_call_quota for select using (auth.uid() = user_id);
+
+-- --------- ai_calls ---------
+-- Users can read + insert their own log rows (the WITH CHECK clamps
+-- inserts to the signed-in user). No update / delete — the log is
+-- append-only by design.
+drop policy if exists "ai_calls self read"   on public.ai_calls;
+drop policy if exists "ai_calls self insert" on public.ai_calls;
+
+create policy "ai_calls self read"
+  on public.ai_calls for select using (auth.uid() = user_id);
+
+create policy "ai_calls self insert"
+  on public.ai_calls for insert with check (auth.uid() = user_id);
 
 -- --------- subscriptions ---------
 -- Read is owner; writes happen via Stripe webhook (service role only).
