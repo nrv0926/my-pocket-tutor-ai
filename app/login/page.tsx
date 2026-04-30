@@ -51,7 +51,17 @@ export default function LoginPage() {
               setStatus("sent");
             } catch (err) {
               setStatus("error");
-              setError(err instanceof Error ? err.message : "Something went wrong.");
+              const raw = err instanceof Error ? err.message : "";
+              const lower = raw.toLowerCase();
+              if (lower.includes("rate limit") || lower.includes("too many")) {
+                setError(
+                  "We've sent a lot of links to this address recently. Please wait a few minutes, then try again — and check your spam folder for the most recent one.",
+                );
+              } else if (lower.includes("invalid") && lower.includes("email")) {
+                setError("That email address doesn't look right. Please check it and try again.");
+              } else {
+                setError("Something went wrong sending the link. Please try again in a moment.");
+              }
             }
           }}
         >
