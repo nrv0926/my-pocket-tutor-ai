@@ -1,4 +1,5 @@
 import Link from "next/link";
+import MobileMenu from "@/components/MobileMenu";
 import { getCurrentUser } from "@/lib/supabaseServer";
 
 export default async function Header() {
@@ -32,7 +33,8 @@ export default async function Header() {
           </nav>
         )}
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <MobileMenu isAuthed={!!user} userEmail={user?.email} />
           {user ? (
             <>
               <span className="hidden text-xs text-ink-muted sm:inline">{user.email}</span>
