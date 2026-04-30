@@ -28,10 +28,10 @@ export default function HomePage() {
                 Start a child profile
               </Link>
               <Link
-                href="#how"
+                href="/try"
                 className="inline-flex items-center rounded-full border border-cream-300 bg-white px-5 py-3 text-sm font-medium text-ink hover:bg-cream-50"
               >
-                See how it works
+                Try a sample · no signup
               </Link>
             </div>
             <p className="mt-3 text-xs text-ink-muted">

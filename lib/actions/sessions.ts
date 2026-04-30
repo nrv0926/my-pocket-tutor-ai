@@ -3,12 +3,23 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { generate } from "@/lib/aiService";
-import { buildAnalysisPrompt, buildReportCardPrompt } from "@/lib/prompts";
+import { generate, currentModel } from "@/lib/aiService";
+import { classifyError, logAICall } from "@/lib/observability";
+import {
+  buildAnalysisPrompt,
+  buildReportCardPrompt,
+  type RecentFeedbackEntry,
+} from "@/lib/prompts";
+import { QuotaExceededError, consumeAIQuota } from "@/lib/quota";
 import { mapToSkillIds } from "@/lib/skillGapEngine";
 import { getServerSupabase } from "@/lib/supabaseServer";
 import type { Grade, LearningNeed, Subject } from "@/types/child";
-import type { AnalysisResult, SessionInputType } from "@/types/session";
+import type {
+  AnalysisResult,
+  Difficulty,
+  SessionInputType,
+} from "@/types/session";
+import type { ParentFeedback } from "@/types/progress";
 
 /**
  * Single end-to-end MVP path:
@@ -63,23 +74,88 @@ export async function createLearningSession(input: {
     parentGoal: child.parent_goal ?? null,
   };
 
+  // Pull the most recent progress rows so the model can calibrate difficulty
+  // against the parent's actual reactions, not just the current input. RLS
+  // already restricts this to the signed-in parent's children.
+  const { data: recentRows } = await supabase
+    .from("progress_records")
+    .select("created_at, skill, difficulty, parent_feedback, completed_independently")
+    .eq("child_id", parsed.childId)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  const recentFeedback: RecentFeedbackEntry[] = (recentRows ?? []).map((r) => ({
+    createdAt: r.created_at as string,
+    skill: r.skill as string,
+    difficulty: (r.difficulty ?? null) as Difficulty | null,
+    parentFeedback: (r.parent_feedback ?? null) as ParentFeedback | null,
+    completedIndependently: (r.completed_independently ?? null) as boolean | null,
+  }));
+
   const prompt =
     parsed.inputType === "paste"
-      ? buildReportCardPrompt({ child: childForPrompt, reportText: parsed.text })
+      ? buildReportCardPrompt({
+          child: childForPrompt,
+          reportText: parsed.text,
+          recentFeedback,
+        })
       : buildAnalysisPrompt({
           child: childForPrompt,
           subject: parsed.subject,
           parentInput: parsed.text,
+          recentFeedback,
         });
+
+  // Per-user daily cap. Throws QuotaExceededError with a friendly message
+  // that the form already surfaces via err.message — no UI changes needed.
+  try {
+    await consumeAIQuota();
+  } catch (err) {
+    if (err instanceof QuotaExceededError) {
+      await logAICall({
+        childId: parsed.childId,
+        promptVersion: prompt.version,
+        model: currentModel(),
+        status: "quota_exceeded",
+        errorClass: "QuotaExceededError",
+        latencyMs: 0,
+      });
+    }
+    throw err;
+  }
 
   // TODO (post-MVP): pass a Zod schema here so generate() returns a
   // type-safe AnalysisResult instead of the manual cast below.
-  const result = await generate<AnalysisResult>({
-    system: prompt.system,
-    user: prompt.user,
+  const startedAt = Date.now();
+  let aiResponse;
+  try {
+    aiResponse = await generate<AnalysisResult>({
+      system: prompt.system,
+      user: prompt.user,
+      promptVersion: prompt.version,
+    });
+  } catch (err) {
+    await logAICall({
+      childId: parsed.childId,
+      promptVersion: prompt.version,
+      model: currentModel(),
+      status: "error",
+      errorClass: classifyError(err),
+      latencyMs: Date.now() - startedAt,
+    });
+    throw err;
+  }
+
+  await logAICall({
+    childId: parsed.childId,
     promptVersion: prompt.version,
+    model: aiResponse.model,
+    status: "ok",
+    latencyMs: Date.now() - startedAt,
+    usage: aiResponse.usage,
   });
 
+  const result = aiResponse.result;
   const skillIds = mapToSkillIds(result);
 
   const { data: inserted, error: insertErr } = await supabase

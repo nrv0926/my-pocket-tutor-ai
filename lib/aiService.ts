@@ -18,13 +18,15 @@ import type { AnalysisResult } from "@/types/session";
  *
  * Per the Claude API guidance for Opus 4.7:
  * - No `temperature`, `top_p`, `top_k` (the API rejects them).
- * - No `budget_tokens` (removed; thinking is adaptive only and off by default).
- * - We default to thinking OFF for low latency on parent-facing analysis;
- *   route operators can flip it on per request via `enableThinking: true`.
+ * - Extended thinking is OFF by default for low latency on parent-facing
+ *   analysis. Route operators can opt in per request with
+ *   `enableThinking: true`, which sends `{ type: "enabled", budget_tokens }`
+ *   per the installed SDK's ThinkingConfigParam shape.
  */
 
 const DEFAULT_MODEL = "claude-opus-4-7";
 const DEFAULT_MAX_TOKENS = 16_000;
+const DEFAULT_THINKING_BUDGET_TOKENS = 4_096;
 
 let _client: Anthropic | null = null;
 function client(): Anthropic {
@@ -49,14 +51,31 @@ export interface AIRequest {
   maxTokens?: number;
 }
 
-export async function generate<T>(req: AIRequest): Promise<T> {
-  if (!hasKey()) return stubResponse<T>(req);
-  return callClaude<T>(req);
+export interface AIUsage {
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheCreationTokens: number;
 }
 
-async function callClaude<T>(req: AIRequest): Promise<T> {
-  const model = process.env.ANTHROPIC_MODEL || DEFAULT_MODEL;
+export interface AIResponse<T> {
+  result: T;
+  usage: AIUsage | null;
+  model: string;
+}
 
+/** Returns the model name a generate() call would currently target. */
+export function currentModel(): string {
+  return process.env.ANTHROPIC_MODEL || DEFAULT_MODEL;
+}
+
+export async function generate<T>(req: AIRequest): Promise<AIResponse<T>> {
+  const model = currentModel();
+  if (!hasKey()) return { result: stubResponse<T>(req), usage: null, model };
+  return callClaude<T>(req, model);
+}
+
+async function callClaude<T>(req: AIRequest, model: string): Promise<AIResponse<T>> {
   try {
     const response = await client().messages.create({
       model,
@@ -74,7 +93,12 @@ async function callClaude<T>(req: AIRequest): Promise<T> {
       ],
       messages: [{ role: "user", content: req.user }],
       ...(req.enableThinking
-        ? { thinking: { type: "adaptive" as const } }
+        ? {
+            thinking: {
+              type: "enabled" as const,
+              budget_tokens: DEFAULT_THINKING_BUDGET_TOKENS,
+            },
+          }
         : {}),
     });
 
@@ -83,7 +107,14 @@ async function callClaude<T>(req: AIRequest): Promise<T> {
       .map((b) => b.text)
       .join("");
 
-    return safeJsonParse<T>(text, req.promptVersion);
+    const result = safeJsonParse<T>(text, req.promptVersion);
+    const usage: AIUsage = {
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+      cacheReadTokens: response.usage.cache_read_input_tokens ?? 0,
+      cacheCreationTokens: response.usage.cache_creation_input_tokens ?? 0,
+    };
+    return { result, usage, model };
   } catch (err) {
     if (err instanceof Anthropic.RateLimitError) {
       throw new Error(`Claude rate-limited (prompt: ${req.promptVersion})`);

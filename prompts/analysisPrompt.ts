@@ -2,10 +2,12 @@ import {
   NINE_SECTION_OUTPUT_SCHEMA,
   SYSTEM_PROMPT,
   childContext,
+  recentFeedbackContext,
+  type RecentFeedbackEntry,
 } from "@/lib/prompts";
 import type { Child, Subject } from "@/types/child";
 
-export const ANALYSIS_PROMPT_VERSION = "analysis@2026-04-27.2";
+export const ANALYSIS_PROMPT_VERSION = "analysis@2026-04-30.1";
 
 /**
  * Main analysis: parent input → 9-section structured plan + worksheet.
@@ -23,8 +25,10 @@ export function buildAnalysisPrompt(args: {
   >;
   subject: Subject;
   parentInput: string;
+  recentFeedback?: RecentFeedbackEntry[];
 }): { system: string; user: string; version: string } {
-  const { child, subject, parentInput } = args;
+  const { child, subject, parentInput, recentFeedback = [] } = args;
+  const feedbackBlock = recentFeedbackContext(recentFeedback);
 
   const taskAddendum = `
 TASK
@@ -45,7 +49,7 @@ CHILD PROFILE
 ${childContext(child)}
 
 SUBJECT: ${subject}
-
+${feedbackBlock ? `\n${feedbackBlock}\n` : ""}
 PARENT / TEACHER INPUT
 """
 ${parentInput}

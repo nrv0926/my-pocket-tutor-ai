@@ -91,6 +91,88 @@ create index if not exists progress_child_id_idx on public.progress_records(chil
 create index if not exists progress_skill_idx    on public.progress_records(skill);
 
 -- ---------------------------------------------------------------------
+-- ai_call_quota  (daily per-user cap on AI generations)
+-- One row per (user, day). Mutated only by the consume_ai_quota RPC below.
+-- Direct writes are blocked by RLS; the RPC runs SECURITY DEFINER.
+-- ---------------------------------------------------------------------
+create table if not exists public.ai_call_quota (
+  user_id     uuid not null references public.users(id) on delete cascade,
+  day         date not null default current_date,
+  count       int  not null default 0 check (count >= 0),
+  primary key (user_id, day)
+);
+
+-- Atomically check + increment the signed-in user's quota for today.
+-- Returns one row: (allowed, used). When `allowed = false`, the count
+-- is left unchanged so the user is locked out cleanly until tomorrow.
+create or replace function public.consume_ai_quota(p_limit int)
+returns table (allowed boolean, used int)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_user  uuid := auth.uid();
+  v_count int;
+begin
+  if v_user is null then
+    raise exception 'not authenticated';
+  end if;
+  if p_limit <= 0 then
+    raise exception 'limit must be positive';
+  end if;
+
+  insert into public.ai_call_quota (user_id, day, count)
+  values (v_user, current_date, 0)
+  on conflict (user_id, day) do nothing;
+
+  select count into v_count
+  from public.ai_call_quota
+  where user_id = v_user and day = current_date
+  for update;
+
+  if v_count >= p_limit then
+    allowed := false;
+    used    := v_count;
+    return next;
+    return;
+  end if;
+
+  update public.ai_call_quota
+     set count = count + 1
+   where user_id = v_user and day = current_date
+   returning true, count into allowed, used;
+  return next;
+end;
+$$;
+
+grant execute on function public.consume_ai_quota(int) to authenticated;
+
+-- ---------------------------------------------------------------------
+-- ai_calls  (one row per AI invocation — observability + cost analysis)
+-- IMPORTANT: never store the prompt or the response here. Per CLAUDE.md
+-- §3, log IDs and counts only. error_class is the SDK class name (e.g.
+-- 'RateLimitError'), never the message — that could leak parent input.
+-- ---------------------------------------------------------------------
+create table if not exists public.ai_calls (
+  id                       uuid primary key default uuid_generate_v4(),
+  user_id                  uuid not null references public.users(id) on delete cascade,
+  child_id                 uuid references public.children(id) on delete set null,
+  prompt_version           text not null,
+  model                    text not null,
+  status                   text not null check (status in ('ok','error','quota_exceeded')),
+  error_class              text,
+  latency_ms               int  not null check (latency_ms >= 0),
+  input_tokens             int,
+  output_tokens            int,
+  cache_read_tokens        int,
+  cache_creation_tokens    int,
+  created_at               timestamptz not null default now()
+);
+create index if not exists ai_calls_user_created_idx
+  on public.ai_calls(user_id, created_at desc);
+
+-- ---------------------------------------------------------------------
 -- subscriptions  (Stripe placeholder for MVP)
 -- ---------------------------------------------------------------------
 create table if not exists public.subscriptions (
