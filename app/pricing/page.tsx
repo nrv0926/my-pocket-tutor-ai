@@ -2,39 +2,52 @@ import PricingCards from "@/components/PricingCards";
 
 export default function PricingPage() {
   return (
-    <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
-      <header className="mx-auto mb-10 max-w-2xl text-center">
-        <p className="text-xs font-semibold uppercase tracking-widest text-forest-600">
-          Pricing
-        </p>
-        <h1 className="mt-2 font-serif text-4xl text-ink">
-          Simple pricing, <em className="text-forest-500">no surprises.</em>
-        </h1>
-        <p className="mt-3 text-ink-soft">
-          Start free. Upgrade when you're ready. Cancel any time. Stripe billing
-          wires up in Phase 1.5.
-        </p>
-      </header>
+    <>
+      <section className="bg-teal-700 px-4 py-20 sm:px-6">
+        <div className="mx-auto max-w-6xl">
+          <header className="mb-10 max-w-2xl">
+            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-forest-400">
+              Pricing
+            </p>
+            <h1 className="mt-3 font-serif text-3xl font-semibold text-white sm:text-4xl">
+              Simple pricing. Big impact.
+            </h1>
+            <p className="mt-3 max-w-xl font-light text-white/60">
+              Start free. Upgrade when you&rsquo;re ready. Cancel anytime &mdash;
+              no questions asked.
+            </p>
+          </header>
+          <PricingCards />
+          <p className="mt-6 text-center text-sm text-white/40">
+            Cancel anytime. No commitment. No credit card required to start free.
+          </p>
+        </div>
+      </section>
 
-      <PricingCards />
-
-      <section className="mt-12 rounded-2xl border border-cream-300 bg-white p-6 text-sm text-ink-soft shadow-card">
-        <h2 className="font-serif text-lg text-ink">Frequently asked</h2>
-        <dl className="mt-4 space-y-4">
+      <section className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+        <h2 className="font-serif text-2xl font-semibold text-forest-600">
+          Frequently asked
+        </h2>
+        <dl className="mt-6 space-y-5 text-sm text-ink-soft">
           <div>
-            <dt className="font-semibold text-ink">Can I switch plans?</dt>
+            <dt className="font-medium text-ink">Can I switch plans?</dt>
             <dd>Yes. Up- or down-grade at any time; we prorate the change.</dd>
           </div>
           <div>
-            <dt className="font-semibold text-ink">What about refunds?</dt>
-            <dd>If the first month doesn't help, email us and we'll refund it. No drama.</dd>
+            <dt className="font-medium text-ink">What about refunds?</dt>
+            <dd>
+              If the first month doesn&rsquo;t help, email us and we&rsquo;ll
+              refund it. No drama.
+            </dd>
           </div>
           <div>
-            <dt className="font-semibold text-ink">Do you offer school / district pricing?</dt>
-            <dd>Phase 4 (teacher accounts). Email us if you want early access.</dd>
+            <dt className="font-medium text-ink">
+              Do you offer school / district pricing?
+            </dt>
+            <dd>Teacher mode is included in Premium. Reach out for district plans.</dd>
           </div>
         </dl>
       </section>
-    </div>
+    </>
   );
 }

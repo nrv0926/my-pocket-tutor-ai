@@ -4,9 +4,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "AI Pocket Tutor — calm, parent-friendly learning support",
+  title: "Pocket Tutor — the clearest path from struggle to progress",
   description:
-    "Turn school materials into a clear plan for what to teach next. Aligned to Ontario curriculum and the science of reading.",
+    "A quiet co-pilot for parents, homeschoolers, and teachers of K–3 children. Clear plans, focused practice, real progress — starting tonight.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
   ),
@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;700&display=swap"
           rel="stylesheet"
         />
       </head>

@@ -1,72 +1,114 @@
 import Link from "next/link";
 
-const PLANS = [
+type Plan = {
+  name: string;
+  price: string;
+  cadence: string;
+  description: string;
+  features: { label: string; off?: boolean }[];
+  cta: { label: string; href: string };
+  featured?: boolean;
+};
+
+const PLANS: Plan[] = [
   {
-    name: "Single Child",
-    price: "$9.99",
-    cadence: "/month",
-    description: "Everything one parent needs for one child.",
+    name: "Free",
+    price: "$0",
+    cadence: "/month, forever",
+    description: "Try one full plan, end to end.",
     features: [
-      "1 child profile",
-      "Unlimited learning sessions",
-      "Weekly plan + worksheets",
-      "Progress tracking",
+      { label: "1 analysis per month" },
+      { label: "Printable worksheet + answer key" },
+      { label: "Step-by-step teaching guide" },
+      { label: "Parent tips for every plan" },
+      { label: "Interactive practice", off: true },
+      { label: "Progress tracking", off: true },
     ],
-    cta: { label: "Start Single Child", href: "/children/new" },
-    featured: false,
+    cta: { label: "Get started free", href: "/login" },
+  },
+  {
+    name: "Premium",
+    price: "$17.99",
+    cadence: "/month · 1 child",
+    description: "Everything you need to make every session count.",
+    features: [
+      { label: "Unlimited analyses" },
+      { label: "All three modes — Parent, Homeschool, Teacher" },
+      { label: "Printable worksheet + answer key" },
+      { label: "Interactive practice with instant feedback" },
+      { label: "Automatic progress tracking" },
+      { label: "Personalised learning plan" },
+      { label: "Priority support" },
+    ],
+    cta: { label: "Start free 7-day trial", href: "/login" },
+    featured: true,
   },
   {
     name: "Family",
-    price: "$19.99",
-    cadence: "/month",
-    description: "Up to 4 kids. The most popular choice for families.",
+    price: "$29.99",
+    cadence: "/month · up to 4 children",
+    description: "Built for homeschool families and households with siblings.",
     features: [
-      "Up to 4 child profiles",
-      "Unlimited learning sessions",
-      "Weekly plans across all kids",
-      "Progress tracking + comparisons",
-      "Priority support",
+      { label: "Everything in Premium" },
+      { label: "Up to 4 child profiles" },
+      { label: "Individual progress tracking per child" },
+      { label: "Perfect for homeschool families" },
+      { label: "Extra parent resources" },
+      { label: "Early access to new features" },
     ],
-    cta: { label: "Start Family plan", href: "/children/new" },
-    featured: true,
+    cta: { label: "Start free 7-day trial", href: "/login" },
   },
 ];
 
 export default function PricingCards() {
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    <div className="grid gap-4 md:grid-cols-3">
       {PLANS.map((p) => (
         <article
           key={p.name}
           className={[
-            "relative flex flex-col rounded-2xl border p-6 shadow-card",
+            "relative flex flex-col rounded-2xl p-7 transition-transform hover:-translate-y-0.5",
             p.featured
-              ? "border-forest-500 bg-forest-500 text-cream-50"
-              : "border-cream-300 bg-white text-ink",
+              ? "bg-white text-ink shadow-lift"
+              : "border border-white/10 bg-white/5 text-white/85",
           ].join(" ")}
         >
           {p.featured && (
-            <span className="absolute -top-3 right-6 rounded-full bg-sand px-3 py-1 text-xs font-semibold uppercase tracking-widest text-ink">
-              Most popular
+            <span className="mb-3 inline-block w-fit rounded-full bg-forest-50 px-2.5 py-1 text-[10px] font-medium text-forest-600">
+              ⭐ Most popular
             </span>
           )}
-          <header>
-            <h3 className="font-serif text-2xl">{p.name}</h3>
-            <p className={p.featured ? "mt-1 text-sm text-cream-50/80" : "mt-1 text-sm text-ink-muted"}>
-              {p.description}
-            </p>
-          </header>
-
-          <p className="my-5 border-y border-cream-300/40 py-4">
-            <span className="font-serif text-4xl">{p.price}</span>
-            <span className={p.featured ? "text-cream-50/70" : "text-ink-muted"}>{p.cadence}</span>
+          <h3 className={["font-serif text-2xl font-semibold", p.featured ? "text-forest-600" : "text-white/90"].join(" ")}>
+            {p.name}
+          </h3>
+          <p className="mt-3">
+            <span className={["font-medium text-[34px] leading-none", p.featured ? "text-forest-500" : "text-forest-400"].join(" ")}>
+              {p.price}
+            </span>
+            <span className={["ml-1 text-sm font-light", p.featured ? "text-ink-muted" : "text-white/45"].join(" ")}>
+              {p.cadence}
+            </span>
+          </p>
+          <p className={["mt-2 text-sm font-light", p.featured ? "text-ink-soft" : "text-white/55"].join(" ")}>
+            {p.description}
           </p>
 
-          <ul className="mb-6 space-y-2 text-sm">
+          <div className={["my-5 h-px", p.featured ? "bg-cream-300" : "bg-white/10"].join(" ")} />
+
+          <ul className="mb-6 flex flex-col gap-2.5 text-sm">
             {p.features.map((f) => (
-              <li key={f} className="flex items-start gap-2">
-                <span aria-hidden className="mt-1">✓</span>
-                <span>{f}</span>
+              <li
+                key={f.label}
+                className={[
+                  "flex items-start gap-2",
+                  f.off ? "opacity-40" : "",
+                  p.featured ? "text-ink-soft" : "text-white/72",
+                ].join(" ")}
+              >
+                <span aria-hidden className={f.off ? "text-white/30" : "text-forest-400"}>
+                  {f.off ? "—" : "✓"}
+                </span>
+                <span>{f.label}</span>
               </li>
             ))}
           </ul>
@@ -74,10 +116,10 @@ export default function PricingCards() {
           <Link
             href={p.cta.href}
             className={[
-              "mt-auto inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold",
+              "mt-auto inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-medium transition",
               p.featured
-                ? "bg-white text-forest-600 hover:bg-cream-100"
-                : "border border-forest-500 text-forest-600 hover:bg-forest-50",
+                ? "bg-gradient-to-br from-forest-500 to-teal-400 text-white shadow-glow hover:opacity-90"
+                : "border border-white/20 text-white/85 hover:bg-white/10",
             ].join(" ")}
           >
             {p.cta.label}

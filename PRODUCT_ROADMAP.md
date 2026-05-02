@@ -1,41 +1,51 @@
-# AI Pocket Tutor — product roadmap
+# Pocket Tutor — product roadmap
 
 A short, opinionated plan. Each phase ships only when the previous one is
-**stable and useful** for real parents.
+**stable and useful** for real users.
 
 ---
 
 ## Phase 1 — MVP web app  *(current)*
 
 The smallest version of the product that solves the problem end-to-end for a
-parent of a single K–6 child in Ontario.
+K–3 child in Ontario, in any of the three modes.
 
 **Scope**
-- Parent account + child profile.
+- Account + child profile.
+- Mode selection (Parent / Homeschool / Teacher) at session start.
 - Manual input + secure upload (with privacy warning).
-- AI analysis using the fixed 9-section output.
-- Worksheet generator (5–8 questions, answer key, print stylesheet).
-- Progress dashboard with adaptive difficulty.
-- Stripe-ready subscription placeholder (Single Child / Family up to 4).
+- AI analysis with the mode-specific output shape (see CLAUDE.md §7).
+- Printable worksheet generator with answer key (all tiers).
+- Pricing: Free (1 analysis/mo), Premium ($17.99/mo), Family ($29.99/mo).
 
 **Done when**
-- A parent can go from "I'm worried about reading" to a printed practice page
+- An adult can go from "I'm worried about reading" to a printed practice page
   in under 5 minutes.
-- 10 parent testers report a 4/5+ on "this was clearly useful."
+- 10 testers (parents, homeschoolers, teachers) report a 4/5+ on
+  "this was clearly useful."
 
 ---
 
-## Phase 2 — Better curriculum mapping
+## Phase 2 — Interactive practice  *(Premium feature)*
 
-- Expand `data/ontario-curriculum-k6.json` into a fully indexed skill graph.
+- On-screen worksheet runner with instant per-question feedback.
+- Auto-save of score + per-skill correctness.
+- Progress dashboard updates after each interactive session.
+- Print stylesheet still works for the same worksheet.
+
+---
+
+## Phase 3 — Better curriculum mapping
+
+- Expand `data/ontario-curriculum-k3.json` into a fully indexed skill graph.
 - Tag every generated worksheet question with the curriculum expectation it
   practices.
-- Show the parent which expectations are mastered / in progress / new.
+- Show which expectations are mastered / in progress / new.
 - Move Supabase to a Canadian region.
 
 ---
 
-## Phase 3 — PDF worksheet export
+## Phase 4 — PDF worksheet export
 
 - Server-side PDF rendering of the worksheet + answer key.
 - Branded but minimal layout.
@@ -43,15 +53,15 @@ parent of a single K–6 child in Ontario.
 
 ---
 
-## Phase 4 — Teacher accounts
+## Phase 5 — Grades 4–6 expansion
 
-- Teacher role with a small group of student profiles (parent-granted).
-- Group plan view: 4–6 kids, common gaps, shared worksheet.
-- Read-only "share with parent" link.
+- Extend curriculum data + prompt rules to Grades 4, 5, 6.
+- Add Writing rubric scaffolding for upper-elementary samples.
+- Adjust UI copy to drop the "K–3" positioning.
 
 ---
 
-## Phase 5 — Multi-curriculum (Canada + USA)
+## Phase 6 — Multi-curriculum (Canada + USA)
 
 - Add curricula: BC, AB, QC, plus Common Core (US).
 - Profile picks the curriculum at child creation.
@@ -59,7 +69,7 @@ parent of a single K–6 child in Ontario.
 
 ---
 
-## Phase 6 — Native mobile app
+## Phase 7 — Native mobile app
 
 - React Native (or Expo) wrapping the web flows.
 - Camera-first upload (snap a worksheet → analyze).
@@ -67,12 +77,12 @@ parent of a single K–6 child in Ontario.
 
 ---
 
-## Phase 7 — Full adaptive AI tutoring system
+## Phase 8 — Full adaptive AI tutoring system
 
 - A live, mid-session loop that adjusts difficulty after each question.
-- Optional, supervised child-facing read-aloud + dictation (still under a
-  parent account).
-- Long-running learning plan that re-evaluates monthly with no parent input.
+- Optional, supervised child-facing read-aloud + dictation (still under an
+  adult account).
+- Long-running learning plan that re-evaluates monthly with no adult input.
 
 ---
 
@@ -82,3 +92,4 @@ parent of a single K–6 child in Ontario.
 - A leaderboard, a streak war, a social feed.
 - Anything that diagnoses a learning condition.
 - Selling parent or child data.
+- Child logins.
