@@ -11,6 +11,7 @@ import {
   type RecentFeedbackEntry,
 } from "@/lib/prompts";
 import { QuotaExceededError, consumeAIQuota } from "@/lib/quota";
+import { getRole } from "@/lib/role";
 import { mapToSkillIds } from "@/lib/skillGapEngine";
 import { getServerSupabase } from "@/lib/supabaseServer";
 import type { Grade, LearningNeed, Subject } from "@/types/child";
@@ -92,17 +93,21 @@ export async function createLearningSession(input: {
     completedIndependently: (r.completed_independently ?? null) as boolean | null,
   }));
 
+  const role = getRole();
+
   const prompt =
     parsed.inputType === "paste"
       ? buildReportCardPrompt({
           child: childForPrompt,
           reportText: parsed.text,
+          role,
           recentFeedback,
         })
       : buildAnalysisPrompt({
           child: childForPrompt,
           subject: parsed.subject,
           parentInput: parsed.text,
+          role,
           recentFeedback,
         });
 
