@@ -3,11 +3,12 @@ import {
   SYSTEM_PROMPT,
   childContext,
   recentFeedbackContext,
+  roleContext,
   type RecentFeedbackEntry,
 } from "@/lib/prompts";
-import type { Child } from "@/types/child";
+import type { Child, Role } from "@/types/child";
 
-export const REPORT_CARD_PROMPT_VERSION = "report-card@2026-04-30.1";
+export const REPORT_CARD_PROMPT_VERSION = "report-card@2026-05-03.1";
 
 /**
  * Specialised analysis for a school report card comment / teacher note.
@@ -25,15 +26,17 @@ export function buildReportCardPrompt(args: {
     | "parentGoal"
   >;
   reportText: string;
+  role?: Role | null;
   recentFeedback?: RecentFeedbackEntry[];
 }): { system: string; user: string; version: string } {
-  const { child, reportText, recentFeedback = [] } = args;
+  const { child, reportText, role = null, recentFeedback = [] } = args;
   const feedbackBlock = recentFeedbackContext(recentFeedback);
+  const roleBlock = roleContext(role);
 
   const taskAddendum = `
 TASK
 Translate this school report card comment (or teacher note) into a concrete,
-kind plan a parent can act on tonight.
+kind plan a reader can act on today.
 
 - Decode the SPECIFIC skills the comment is hinting at — teachers often
   write softly. Your job is to interpret without judgement of the teacher
@@ -43,7 +46,7 @@ kind plan a parent can act on tonight.
   affected strand and rebuild before pushing forward.
 - Strip and ignore the school name, teacher name, and any student
   identifier in the report text. Never repeat them.
-
+${roleBlock ? `\n${roleBlock}\n` : ""}
 OUTPUT FORMAT
 ${NINE_SECTION_OUTPUT_SCHEMA}
 `.trim();

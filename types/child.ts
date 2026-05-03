@@ -4,6 +4,14 @@ export type Subject = "language" | "reading" | "writing" | "math";
 
 export type LearningNeed = "adhd" | "dyslexia" | "anxiety" | "esl" | "other";
 
+export type Role = "parent" | "homeschooler" | "teacher";
+
+export const ROLES: Role[] = ["parent", "homeschooler", "teacher"];
+
+export function isRole(value: unknown): value is Role {
+  return value === "parent" || value === "homeschooler" || value === "teacher";
+}
+
 export interface Child {
   id: string;
   userId: string;

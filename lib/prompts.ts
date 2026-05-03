@@ -11,7 +11,7 @@
  * functions from "@/lib/prompts" and passes the result to aiService.generate().
  */
 
-import type { Child } from "@/types/child";
+import type { Child, Role } from "@/types/child";
 import type { ParentFeedback } from "@/types/progress";
 import type { Difficulty } from "@/types/session";
 
@@ -169,6 +169,42 @@ export function recentFeedbackContext(
     "- If 'too_hard' or 'needed help' dominates → step DOWN one stage in the phonics/skill progression and shrink the worksheet.",
     "- If 'too_easy' AND 'done independently' dominate → step UP one stage within the same family. Never skip a stage.",
     "- If mixed or 'just_right' → hold the current level and vary the practice.",
+  ].join("\n");
+}
+
+/**
+ * Per-role TASK-block addendum. Lets each prompt resize the session and tune
+ * the tone for a parent at the kitchen table, a homeschooling parent running
+ * the curriculum, or a classroom teacher running a small-group rotation.
+ *
+ * Returns "" when role is null so the caller can simply concatenate.
+ */
+export function roleContext(role: Role | null): string {
+  if (!role) return "";
+  if (role === "parent") {
+    return [
+      "READER ROLE: parent of a school-going child.",
+      "- Size the session for 10–15 minutes at the kitchen table.",
+      "- Plain, encouraging tone. Do not assume teacher vocabulary.",
+      "- Worksheet should be short and low-stakes (after-school energy).",
+    ].join("\n");
+  }
+  if (role === "homeschooler") {
+    return [
+      "READER ROLE: homeschooling parent running the curriculum.",
+      "- Write a fuller mini-lesson: model → guided practice → independent practice.",
+      "- It is OK for the session to run 20–30 minutes.",
+      "- Worksheet may be longer and serve as the day's main practice.",
+      "- Reference scope-and-sequence position explicitly (e.g. 'phonics: vowel teams').",
+    ].join("\n");
+  }
+  // teacher
+  return [
+    "READER ROLE: classroom teacher addressing one student or a small group.",
+    "- Size the mini-lesson for ~10 minutes during a small-group rotation.",
+    "- Name the misconception precisely and the most common error to watch for.",
+    "- Worksheet should be classroom-ready: differentiated Easy / Medium / Hard, usable as an exit ticket.",
+    "- Speak teacher-to-teacher; you can use grade-band terminology.",
   ].join("\n");
 }
 

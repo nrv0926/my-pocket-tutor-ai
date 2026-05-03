@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { selectRole } from "@/lib/actions/role";
 
 export const metadata = {
   title: "For parents · AI Pocket Tutor",
@@ -23,12 +24,15 @@ export default function ForParentPage() {
             what to focus on tonight and how to do it without a fight.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              href="/children/new"
-              className="inline-flex items-center rounded-full bg-forest-500 px-5 py-3 text-sm font-semibold text-white shadow hover:bg-forest-600"
-            >
-              Start a child profile
-            </Link>
+            <form action={selectRole}>
+              <input type="hidden" name="role" value="parent" />
+              <button
+                type="submit"
+                className="inline-flex items-center rounded-full bg-forest-500 px-5 py-3 text-sm font-semibold text-white shadow hover:bg-forest-600"
+              >
+                Start a child profile
+              </button>
+            </form>
             <Link
               href="/try"
               className="inline-flex items-center rounded-full border border-cream-300 bg-white px-5 py-3 text-sm font-medium text-ink hover:bg-cream-50"
@@ -129,12 +133,15 @@ export default function ForParentPage() {
       <section className="bg-forest-500 py-14 text-center text-cream-50">
         <div className="mx-auto max-w-2xl px-4 sm:px-6">
           <h2 className="font-serif text-3xl">Ten minutes tonight beats an hour of arguing.</h2>
-          <Link
-            href="/children/new"
-            className="mt-6 inline-flex items-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-forest-600 hover:bg-cream-100"
-          >
-            Start child profile
-          </Link>
+          <form action={selectRole} className="mt-6 inline-block">
+            <input type="hidden" name="role" value="parent" />
+            <button
+              type="submit"
+              className="inline-flex items-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-forest-600 hover:bg-cream-100"
+            >
+              Start child profile
+            </button>
+          </form>
         </div>
       </section>
     </>
