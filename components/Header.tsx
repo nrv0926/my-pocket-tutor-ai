@@ -27,6 +27,7 @@ export default async function Header() {
           </nav>
         ) : (
           <nav className="hidden items-center gap-6 text-sm text-ink-soft md:flex">
+            <Link href="/#who" className="hover:text-forest-500">Who it&apos;s for</Link>
             <Link href="/#how" className="hover:text-forest-500">How it works</Link>
             <Link href="/pricing" className="hover:text-forest-500">Pricing</Link>
           </nav>
