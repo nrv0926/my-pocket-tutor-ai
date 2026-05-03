@@ -2,11 +2,12 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { safeRelativePath } from "@/lib/safeRedirect";
 import { getBrowserSupabase } from "@/lib/supabaseBrowser";
 
 export default function LoginPage() {
   const params = useSearchParams();
-  const next = params.get("next") || "/dashboard";
+  const next = safeRelativePath(params.get("next"), "/dashboard");
 
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");

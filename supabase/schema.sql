@@ -73,6 +73,10 @@ create table if not exists public.learning_sessions (
   created_at        timestamptz not null default now()
 );
 create index if not exists sessions_child_id_idx on public.learning_sessions(child_id);
+-- Dashboard query: ORDER BY created_at DESC LIMIT 8 per child / overall.
+-- The composite index lets Postgres serve this without a sort.
+create index if not exists sessions_child_created_idx
+  on public.learning_sessions(child_id, created_at desc);
 
 -- Idempotent migration for an already-deployed table missing `mode`.
 alter table public.learning_sessions

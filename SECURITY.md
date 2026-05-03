@@ -117,9 +117,27 @@ Email **security@aipockettutor.app** (placeholder) with a short description
 and reproduction steps. Please do not file public issues for security
 problems.
 
+## Redirect handling
+
+Any `next` / `returnTo` URL coming from a query string passes through
+`safeRelativePath()` (`lib/safeRedirect.ts`) before being used. Only
+same-origin paths starting with a single `/` are accepted; absolute,
+protocol-relative, and backslash-prefixed values fall back to
+`/dashboard`. This blocks the magic-link → phishing redirect chain.
+Regression covered by `tests/safeRedirect.test.ts`.
+
 ## Out of scope for MVP (tracked in roadmap)
 
 - SOC 2 / formal compliance audit.
 - Bug bounty.
 - WAF / managed rate limiting beyond the platform default.
 - Field-level encryption at rest beyond Supabase defaults.
+- Idempotency tokens on `createLearningSession` (currently double-submit
+  protected only on the client).
+- Async AI generation with polling (today the request blocks for the
+  full Claude latency).
+- Migration tooling — schema changes are hand-edited in
+  `supabase/schema.sql`. Adopt `supabase migrations` or `dbmate` before
+  multi-environment deployment.
+- Per-IP rate limiting on signed-upload URL creation (the AI quota
+  applies only to generations).
