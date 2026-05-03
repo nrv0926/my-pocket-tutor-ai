@@ -28,13 +28,21 @@ import type {
 import type { ParentFeedback } from "@/types/progress";
 
 /**
- * Single end-to-end MVP path for all three modes:
+ * Async generation. The session is split across two server entry points:
  *
- *   pick mode → text in → call generate() → save the session → /results/[id]
+ *   createLearningSession()  — validate input, charge quota, insert a
+ *                              `pending` row, redirect to /results/[id].
+ *                              Cheap; returns in <100ms.
  *
- * The mode chooses the prompt + the expected output shape. Page code stays
- * uniform; this action is the routing seam.
+ *   processLearningSession() — pulls the pending row, calls Claude,
+ *                              writes the result back. Several seconds.
+ *                              Called by the /results page after
+ *                              redirect, via /api/sessions/[id]/process.
+ *
+ * Quota is consumed up front so an attacker can't spam pending rows
+ * without paying the rate-limit cost.
  */
+
 const InputSchema = z.object({
   childId: z.string().uuid(),
   mode: z.enum(["parent", "homeschool", "teacher"]),
@@ -42,6 +50,8 @@ const InputSchema = z.object({
   subject: z.enum(["language", "reading", "writing", "math"]),
   text: z.string().min(5).max(8000),
 });
+
+type ChildForPrompt = Parameters<typeof buildAnalysisPrompt>[0]["child"];
 
 export async function createLearningSession(input: {
   childId: string;
@@ -58,54 +68,25 @@ export async function createLearningSession(input: {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not signed in.");
 
+  // Confirm the child belongs to this user (RLS would also block, but a
+  // friendly error beats a silent insert failure).
   const { data: child, error: childErr } = await supabase
     .from("children")
-    .select("grade, age, curriculum, learning_needs, strengths, weaknesses, parent_goal")
+    .select("id")
     .eq("id", parsed.childId)
     .single();
   if (childErr || !child) throw new Error("Child not found.");
 
-  const childForPrompt = {
-    grade: child.grade as Grade,
-    age: child.age ?? null,
-    curriculum: child.curriculum as "ontario" | "common-core" | "other",
-    learningNeeds: (child.learning_needs ?? []) as LearningNeed[],
-    strengths: child.strengths ?? null,
-    weaknesses: child.weaknesses ?? null,
-    parentGoal: child.parent_goal ?? null,
-  };
-
-  const { data: recentRows } = await supabase
-    .from("progress_records")
-    .select("created_at, skill, difficulty, parent_feedback, completed_independently")
-    .eq("child_id", parsed.childId)
-    .order("created_at", { ascending: false })
-    .limit(5);
-
-  const recentFeedback: RecentFeedbackEntry[] = (recentRows ?? []).map((r) => ({
-    createdAt: r.created_at as string,
-    skill: r.skill as string,
-    difficulty: (r.difficulty ?? null) as Difficulty | null,
-    parentFeedback: (r.parent_feedback ?? null) as ParentFeedback | null,
-    completedIndependently: (r.completed_independently ?? null) as boolean | null,
-  }));
-
-  const prompt = pickPrompt({
-    mode: parsed.mode,
-    inputType: parsed.inputType,
-    subject: parsed.subject,
-    text: parsed.text,
-    child: childForPrompt,
-    recentFeedback,
-  });
-
+  // Charge quota BEFORE inserting the pending row. If we did it the
+  // other way around an over-quota user could keep creating pending
+  // rows that the dashboard then has to filter out.
   try {
     await consumeAIQuota();
   } catch (err) {
     if (err instanceof QuotaExceededError) {
       await logAICall({
         childId: parsed.childId,
-        promptVersion: prompt.version,
+        promptVersion: `pending@${parsed.mode}`,
         model: currentModel(),
         status: "quota_exceeded",
         errorClass: "QuotaExceededError",
@@ -114,6 +95,87 @@ export async function createLearningSession(input: {
     }
     throw err;
   }
+
+  const { data: inserted, error: insertErr } = await supabase
+    .from("learning_sessions")
+    .insert({
+      child_id: parsed.childId,
+      mode: parsed.mode,
+      input_type: parsed.inputType,
+      subject: parsed.subject,
+      raw_input: parsed.text,
+      analysis_result: null,
+      top_skill_gaps: [],
+      worksheet: null,
+      answer_key: null,
+      difficulty: null,
+      status: "pending",
+    })
+    .select("id")
+    .single();
+
+  if (insertErr || !inserted) {
+    throw new Error(`Could not create session: ${insertErr?.message ?? "unknown error"}`);
+  }
+
+  redirect(`/results/${inserted.id}`);
+}
+
+/**
+ * Pull the pending row and run the AI. Idempotent on already-completed
+ * sessions: if status is anything other than 'pending', this is a
+ * no-op. Concurrent callers race to flip pending → processing via a
+ * conditional UPDATE; only the winner runs the AI.
+ *
+ * Returns the final status so the caller (the API route) can shape its
+ * HTTP response.
+ */
+export async function processLearningSession(
+  sessionId: string,
+): Promise<"done" | "error" | "already_done" | "in_flight"> {
+  const supabase = getServerSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in.");
+
+  // Atomic status flip. RLS scopes this to sessions whose child belongs
+  // to the caller. If 0 rows come back, either the session doesn't
+  // belong to us, it's already finished, or another worker took it.
+  const { data: claimed } = await supabase
+    .from("learning_sessions")
+    .update({ status: "processing" })
+    .eq("id", sessionId)
+    .eq("status", "pending")
+    .select("id, child_id, mode, input_type, subject, raw_input")
+    .maybeSingle();
+
+  if (!claimed) {
+    const { data: current } = await supabase
+      .from("learning_sessions")
+      .select("status")
+      .eq("id", sessionId)
+      .maybeSingle();
+    if (current?.status === "done") return "already_done";
+    return "in_flight";
+  }
+
+  const childForPrompt = await loadChildForPrompt(claimed.child_id);
+  if (!childForPrompt) {
+    await markError(sessionId, "Child profile not found.");
+    return "error";
+  }
+
+  const recentFeedback = await loadRecentFeedback(claimed.child_id);
+
+  const prompt = pickPrompt({
+    mode: claimed.mode as Mode,
+    inputType: claimed.input_type as SessionInputType,
+    subject: claimed.subject as Subject,
+    text: claimed.raw_input ?? "",
+    child: childForPrompt,
+    recentFeedback,
+  });
 
   const startedAt = Date.now();
   let aiResponse;
@@ -125,18 +187,22 @@ export async function createLearningSession(input: {
     });
   } catch (err) {
     await logAICall({
-      childId: parsed.childId,
+      childId: claimed.child_id,
       promptVersion: prompt.version,
       model: currentModel(),
       status: "error",
       errorClass: classifyError(err),
       latencyMs: Date.now() - startedAt,
     });
-    throw err;
+    await markError(
+      sessionId,
+      err instanceof Error ? err.message : "Generation failed.",
+    );
+    return "error";
   }
 
   await logAICall({
-    childId: parsed.childId,
+    childId: claimed.child_id,
     promptVersion: prompt.version,
     model: aiResponse.model,
     status: "ok",
@@ -145,34 +211,81 @@ export async function createLearningSession(input: {
   });
 
   const result = aiResponse.result;
-  const skillIds = mapToSkillIds(result, parsed.mode);
-  const { worksheet, answerKey, difficulty } = extractStorableWorksheet(result, parsed.mode);
+  const skillIds = mapToSkillIds(result, claimed.mode as Mode);
+  const { worksheet, answerKey, difficulty } = extractStorableWorksheet(
+    result,
+    claimed.mode as Mode,
+  );
 
-  const { data: inserted, error: insertErr } = await supabase
+  const { error: updateErr } = await supabase
     .from("learning_sessions")
-    .insert({
-      child_id: parsed.childId,
-      mode: parsed.mode,
-      input_type: parsed.inputType,
-      subject: parsed.subject,
-      raw_input: parsed.text,
+    .update({
       analysis_result: result,
-      top_skill_gaps: skillIds.length > 0 ? skillIds : fallbackSkills(result, parsed.mode),
+      top_skill_gaps:
+        skillIds.length > 0 ? skillIds : fallbackSkills(result, claimed.mode as Mode),
       worksheet,
       answer_key: answerKey,
       difficulty,
+      status: "done",
     })
-    .select("id")
-    .single();
+    .eq("id", sessionId);
 
-  if (insertErr || !inserted) {
-    throw new Error(`Could not save session: ${insertErr?.message ?? "unknown error"}`);
+  if (updateErr) {
+    await markError(sessionId, `Could not save session: ${updateErr.message}`);
+    return "error";
   }
 
   revalidatePath("/dashboard");
-  revalidatePath(`/progress/${parsed.childId}`);
+  revalidatePath(`/progress/${claimed.child_id}`);
+  revalidatePath(`/results/${sessionId}`);
 
-  redirect(`/results/${inserted.id}`);
+  return "done";
+}
+
+async function loadChildForPrompt(childId: string): Promise<ChildForPrompt | null> {
+  const supabase = getServerSupabase();
+  const { data, error } = await supabase
+    .from("children")
+    .select("grade, age, curriculum, learning_needs, strengths, weaknesses, parent_goal")
+    .eq("id", childId)
+    .single();
+  if (error || !data) return null;
+  return {
+    grade: data.grade as Grade,
+    age: data.age ?? null,
+    curriculum: data.curriculum as "ontario" | "common-core" | "other",
+    learningNeeds: (data.learning_needs ?? []) as LearningNeed[],
+    strengths: data.strengths ?? null,
+    weaknesses: data.weaknesses ?? null,
+    parentGoal: data.parent_goal ?? null,
+  };
+}
+
+async function loadRecentFeedback(childId: string): Promise<RecentFeedbackEntry[]> {
+  const supabase = getServerSupabase();
+  const { data } = await supabase
+    .from("progress_records")
+    .select("created_at, skill, difficulty, parent_feedback, completed_independently")
+    .eq("child_id", childId)
+    .order("created_at", { ascending: false })
+    .limit(5);
+  return (data ?? []).map((r) => ({
+    createdAt: r.created_at as string,
+    skill: r.skill as string,
+    difficulty: (r.difficulty ?? null) as Difficulty | null,
+    parentFeedback: (r.parent_feedback ?? null) as ParentFeedback | null,
+    completedIndependently: (r.completed_independently ?? null) as boolean | null,
+  }));
+}
+
+async function markError(sessionId: string, message: string): Promise<void> {
+  const supabase = getServerSupabase();
+  // Truncate so a leaky upstream message doesn't blow the column up.
+  const trimmed = message.slice(0, 500);
+  await supabase
+    .from("learning_sessions")
+    .update({ status: "error", error_message: trimmed })
+    .eq("id", sessionId);
 }
 
 function pickPrompt(args: {
@@ -180,7 +293,7 @@ function pickPrompt(args: {
   inputType: SessionInputType;
   subject: Subject;
   text: string;
-  child: Parameters<typeof buildAnalysisPrompt>[0]["child"];
+  child: ChildForPrompt;
   recentFeedback: RecentFeedbackEntry[];
 }) {
   const { mode, inputType, subject, text, child, recentFeedback } = args;
@@ -205,7 +318,6 @@ function pickPrompt(args: {
     });
   }
 
-  // Parent mode keeps the original two-prompt routing: paste vs description.
   if (inputType === "paste") {
     return buildReportCardPrompt({
       child,
@@ -221,11 +333,6 @@ function pickPrompt(args: {
   });
 }
 
-/**
- * Pull a single representative worksheet for the storage convenience columns.
- * Parent: the one practice worksheet. Homeschool/Teacher: first of the set
- * (the full set lives inside analysis_result for the renderer).
- */
 function extractStorableWorksheet(
   result: ParentResult | HomeschoolResult | TeacherResult,
   mode: Mode,
@@ -242,7 +349,6 @@ function extractStorableWorksheet(
       difficulty: r.practiceWorksheet.difficulty,
     };
   }
-
   const r = result as HomeschoolResult | TeacherResult;
   const first = r.worksheetSet?.[0] ?? null;
   const firstKey = first

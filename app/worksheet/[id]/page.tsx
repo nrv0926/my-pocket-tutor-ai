@@ -16,13 +16,21 @@ export default async function WorksheetPage({ params }: { params: { id: string }
   if (error || !data) notFound();
 
   const worksheet = data.worksheet as Worksheet | null;
-  // analysis_result.answerKey is the canonical source; the answer_key column
-  // is a denormalised copy that may be empty for older rows.
-  const answerKey =
-    (data.answer_key as { questionId: string; answer: string }[] | null) ??
-    (data.analysis_result as { answerKey: { questionId: string; answer: string }[] }).answerKey;
+  // answer_key is a denormalised copy; for parent-mode rows the canonical
+  // copy is also at analysis_result.answerKey. Pending sessions have a
+  // null analysis_result, so we have to be defensive here.
+  const fromColumn =
+    data.answer_key as { questionId: string; answer: string }[] | null;
+  const fromResult =
+    data.analysis_result &&
+    typeof data.analysis_result === "object" &&
+    "answerKey" in data.analysis_result
+      ? ((data.analysis_result as { answerKey: { questionId: string; answer: string }[] })
+          .answerKey ?? null)
+      : null;
+  const answerKey = fromColumn ?? fromResult;
 
-  if (!worksheet) {
+  if (!worksheet || !answerKey) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
         <p className="text-sm text-ink-muted">No worksheet attached to this session.</p>

@@ -134,8 +134,7 @@ Regression covered by `tests/safeRedirect.test.ts`.
 - WAF / managed rate limiting beyond the platform default.
 - Field-level encryption at rest beyond Supabase defaults.
 - Idempotency tokens on `createLearningSession` (currently double-submit
-  protected only on the client).
-- Async AI generation with polling (today the request blocks for the
-  full Claude latency).
+  protected only on the client + by quota — a fast double-click can
+  burn one extra quota slot).
 - Per-IP rate limiting on signed-upload URL creation (the AI quota
   applies only to generations).

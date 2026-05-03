@@ -24,6 +24,7 @@ export default async function DashboardPage() {
     supabase
       .from("learning_sessions")
       .select("id, child_id, subject, created_at, analysis_result")
+      .eq("status", "done")
       .order("created_at", { ascending: false })
       .limit(8),
     supabase
