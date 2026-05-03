@@ -1,33 +1,39 @@
 import Link from "next/link";
+import { startCheckout } from "@/lib/actions/billing";
+
+type PaidTier = "premium" | "family";
 
 type Plan = {
   name: string;
+  tier: "free" | PaidTier;
   price: string;
   cadence: string;
   description: string;
   features: { label: string; off?: boolean }[];
-  cta: { label: string; href: string };
+  ctaLabel: string;
   featured?: boolean;
 };
 
 const PLANS: Plan[] = [
   {
     name: "Free",
+    tier: "free",
     price: "$0",
     cadence: "/month, forever",
     description: "Try one full plan, end to end.",
     features: [
-      { label: "1 analysis per month" },
+      { label: "1 analysis per day" },
       { label: "Printable worksheet + answer key" },
       { label: "Step-by-step teaching guide" },
       { label: "Parent tips for every plan" },
       { label: "Interactive practice", off: true },
       { label: "Progress tracking", off: true },
     ],
-    cta: { label: "Get started free", href: "/login" },
+    ctaLabel: "Get started free",
   },
   {
     name: "Premium",
+    tier: "premium",
     price: "$17.99",
     cadence: "/month · 1 child",
     description: "Everything you need to make every session count.",
@@ -40,11 +46,12 @@ const PLANS: Plan[] = [
       { label: "Personalised learning plan" },
       { label: "Priority support" },
     ],
-    cta: { label: "Start free 7-day trial", href: "/login" },
+    ctaLabel: "Start free 7-day trial",
     featured: true,
   },
   {
     name: "Family",
+    tier: "family",
     price: "$29.99",
     cadence: "/month · up to 4 children",
     description: "Built for homeschool families and households with siblings.",
@@ -56,7 +63,7 @@ const PLANS: Plan[] = [
       { label: "Extra parent resources" },
       { label: "Early access to new features" },
     ],
-    cta: { label: "Start free 7-day trial", href: "/login" },
+    ctaLabel: "Start free 7-day trial",
   },
 ];
 
@@ -78,22 +85,47 @@ export default function PricingCards() {
               ⭐ Most popular
             </span>
           )}
-          <h3 className={["font-serif text-2xl font-semibold", p.featured ? "text-forest-600" : "text-white/90"].join(" ")}>
+          <h3
+            className={[
+              "font-serif text-2xl font-semibold",
+              p.featured ? "text-forest-600" : "text-white/90",
+            ].join(" ")}
+          >
             {p.name}
           </h3>
           <p className="mt-3">
-            <span className={["font-medium text-[34px] leading-none", p.featured ? "text-forest-500" : "text-forest-400"].join(" ")}>
+            <span
+              className={[
+                "font-medium text-[34px] leading-none",
+                p.featured ? "text-forest-500" : "text-forest-400",
+              ].join(" ")}
+            >
               {p.price}
             </span>
-            <span className={["ml-1 text-sm font-light", p.featured ? "text-ink-muted" : "text-white/45"].join(" ")}>
+            <span
+              className={[
+                "ml-1 text-sm font-light",
+                p.featured ? "text-ink-muted" : "text-white/45",
+              ].join(" ")}
+            >
               {p.cadence}
             </span>
           </p>
-          <p className={["mt-2 text-sm font-light", p.featured ? "text-ink-soft" : "text-white/55"].join(" ")}>
+          <p
+            className={[
+              "mt-2 text-sm font-light",
+              p.featured ? "text-ink-soft" : "text-white/55",
+            ].join(" ")}
+          >
             {p.description}
           </p>
 
-          <div className={["my-5 h-px", p.featured ? "bg-cream-300" : "bg-white/10"].join(" ")} />
+          <div
+            className={[
+              "my-5 h-px",
+              p.featured ? "bg-cream-300" : "bg-white/10",
+            ].join(" ")}
+          />
 
           <ul className="mb-6 flex flex-col gap-2.5 text-sm">
             {p.features.map((f) => (
@@ -113,19 +145,57 @@ export default function PricingCards() {
             ))}
           </ul>
 
-          <Link
-            href={p.cta.href}
-            className={[
-              "mt-auto inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-medium transition",
-              p.featured
-                ? "bg-gradient-to-br from-forest-500 to-teal-400 text-white shadow-glow hover:opacity-90"
-                : "border border-white/20 text-white/85 hover:bg-white/10",
-            ].join(" ")}
-          >
-            {p.cta.label}
-          </Link>
+          {p.tier === "free" ? (
+            <Link
+              href={`/login?next=${encodeURIComponent("/session/new")}`}
+              className={[
+                "mt-auto inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-medium transition",
+                "border border-white/20 text-white/85 hover:bg-white/10",
+              ].join(" ")}
+            >
+              {p.ctaLabel}
+            </Link>
+          ) : (
+            <CheckoutButton tier={p.tier} featured={p.featured} label={p.ctaLabel} />
+          )}
         </article>
       ))}
     </div>
   );
+}
+
+function CheckoutButton({
+  tier,
+  featured,
+  label,
+}: {
+  tier: PaidTier;
+  featured?: boolean;
+  label: string;
+}) {
+  return (
+    <form action={startCheckoutAction} className="mt-auto">
+      <input type="hidden" name="tier" value={tier} />
+      <button
+        type="submit"
+        className={[
+          "inline-flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-medium transition",
+          featured
+            ? "bg-gradient-to-br from-forest-500 to-teal-400 text-white shadow-glow hover:opacity-90"
+            : "border border-white/20 text-white/85 hover:bg-white/10",
+        ].join(" ")}
+      >
+        {label}
+      </button>
+    </form>
+  );
+}
+
+async function startCheckoutAction(formData: FormData) {
+  "use server";
+  const tier = formData.get("tier");
+  if (tier !== "premium" && tier !== "family") {
+    throw new Error("Invalid tier.");
+  }
+  await startCheckout(tier);
 }
