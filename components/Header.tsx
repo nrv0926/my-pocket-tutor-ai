@@ -51,7 +51,7 @@ export default async function Header() {
                 Sign in
               </Link>
               <Link
-                href="/login"
+                href={`/login?next=${encodeURIComponent("/session/new")}`}
                 className="inline-flex items-center rounded-lg bg-forest-500 px-4 py-2 text-sm font-medium text-white shadow-glow hover:bg-forest-600"
               >
                 Get started free

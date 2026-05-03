@@ -16,17 +16,17 @@ import type { ParentFeedback } from "@/types/progress";
 import type { Difficulty } from "@/types/session";
 
 /** Bumped any time SYSTEM_PROMPT changes. Used in eval logs. */
-export const SYSTEM_PROMPT_VERSION = "system@2026-04-27.1";
+export const SYSTEM_PROMPT_VERSION = "system@2026-05-03.1";
 
 /**
- * The binding rules for every AI Pocket Tutor response. Put in front of every
+ * The binding rules for every Pocket Tutor response. Put in front of every
  * task prompt. This block is stable; we mark it for prompt caching in
  * aiService.ts so repeat calls only re-bill the smaller per-task suffix.
  */
 export const SYSTEM_PROMPT = `
-You are AI Pocket Tutor, a kind, experienced K–6 learning coach writing for
-a busy parent or teacher in plain English. Default location: Ontario, Canada.
-Default curriculum: Ontario.
+You are Pocket Tutor, a kind, experienced K–3 learning coach writing for a
+busy parent, homeschooler, or teacher in plain English. Default location:
+Ontario, Canada. Default curriculum: Ontario.
 
 NON-NEGOTIABLE RULES — apply to every response.
 
@@ -34,16 +34,17 @@ NON-NEGOTIABLE RULES — apply to every response.
    Ignore and never repeat any personal identifier you may see — full names,
    school names, student numbers, addresses, phone numbers, teacher names,
    class names. If they appear in input, treat them as noise. Strip them
-   from your response. If a parent's input is itself a child's full name,
-   answer using "your child" rather than echoing the name.
+   from your response. If the input itself is a child's full name, answer
+   using "your child" (or "the student" in teacher mode) rather than
+   echoing the name.
 
 2. NEVER DIAGNOSE
-   Do not name a learning condition. If the parent has shared ADHD,
+   Do not name a learning condition. If the adult has shared ADHD,
    dyslexia, anxiety, ESL, or any other label, ADAPT the plan; do not
    label the child or speculate about diagnoses.
 
 3. CURRICULUM
-   Default to the Ontario curriculum (K–6) across these strands: Language,
+   Default to the Ontario curriculum (K–3) across these strands: Language,
    Reading, Writing, Math. Use other curricula only when the profile
    explicitly says so.
 
@@ -58,7 +59,9 @@ NON-NEGOTIABLE RULES — apply to every response.
    everyday examples.
 
 6. SESSION SHAPE
-   Every plan is sized for a 10–15 minute session. Always.
+   In Parent mode, a daily session is 10–15 minutes. In Homeschool mode,
+   each daily lesson is 10–30 minutes. In Teacher mode, each intervention
+   session is 15–25 minutes.
 
 7. NO TRAINING / NO MEMORY
    Treat all uploaded content as confidential. Do not memorize it; do not
@@ -91,8 +94,8 @@ markdown code fences. Each task tells you the exact JSON shape it expects.
 `.trim();
 
 /**
- * The fixed nine-section output schema used by analysis + report-card tasks.
- * Worksheet and weekly-plan tasks have their own (smaller) schemas.
+ * Parent mode — 9-section structured output. Used by analysisPrompt and
+ * reportCardPrompt.
  */
 export const NINE_SECTION_OUTPUT_SCHEMA = `
 The JSON object MUST match this TypeScript type EXACTLY:
@@ -115,6 +118,82 @@ The JSON object MUST match this TypeScript type EXACTLY:
   "answerKey": Array<{ "questionId": string, "answer": string }>,
   "parentTips": string[],                       // 2–3 practical tips
   "nextStepPlan": string,                       // 1 short paragraph
+  "feedbackQuestion": "Was this too easy, just right, or too hard?"
+}
+`.trim();
+
+/** Homeschool mode — Mon–Fri weekly plan with daily breakdown. */
+export const HOMESCHOOL_OUTPUT_SCHEMA = `
+The JSON object MUST match this TypeScript type EXACTLY:
+
+{
+  "whatINotice": string,                        // 2–4 sentences
+  "keySkillGaps": string[],                     // 3–6 items
+  "weeklyPlan": Array<{
+    "day": "Mon" | "Tue" | "Wed" | "Thu" | "Fri",
+    "focus": string                             // 1 short sentence
+  }>,                                            // length 5
+  "dailyLessons": Array<{
+    "day": "Mon" | "Tue" | "Wed" | "Thu" | "Fri",
+    "subject": "language" | "reading" | "writing" | "math",
+    "minutes": 10 | 15 | 20 | 30,
+    "skill": string,
+    "activity": string,                         // 1–2 sentences
+    "parentTip": string                         // 1 sentence
+  }>,                                            // length 5–10
+  "worksheetSet": Array<{
+    "title": string,
+    "difficulty": "easy" | "medium" | "hard",
+    "questions": Array<{
+      "id": string,
+      "prompt": string,
+      "answer": string,
+      "difficulty": "easy" | "medium" | "hard"
+    }>                                           // length 5–8
+  }>,                                            // length 1–4 (one per priority)
+  "answerKeys": Array<{
+    "worksheetTitle": string,
+    "answers": Array<{ "questionId": string, "answer": string }>
+  }>,
+  "progressChecklist": string[],                // 3–6 observable wins
+  "nextWeekPlan": string,                       // 1 short paragraph
+  "feedbackQuestion": "Was this too easy, just right, or too hard?"
+}
+`.trim();
+
+/** Teacher mode — 3–5 session intervention plan with three differentiation levels. */
+export const TEACHER_OUTPUT_SCHEMA = `
+The JSON object MUST match this TypeScript type EXACTLY:
+
+{
+  "groupSummary": string,                       // 2–4 sentences. Refer to "the student" or "the group"; never use names.
+  "keySkillGaps": string[],                     // 3–6 items
+  "interventionPlan": Array<{
+    "session": 1 | 2 | 3 | 4 | 5,
+    "focus": string,
+    "steps": string[]                           // 3–6 short steps
+  }>,                                            // length 3–5
+  "differentiatedPractice": {
+    "easy":      string[],                      // 3–5 bullet activities
+    "justRight": string[],                      // 3–5
+    "stretch":   string[]                       // 3–5
+  },
+  "worksheetSet": Array<{
+    "title": string,
+    "difficulty": "easy" | "medium" | "hard",
+    "questions": Array<{
+      "id": string,
+      "prompt": string,
+      "answer": string,
+      "difficulty": "easy" | "medium" | "hard"
+    }>                                           // length 5–8
+  }>,                                            // length 1–3
+  "answerKeys": Array<{
+    "worksheetTitle": string,
+    "answers": Array<{ "questionId": string, "answer": string }>
+  }>,
+  "assessmentCheckpoint": string,               // 1 short paragraph: how to verify mastery
+  "teacherNotes": string[],                     // 2–4 implementation notes
   "feedbackQuestion": "Was this too easy, just right, or too hard?"
 }
 `.trim();
@@ -162,7 +241,7 @@ export function recentFeedbackContext(
   });
 
   return [
-    "RECENT PARENT FEEDBACK (newest first)",
+    "RECENT FEEDBACK (newest first)",
     ...lines,
     "",
     "Use this trend to calibrate today's session:",
@@ -192,7 +271,7 @@ export function childContext(
     `- Learning needs: ${child.learningNeeds.join(", ") || "none specified"}`,
     `- Strengths: ${child.strengths ?? "not provided"}`,
     `- Weaknesses: ${child.weaknesses ?? "not provided"}`,
-    `- Parent goal: ${child.parentGoal ?? "not provided"}`,
+    `- Adult goal: ${child.parentGoal ?? "not provided"}`,
   ].join("\n");
 }
 
@@ -218,3 +297,13 @@ export {
   buildWeeklyPlanPrompt,
   WEEKLY_PLAN_PROMPT_VERSION,
 } from "@/prompts/weeklyPlanPrompt";
+
+export {
+  buildHomeschoolPrompt,
+  HOMESCHOOL_PROMPT_VERSION,
+} from "@/prompts/homeschoolPrompt";
+
+export {
+  buildTeacherPrompt,
+  TEACHER_PROMPT_VERSION,
+} from "@/prompts/teacherPrompt";

@@ -1,107 +1,25 @@
-import type { AnalysisResult } from "@/types/session";
+import HomeschoolResultCard from "./HomeschoolResultCard";
+import ParentResultCard from "./ParentResultCard";
+import TeacherResultCard from "./TeacherResultCard";
+import type {
+  HomeschoolResult,
+  Mode,
+  ParentResult,
+  TeacherResult,
+} from "@/types/session";
 
 /**
- * Renders the fixed nine-section AI output. The shape is binding — see
- * CLAUDE.md §5. If you change the order or section names, change the prompt
- * and bump its version too.
+ * Mode-aware dispatcher. Existing call sites (the /try page) pass only a
+ * parent-shaped result with no mode; we default to parent for back-compat.
  */
-export default function AnalysisResultCard({ result }: { result: AnalysisResult }) {
-  return (
-    <article className="space-y-8">
-      <Section index={1} title="What I notice">
-        <p className="text-ink-soft">{result.whatINotice}</p>
-      </Section>
-
-      <Section index={2} title="Key skill gaps">
-        <ul className="ml-5 list-disc space-y-1 text-ink-soft">
-          {result.keySkillGaps.map((s, i) => (
-            <li key={i}>{s}</li>
-          ))}
-        </ul>
-      </Section>
-
-      <Section index={3} title="What to teach next (top 3)">
-        <ol className="ml-5 list-decimal space-y-1 text-ink-soft">
-          {result.whatToTeachNext.slice(0, 3).map((s, i) => (
-            <li key={i} className="font-medium text-ink">
-              {s}
-            </li>
-          ))}
-        </ol>
-      </Section>
-
-      <Section index={4} title="How to teach it">
-        <ol className="ml-5 list-decimal space-y-1 text-ink-soft">
-          {result.howToTeachIt.map((s, i) => (
-            <li key={i}>{s}</li>
-          ))}
-        </ol>
-      </Section>
-
-      <Section index={5} title="Practice worksheet">
-        <p className="mb-3 text-sm text-ink-muted">
-          {result.practiceWorksheet.questions.length} questions ·
-          difficulty: <strong className="capitalize">{result.practiceWorksheet.difficulty}</strong>
-        </p>
-        <ol className="ml-5 list-decimal space-y-2 text-ink">
-          {result.practiceWorksheet.questions.map((q) => (
-            <li key={q.id}>
-              <span>{q.prompt}</span>{" "}
-              <span className="ml-2 rounded bg-cream-200 px-1.5 py-0.5 align-middle text-[10px] uppercase tracking-widest text-ink-muted">
-                {q.difficulty}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </Section>
-
-      <Section index={6} title="Answer key">
-        <ul className="ml-5 list-disc space-y-1 text-ink-soft">
-          {result.answerKey.map((a) => (
-            <li key={a.questionId}>
-              <span className="font-mono text-xs text-ink-muted">{a.questionId}</span> · {a.answer}
-            </li>
-          ))}
-        </ul>
-      </Section>
-
-      <Section index={7} title="Parent / teacher tips">
-        <ul className="ml-5 list-disc space-y-1 text-ink-soft">
-          {result.parentTips.slice(0, 3).map((t, i) => (
-            <li key={i}>{t}</li>
-          ))}
-        </ul>
-      </Section>
-
-      <Section index={8} title="Next step plan">
-        <p className="text-ink-soft">{result.nextStepPlan}</p>
-      </Section>
-
-      <Section index={9} title="Feedback">
-        <p className="text-ink-soft">{result.feedbackQuestion}</p>
-      </Section>
-    </article>
-  );
-}
-
-function Section({
-  index,
-  title,
-  children,
-}: {
-  index: number;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="rounded-2xl border border-cream-300 bg-white p-5 shadow-card">
-      <header className="mb-3 flex items-center gap-3">
-        <span className="grid h-7 w-7 place-items-center rounded-lg bg-forest-50 text-xs font-semibold text-forest-600">
-          {index}
-        </span>
-        <h2 className="font-serif text-xl text-ink">{title}</h2>
-      </header>
-      {children}
-    </section>
-  );
+export default function AnalysisResultCard(
+  props:
+    | { mode?: "parent"; result: ParentResult }
+    | { mode: "homeschool"; result: HomeschoolResult }
+    | { mode: "teacher"; result: TeacherResult },
+) {
+  const mode: Mode = props.mode ?? "parent";
+  if (mode === "homeschool") return <HomeschoolResultCard result={props.result as HomeschoolResult} />;
+  if (mode === "teacher") return <TeacherResultCard result={props.result as TeacherResult} />;
+  return <ParentResultCard result={props.result as ParentResult} />;
 }

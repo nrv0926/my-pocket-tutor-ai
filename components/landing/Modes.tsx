@@ -5,7 +5,7 @@ const MODES = [
   {
     icon: "👨‍👩‍👧",
     name: "Parent mode",
-    href: "/login?mode=parent",
+    href: "/login?next=" + encodeURIComponent("/session/new?mode=parent"),
     cta: "I'm a parent",
     desc: "You care deeply about your child's learning. You just want to know exactly what to do at home — clearly, simply, tonight.",
     outputs: [
@@ -19,7 +19,7 @@ const MODES = [
   {
     icon: "🏠",
     name: "Homeschool mode",
-    href: "/login?mode=homeschool",
+    href: "/login?next=" + encodeURIComponent("/session/new?mode=homeschool"),
     cta: "I homeschool",
     desc: "You're leading your child's education at home. You need structured weekly plans, subject-by-subject guidance, and resources you can actually use.",
     outputs: [
@@ -33,7 +33,7 @@ const MODES = [
   {
     icon: "🍎",
     name: "Teacher mode",
-    href: "/login?mode=teacher",
+    href: "/login?next=" + encodeURIComponent("/session/new?mode=teacher"),
     cta: "I'm a teacher",
     desc: "You're supporting students with specific skill gaps. You need targeted intervention plans and differentiated resources — without the hours of planning.",
     outputs: [

@@ -59,18 +59,33 @@ create index if not exists uploads_child_id_idx on public.uploads(child_id);
 create table if not exists public.learning_sessions (
   id                uuid primary key default uuid_generate_v4(),
   child_id          uuid not null references public.children(id) on delete cascade,
+  mode              text not null default 'parent'
+                     check (mode in ('parent','homeschool','teacher')),
   input_type        text not null,         -- 'paste' | 'upload' | 'description' | 'plan'
   subject           text not null,         -- 'language' | 'reading' | 'writing' | 'math'
-  raw_input         text,                  -- the parent's text (no PII please)
+  raw_input         text,                  -- adult's text input (no PII please)
   upload_id         uuid references public.uploads(id) on delete set null,
-  analysis_result   jsonb not null,        -- the full 9-section structured output
+  analysis_result   jsonb not null,        -- shape varies by mode (see CLAUDE.md §7)
   top_skill_gaps    text[] not null default '{}',
-  worksheet         jsonb,                 -- { questions: [...], difficulty: 'easy'|'medium'|'hard' }
+  worksheet         jsonb,                 -- representative worksheet (parent: the worksheet; others: first of set)
   answer_key        jsonb,
   difficulty        text check (difficulty in ('easy','medium','hard')),
   created_at        timestamptz not null default now()
 );
 create index if not exists sessions_child_id_idx on public.learning_sessions(child_id);
+
+-- Idempotent migration for an already-deployed table missing `mode`.
+alter table public.learning_sessions
+  add column if not exists mode text not null default 'parent';
+do $$ begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'learning_sessions_mode_check'
+  ) then
+    alter table public.learning_sessions
+      add constraint learning_sessions_mode_check
+      check (mode in ('parent','homeschool','teacher'));
+  end if;
+end $$;
 
 -- ---------------------------------------------------------------------
 -- progress_records

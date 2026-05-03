@@ -3,67 +3,73 @@ import AnalysisResultCard from "@/components/AnalysisResultCard";
 import { SAMPLE_ANALYSIS, SAMPLE_PARENT_INPUT } from "./sampleAnalysis";
 
 export const metadata = {
-  title: "See a sample plan · AI Pocket Tutor",
+  title: "See a sample plan · Pocket Tutor",
   description:
-    "What an AI Pocket Tutor plan looks like for a Grade 3 reader who's started to dread reading.",
+    "What a Pocket Tutor plan looks like for a Grade 3 reader who's started to dread reading.",
 };
 
 export default function TryPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 pb-20 pt-12 sm:px-6 sm:pt-16">
-      <header className="text-center">
-        <span className="inline-block rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-forest-600">
-          Sample plan · no signup needed
-        </span>
-        <h1 className="mt-4 font-serif text-3xl text-ink sm:text-4xl">
-          Here's what a plan looks like.
-        </h1>
-        <p className="mx-auto mt-3 max-w-prose text-ink-soft">
-          A real parent shares what's happening. We turn it into a clear,
-          ten-minute session you can run tonight. Below is one such plan,
-          generated for a Grade 3 reading worry.
-        </p>
-      </header>
-
-      <section className="mt-10 rounded-2xl border border-cream-300 bg-white p-6 shadow-card">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-ink-muted">
-          The parent's worry
-        </h2>
-        <blockquote className="mt-3 border-l-4 border-forest-200 pl-4 text-ink">
-          {SAMPLE_PARENT_INPUT}
-        </blockquote>
-      </section>
-
-      <div className="mt-10">
-        <AnalysisResultCard result={SAMPLE_ANALYSIS} />
-      </div>
-
-      <section className="mt-12 rounded-2xl bg-forest-500 p-8 text-center text-cream-50">
-        <h2 className="font-serif text-2xl">
-          Get a plan tailored to <em>your</em> child.
-        </h2>
-        <p className="mx-auto mt-2 max-w-md text-cream-100">
-          The sample above is fictional. Your plan will be built from your
-          child's grade, what's been working, and what hasn't.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Link
-            href="/login"
-            className="inline-flex items-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-forest-600 hover:bg-cream-100"
-          >
-            Start free →
-          </Link>
-          <Link
-            href="/"
-            className="inline-flex items-center rounded-full border border-cream-100/40 px-5 py-3 text-sm font-medium text-cream-50 hover:bg-forest-600"
-          >
-            Back to home
-          </Link>
+    <>
+      <section className="bg-gradient-to-br from-cream-50 to-forest-50 px-4 pt-16 pb-10 sm:px-6">
+        <div className="mx-auto max-w-3xl text-center">
+          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-forest-100 bg-forest-50 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.06em] text-forest-500">
+            ✦ Sample plan · no signup needed
+          </span>
+          <h1 className="mt-4 font-serif text-3xl font-semibold leading-tight text-forest-600 sm:text-4xl">
+            Here&rsquo;s what a plan looks like.
+          </h1>
+          <p className="mx-auto mt-3 max-w-prose text-lg font-light text-ink-soft">
+            A real parent shares what&rsquo;s happening. We turn it into a
+            clear, ten-minute session you can run tonight. Below is one such
+            plan, generated for a Grade 3 reading worry &mdash; in Parent
+            mode.
+          </p>
         </div>
-        <p className="mt-4 text-xs text-cream-100/80">
-          No credit card required · Ontario curriculum first
-        </p>
       </section>
-    </div>
+
+      <div className="mx-auto max-w-3xl px-4 pb-20 sm:px-6">
+        <section className="mt-8 rounded-2xl border border-cream-300 bg-white p-6 shadow-card">
+          <p className="text-[10px] font-medium uppercase tracking-[0.07em] text-teal-400">
+            The parent&rsquo;s worry
+          </p>
+          <blockquote className="mt-3 border-l-4 border-forest-100 pl-4 text-ink">
+            {SAMPLE_PARENT_INPUT}
+          </blockquote>
+        </section>
+
+        <div className="mt-10">
+          <AnalysisResultCard mode="parent" result={SAMPLE_ANALYSIS} />
+        </div>
+
+        <section className="mt-12 rounded-2xl bg-gradient-to-br from-forest-600 to-teal-700 p-8 text-center text-white">
+          <h2 className="font-serif text-2xl font-semibold">
+            Get a plan tailored to your child.
+          </h2>
+          <p className="mx-auto mt-2 max-w-md text-white/70">
+            The sample above is fictional. Your plan will be built from your
+            child&rsquo;s grade, what&rsquo;s been working, and what
+            hasn&rsquo;t.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Link
+              href={`/login?next=${encodeURIComponent("/session/new")}`}
+              className="inline-flex items-center rounded-xl bg-white px-5 py-3 text-sm font-medium text-forest-600 hover:bg-cream-100"
+            >
+              Start free →
+            </Link>
+            <Link
+              href="/"
+              className="inline-flex items-center rounded-xl border border-white/30 px-5 py-3 text-sm font-medium text-white hover:bg-white/10"
+            >
+              Back to home
+            </Link>
+          </div>
+          <p className="mt-4 text-xs text-white/55">
+            No credit card required · Ontario curriculum first
+          </p>
+        </section>
+      </div>
+    </>
   );
 }

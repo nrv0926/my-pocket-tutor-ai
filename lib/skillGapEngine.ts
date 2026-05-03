@@ -1,4 +1,9 @@
-import type { AnalysisResult } from "@/types/session";
+import type {
+  HomeschoolResult,
+  Mode,
+  ParentResult,
+  TeacherResult,
+} from "@/types/session";
 import { SKILLS } from "./curriculumMap";
 
 /**
@@ -6,13 +11,16 @@ import { SKILLS } from "./curriculumMap";
  * skill IDs from `data/skill-map.json`. We use a lightweight token-overlap
  * heuristic — good enough for MVP routing of progress records.
  *
- * Returns an array of canonical skill IDs in priority order.
+ * Each mode exposes priority targets in a different shape:
+ * - parent     → whatToTeachNext (top 3) + keySkillGaps
+ * - homeschool → keySkillGaps + dailyLessons[].skill
+ * - teacher    → keySkillGaps + interventionPlan[].focus
  */
-export function mapToSkillIds(result: AnalysisResult): string[] {
-  const targets = [
-    ...result.whatToTeachNext,
-    ...result.keySkillGaps,
-  ];
+export function mapToSkillIds(
+  result: ParentResult | HomeschoolResult | TeacherResult,
+  mode: Mode,
+): string[] {
+  const targets = collectTargets(result, mode);
   const out: string[] = [];
 
   for (const phrase of targets) {
@@ -20,6 +28,22 @@ export function mapToSkillIds(result: AnalysisResult): string[] {
     if (id && !out.includes(id)) out.push(id);
   }
   return out;
+}
+
+function collectTargets(
+  result: ParentResult | HomeschoolResult | TeacherResult,
+  mode: Mode,
+): string[] {
+  if (mode === "parent") {
+    const r = result as ParentResult;
+    return [...r.whatToTeachNext, ...r.keySkillGaps];
+  }
+  if (mode === "homeschool") {
+    const r = result as HomeschoolResult;
+    return [...r.keySkillGaps, ...r.dailyLessons.map((l) => l.skill)];
+  }
+  const r = result as TeacherResult;
+  return [...r.keySkillGaps, ...r.interventionPlan.map((s) => s.focus)];
 }
 
 function bestMatch(phrase: string): string | null {
@@ -32,7 +56,6 @@ function bestMatch(phrase: string): string | null {
       best = { id: s.id, score };
     }
   }
-  // Require at least 2 overlapping meaningful tokens to claim a match.
   return best && best.score >= 2 ? best.id : null;
 }
 

@@ -7,7 +7,9 @@ import { generate, currentModel } from "@/lib/aiService";
 import { classifyError, logAICall } from "@/lib/observability";
 import {
   buildAnalysisPrompt,
+  buildHomeschoolPrompt,
   buildReportCardPrompt,
+  buildTeacherPrompt,
   type RecentFeedbackEntry,
 } from "@/lib/prompts";
 import { QuotaExceededError, consumeAIQuota } from "@/lib/quota";
@@ -15,27 +17,27 @@ import { mapToSkillIds } from "@/lib/skillGapEngine";
 import { getServerSupabase } from "@/lib/supabaseServer";
 import type { Grade, LearningNeed, Subject } from "@/types/child";
 import type {
-  AnalysisResult,
   Difficulty,
+  HomeschoolResult,
+  Mode,
+  ParentResult,
   SessionInputType,
+  TeacherResult,
+  Worksheet,
 } from "@/types/session";
 import type { ParentFeedback } from "@/types/progress";
 
 /**
- * Single end-to-end MVP path:
+ * Single end-to-end MVP path for all three modes:
  *
- *   paste text  →  call generate()  →  save the session  →  /results/[id]
+ *   pick mode → text in → call generate() → save the session → /results/[id]
  *
- * Inputs validated. RLS scopes child reads to the parent. Uploaded files
- * are not handled here — the input is plain text only at MVP.
- *
- * TODO (post-MVP): replace the manual JSON.parse in aiService.generate()
- * with a Zod-validated structured output (output_config.format /
- * client.messages.parse). Also turn this AnalysisResultSchema into the
- * source of truth for the prompt's expected shape.
+ * The mode chooses the prompt + the expected output shape. Page code stays
+ * uniform; this action is the routing seam.
  */
 const InputSchema = z.object({
   childId: z.string().uuid(),
+  mode: z.enum(["parent", "homeschool", "teacher"]),
   inputType: z.enum(["paste", "upload", "description", "plan"]),
   subject: z.enum(["language", "reading", "writing", "math"]),
   text: z.string().min(5).max(8000),
@@ -43,6 +45,7 @@ const InputSchema = z.object({
 
 export async function createLearningSession(input: {
   childId: string;
+  mode: Mode;
   inputType: SessionInputType;
   subject: Subject;
   text: string;
@@ -55,8 +58,6 @@ export async function createLearningSession(input: {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not signed in.");
 
-  // RLS: this select returns no rows if the child isn't this parent's, so
-  // we don't need a separate ownership check.
   const { data: child, error: childErr } = await supabase
     .from("children")
     .select("grade, age, curriculum, learning_needs, strengths, weaknesses, parent_goal")
@@ -74,9 +75,6 @@ export async function createLearningSession(input: {
     parentGoal: child.parent_goal ?? null,
   };
 
-  // Pull the most recent progress rows so the model can calibrate difficulty
-  // against the parent's actual reactions, not just the current input. RLS
-  // already restricts this to the signed-in parent's children.
   const { data: recentRows } = await supabase
     .from("progress_records")
     .select("created_at, skill, difficulty, parent_feedback, completed_independently")
@@ -92,22 +90,15 @@ export async function createLearningSession(input: {
     completedIndependently: (r.completed_independently ?? null) as boolean | null,
   }));
 
-  const prompt =
-    parsed.inputType === "paste"
-      ? buildReportCardPrompt({
-          child: childForPrompt,
-          reportText: parsed.text,
-          recentFeedback,
-        })
-      : buildAnalysisPrompt({
-          child: childForPrompt,
-          subject: parsed.subject,
-          parentInput: parsed.text,
-          recentFeedback,
-        });
+  const prompt = pickPrompt({
+    mode: parsed.mode,
+    inputType: parsed.inputType,
+    subject: parsed.subject,
+    text: parsed.text,
+    child: childForPrompt,
+    recentFeedback,
+  });
 
-  // Per-user daily cap. Throws QuotaExceededError with a friendly message
-  // that the form already surfaces via err.message — no UI changes needed.
   try {
     await consumeAIQuota();
   } catch (err) {
@@ -124,12 +115,10 @@ export async function createLearningSession(input: {
     throw err;
   }
 
-  // TODO (post-MVP): pass a Zod schema here so generate() returns a
-  // type-safe AnalysisResult instead of the manual cast below.
   const startedAt = Date.now();
   let aiResponse;
   try {
-    aiResponse = await generate<AnalysisResult>({
+    aiResponse = await generate<ParentResult | HomeschoolResult | TeacherResult>({
       system: prompt.system,
       user: prompt.user,
       promptVersion: prompt.version,
@@ -156,20 +145,22 @@ export async function createLearningSession(input: {
   });
 
   const result = aiResponse.result;
-  const skillIds = mapToSkillIds(result);
+  const skillIds = mapToSkillIds(result, parsed.mode);
+  const { worksheet, answerKey, difficulty } = extractStorableWorksheet(result, parsed.mode);
 
   const { data: inserted, error: insertErr } = await supabase
     .from("learning_sessions")
     .insert({
       child_id: parsed.childId,
+      mode: parsed.mode,
       input_type: parsed.inputType,
       subject: parsed.subject,
       raw_input: parsed.text,
       analysis_result: result,
-      top_skill_gaps: skillIds.length > 0 ? skillIds : result.whatToTeachNext,
-      worksheet: result.practiceWorksheet,
-      answer_key: result.answerKey,
-      difficulty: result.practiceWorksheet.difficulty,
+      top_skill_gaps: skillIds.length > 0 ? skillIds : fallbackSkills(result, parsed.mode),
+      worksheet,
+      answer_key: answerKey,
+      difficulty,
     })
     .select("id")
     .single();
@@ -181,7 +172,93 @@ export async function createLearningSession(input: {
   revalidatePath("/dashboard");
   revalidatePath(`/progress/${parsed.childId}`);
 
-  // redirect() throws an internal NEXT_REDIRECT signal — the calling
-  // client component must rethrow it (see NewSessionForm catch block).
   redirect(`/results/${inserted.id}`);
+}
+
+function pickPrompt(args: {
+  mode: Mode;
+  inputType: SessionInputType;
+  subject: Subject;
+  text: string;
+  child: Parameters<typeof buildAnalysisPrompt>[0]["child"];
+  recentFeedback: RecentFeedbackEntry[];
+}) {
+  const { mode, inputType, subject, text, child, recentFeedback } = args;
+
+  if (mode === "homeschool") {
+    return buildHomeschoolPrompt({
+      child,
+      subject,
+      inputType,
+      inputText: text,
+      recentFeedback,
+    });
+  }
+
+  if (mode === "teacher") {
+    return buildTeacherPrompt({
+      child,
+      subject,
+      inputType,
+      inputText: text,
+      recentFeedback,
+    });
+  }
+
+  // Parent mode keeps the original two-prompt routing: paste vs description.
+  if (inputType === "paste") {
+    return buildReportCardPrompt({
+      child,
+      reportText: text,
+      recentFeedback,
+    });
+  }
+  return buildAnalysisPrompt({
+    child,
+    subject,
+    parentInput: text,
+    recentFeedback,
+  });
+}
+
+/**
+ * Pull a single representative worksheet for the storage convenience columns.
+ * Parent: the one practice worksheet. Homeschool/Teacher: first of the set
+ * (the full set lives inside analysis_result for the renderer).
+ */
+function extractStorableWorksheet(
+  result: ParentResult | HomeschoolResult | TeacherResult,
+  mode: Mode,
+): {
+  worksheet: Worksheet | null;
+  answerKey: { questionId: string; answer: string }[] | null;
+  difficulty: Difficulty | null;
+} {
+  if (mode === "parent") {
+    const r = result as ParentResult;
+    return {
+      worksheet: r.practiceWorksheet,
+      answerKey: r.answerKey,
+      difficulty: r.practiceWorksheet.difficulty,
+    };
+  }
+
+  const r = result as HomeschoolResult | TeacherResult;
+  const first = r.worksheetSet?.[0] ?? null;
+  const firstKey = first
+    ? r.answerKeys.find((k) => k.worksheetTitle === first.title)?.answers ?? null
+    : null;
+  return {
+    worksheet: first,
+    answerKey: firstKey,
+    difficulty: first?.difficulty ?? null,
+  };
+}
+
+function fallbackSkills(
+  result: ParentResult | HomeschoolResult | TeacherResult,
+  mode: Mode,
+): string[] {
+  if (mode === "parent") return (result as ParentResult).whatToTeachNext;
+  return result.keySkillGaps;
 }
