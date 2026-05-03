@@ -54,7 +54,7 @@ export async function createSignedUploadUrl(input: CreateUploadInput) {
 
   const safeName = normalizeFileName(input.fileName);
   // Path is scoped under the user's auth.uid() so the storage RLS policy
-  // (see supabase/policies.sql) permits it.
+  // (see supabase/README.md) permits it.
   const path = `${input.userId}/${input.childId}/${crypto.randomUUID()}-${safeName}`;
 
   const { data, error } = await admin().storage

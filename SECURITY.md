@@ -24,8 +24,9 @@ two failure modes.
 
 ## Authorization — Row-Level Security (RLS)
 
-RLS is enabled on every table. The policies live in
-`supabase/policies.sql`. Summary:
+RLS is enabled on every table. The policies live in the init policies
+migration (`supabase/migrations/20260427000001_init_policies.sql`).
+Summary:
 
 | Table              | Read policy                                  | Write policy                                  |
 | ------------------ | -------------------------------------------- | --------------------------------------------- |
@@ -136,8 +137,5 @@ Regression covered by `tests/safeRedirect.test.ts`.
   protected only on the client).
 - Async AI generation with polling (today the request blocks for the
   full Claude latency).
-- Migration tooling — schema changes are hand-edited in
-  `supabase/schema.sql`. Adopt `supabase migrations` or `dbmate` before
-  multi-environment deployment.
 - Per-IP rate limiting on signed-upload URL creation (the AI quota
   applies only to generations).

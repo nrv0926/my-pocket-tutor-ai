@@ -62,7 +62,7 @@ already trying their best.
 ├── data/                   Curriculum + skill progressions (JSON)
 ├── prompts/                Versioned AI prompt templates
 ├── types/                  Shared TS types
-├── supabase/               schema.sql + RLS policies
+├── supabase/               versioned migrations + RLS policies
 ├── README.md
 ├── CLAUDE.md               House rules for AI contributors
 ├── SECURITY.md             Threat model & security controls
@@ -84,9 +84,10 @@ cp .env.example .env.local
 # Then fill in Supabase + AI provider keys.
 
 # 3. Set up the database
-# In the Supabase SQL editor, run the contents of:
-#   supabase/schema.sql
-#   supabase/policies.sql
+# Apply the migrations to your Supabase project:
+#   supabase link --project-ref <your-project-ref>
+#   supabase db push
+# Or run them with psql — see supabase/README.md.
 
 # 4. Run locally
 npm run dev
@@ -107,7 +108,8 @@ See `.env.example` for the complete list. The minimum to run the UI is:
 
 ## Database setup
 
-The full schema lives in `supabase/schema.sql` and creates:
+The schema lives in versioned migrations under
+`supabase/migrations/`. The init pair creates:
 
 - `users` (mirrors `auth.users`)
 - `children`
@@ -115,10 +117,12 @@ The full schema lives in `supabase/schema.sql` and creates:
 - `progress_records`
 - `uploads`
 - `subscriptions`
+- `ai_call_quota` + the `consume_ai_quota` RPC
+- `ai_calls` (observability log)
 
-Row-Level Security is enabled on every table — see `supabase/policies.sql`.
-**A parent can only ever read or write rows that belong to their own
-`auth.uid()`.**
+Row-Level Security is enabled in `20260427000001_init_policies.sql`.
+**A user can only ever read or write rows that belong to their own
+`auth.uid()`.** See `supabase/README.md` for the migration workflow.
 
 ## Security notes
 

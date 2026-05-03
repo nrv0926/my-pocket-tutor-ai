@@ -1,7 +1,7 @@
 -- =====================================================================
--- AI Pocket Tutor — Row-Level Security policies
--- A parent can only ever read or write rows that belong to their auth.uid().
--- Run AFTER schema.sql.
+-- 20260427000001_init_policies.sql
+-- Row-Level Security policies. A user can only ever read or write rows
+-- that belong to their auth.uid(), directly or via a children join.
 -- =====================================================================
 
 alter table public.users               enable row level security;
@@ -36,7 +36,6 @@ create policy "children owner all"
   with check (auth.uid() = user_id);
 
 -- --------- learning_sessions ---------
--- Access is owner-checked via the parent child row.
 drop policy if exists "sessions owner all" on public.learning_sessions;
 
 create policy "sessions owner all"
@@ -85,18 +84,12 @@ create policy "uploads owner all"
   );
 
 -- --------- ai_call_quota ---------
--- The user can read their own counter (e.g. for a "you've used X/Y today"
--- UI). All mutations go through the consume_ai_quota RPC, which runs
--- SECURITY DEFINER, so no INSERT / UPDATE / DELETE policies are granted.
 drop policy if exists "ai_call_quota self read" on public.ai_call_quota;
 
 create policy "ai_call_quota self read"
   on public.ai_call_quota for select using (auth.uid() = user_id);
 
 -- --------- ai_calls ---------
--- Users can read + insert their own log rows (the WITH CHECK clamps
--- inserts to the signed-in user). No update / delete — the log is
--- append-only by design.
 drop policy if exists "ai_calls self read"   on public.ai_calls;
 drop policy if exists "ai_calls self insert" on public.ai_calls;
 
@@ -107,16 +100,15 @@ create policy "ai_calls self insert"
   on public.ai_calls for insert with check (auth.uid() = user_id);
 
 -- --------- subscriptions ---------
--- Read is owner; writes happen via Stripe webhook (service role only).
 drop policy if exists "subs owner read" on public.subscriptions;
 
 create policy "subs owner read"
   on public.subscriptions for select using (auth.uid() = user_id);
 
 -- =====================================================================
--- Storage bucket policy notes
+-- Storage bucket policy notes (configured in the Supabase dashboard)
 -- ---------------------------------------------------------------------
--- Create the bucket as PRIVATE in the Supabase dashboard:
+-- Create the bucket as PRIVATE:
 --   name: child-uploads
 --   public: false
 --
@@ -126,6 +118,6 @@ create policy "subs owner read"
 --   bucket_id = 'child-uploads'
 --   AND (storage.foldername(name))[1] = auth.uid()::text
 --
--- Server actions issue short-lived signed URLs; nothing in this bucket is
--- ever served publicly. See SECURITY.md.
+-- Server actions issue short-lived signed URLs; nothing in this bucket
+-- is ever served publicly. See SECURITY.md.
 -- =====================================================================

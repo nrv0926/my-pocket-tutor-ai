@@ -1,7 +1,8 @@
 -- =====================================================================
--- AI Pocket Tutor — database schema
--- Run this in the Supabase SQL editor (or via supabase migration).
--- Then run policies.sql for Row-Level Security.
+-- 20260427000000_init_schema.sql
+-- Initial database schema for Pocket Tutor.
+-- Adds the core tables, the consume_ai_quota RPC, and base indexes.
+-- Run AFTER this migration the policies migration to enable RLS.
 -- =====================================================================
 
 create extension if not exists "uuid-ossp";
@@ -25,10 +26,10 @@ create table if not exists public.children (
   user_id         uuid not null references public.users(id) on delete cascade,
   nickname        text not null check (char_length(nickname) between 1 and 40),
   age             smallint check (age between 4 and 14),
-  grade           text not null,                 -- 'K','1','2','3','4','5','6'
-  location        text not null default 'ON-CA', -- e.g. 'ON-CA' (Ontario, Canada)
+  grade           text not null,
+  location        text not null default 'ON-CA',
   curriculum      text not null default 'ontario',
-  learning_needs  text[] not null default '{}',  -- e.g. {'adhd','dyslexia','anxiety'}
+  learning_needs  text[] not null default '{}',
   main_concern    text,
   strengths       text,
   weaknesses      text,
@@ -43,9 +44,9 @@ create index if not exists children_user_id_idx on public.children(user_id);
 create table if not exists public.uploads (
   id                          uuid primary key default uuid_generate_v4(),
   child_id                    uuid not null references public.children(id) on delete cascade,
-  file_name                   text not null,                          -- normalized filename, no path
-  file_type                   text not null,                          -- mime type
-  storage_path                text not null,                          -- bucket-relative path
+  file_name                   text not null,
+  file_type                   text not null,
+  storage_path                text not null,
   processing_status           text not null default 'pending'
                                check (processing_status in ('pending','processing','done','failed')),
   deleted_after_processing    boolean not null default true,
@@ -59,37 +60,18 @@ create index if not exists uploads_child_id_idx on public.uploads(child_id);
 create table if not exists public.learning_sessions (
   id                uuid primary key default uuid_generate_v4(),
   child_id          uuid not null references public.children(id) on delete cascade,
-  mode              text not null default 'parent'
-                     check (mode in ('parent','homeschool','teacher')),
-  input_type        text not null,         -- 'paste' | 'upload' | 'description' | 'plan'
-  subject           text not null,         -- 'language' | 'reading' | 'writing' | 'math'
-  raw_input         text,                  -- adult's text input (no PII please)
+  input_type        text not null,
+  subject           text not null,
+  raw_input         text,
   upload_id         uuid references public.uploads(id) on delete set null,
-  analysis_result   jsonb not null,        -- shape varies by mode (see CLAUDE.md §7)
+  analysis_result   jsonb not null,
   top_skill_gaps    text[] not null default '{}',
-  worksheet         jsonb,                 -- representative worksheet (parent: the worksheet; others: first of set)
+  worksheet         jsonb,
   answer_key        jsonb,
   difficulty        text check (difficulty in ('easy','medium','hard')),
   created_at        timestamptz not null default now()
 );
 create index if not exists sessions_child_id_idx on public.learning_sessions(child_id);
--- Dashboard query: ORDER BY created_at DESC LIMIT 8 per child / overall.
--- The composite index lets Postgres serve this without a sort.
-create index if not exists sessions_child_created_idx
-  on public.learning_sessions(child_id, created_at desc);
-
--- Idempotent migration for an already-deployed table missing `mode`.
-alter table public.learning_sessions
-  add column if not exists mode text not null default 'parent';
-do $$ begin
-  if not exists (
-    select 1 from pg_constraint where conname = 'learning_sessions_mode_check'
-  ) then
-    alter table public.learning_sessions
-      add constraint learning_sessions_mode_check
-      check (mode in ('parent','homeschool','teacher'));
-  end if;
-end $$;
 
 -- ---------------------------------------------------------------------
 -- progress_records
@@ -111,8 +93,6 @@ create index if not exists progress_skill_idx    on public.progress_records(skil
 
 -- ---------------------------------------------------------------------
 -- ai_call_quota  (daily per-user cap on AI generations)
--- One row per (user, day). Mutated only by the consume_ai_quota RPC below.
--- Direct writes are blocked by RLS; the RPC runs SECURITY DEFINER.
 -- ---------------------------------------------------------------------
 create table if not exists public.ai_call_quota (
   user_id     uuid not null references public.users(id) on delete cascade,
@@ -121,9 +101,6 @@ create table if not exists public.ai_call_quota (
   primary key (user_id, day)
 );
 
--- Atomically check + increment the signed-in user's quota for today.
--- Returns one row: (allowed, used). When `allowed = false`, the count
--- is left unchanged so the user is locked out cleanly until tomorrow.
 create or replace function public.consume_ai_quota(p_limit int)
 returns table (allowed boolean, used int)
 language plpgsql
@@ -170,7 +147,7 @@ grant execute on function public.consume_ai_quota(int) to authenticated;
 -- ---------------------------------------------------------------------
 -- ai_calls  (one row per AI invocation — observability + cost analysis)
 -- IMPORTANT: never store the prompt or the response here. Per CLAUDE.md
--- §3, log IDs and counts only. error_class is the SDK class name (e.g.
+-- §5, log IDs and counts only. error_class is the SDK class name (e.g.
 -- 'RateLimitError'), never the message — that could leak parent input.
 -- ---------------------------------------------------------------------
 create table if not exists public.ai_calls (
@@ -192,7 +169,7 @@ create index if not exists ai_calls_user_created_idx
   on public.ai_calls(user_id, created_at desc);
 
 -- ---------------------------------------------------------------------
--- subscriptions  (Stripe placeholder for MVP)
+-- subscriptions  (Stripe placeholder for MVP; see add_subscription_tiers)
 -- ---------------------------------------------------------------------
 create table if not exists public.subscriptions (
   id                       uuid primary key default uuid_generate_v4(),
