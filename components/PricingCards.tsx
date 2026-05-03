@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { startCheckout } from "@/lib/actions/billing";
+import { isStripeConfigured } from "@/lib/stripeClient";
 
 type PaidTier = "premium" | "family";
 
@@ -68,6 +69,7 @@ const PLANS: Plan[] = [
 ];
 
 export default function PricingCards() {
+  const stripeReady = isStripeConfigured();
   return (
     <div className="grid gap-4 md:grid-cols-3">
       {PLANS.map((p) => (
@@ -155,8 +157,20 @@ export default function PricingCards() {
             >
               {p.ctaLabel}
             </Link>
-          ) : (
+          ) : stripeReady ? (
             <CheckoutButton tier={p.tier} featured={p.featured} label={p.ctaLabel} />
+          ) : (
+            <span
+              className={[
+                "mt-auto inline-flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-medium opacity-60",
+                p.featured
+                  ? "border border-cream-300 text-ink-muted"
+                  : "border border-white/20 text-white/55",
+              ].join(" ")}
+              title="Set STRIPE_SECRET_KEY + STRIPE_PRICE_* to enable checkout."
+            >
+              Billing not configured
+            </span>
           )}
         </article>
       ))}

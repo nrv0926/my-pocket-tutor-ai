@@ -23,6 +23,19 @@ export function stripe(): Stripe {
 }
 
 /** Maps a Stripe price ID env var name to a tier. */
+/**
+ * True iff Stripe is configured well enough to start a checkout. Used by
+ * the UI to hide / disable upgrade buttons in dev environments where the
+ * keys aren't set, instead of letting them throw at submit time.
+ */
+export function isStripeConfigured(): boolean {
+  return Boolean(
+    process.env.STRIPE_SECRET_KEY &&
+      process.env.STRIPE_PRICE_PREMIUM &&
+      process.env.STRIPE_PRICE_FAMILY,
+  );
+}
+
 export function tierForPriceId(priceId: string): "premium" | "family" | null {
   if (priceId === process.env.STRIPE_PRICE_PREMIUM) return "premium";
   if (priceId === process.env.STRIPE_PRICE_FAMILY) return "family";

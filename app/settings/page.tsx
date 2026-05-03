@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { openBillingPortal, startCheckout } from "@/lib/actions/billing";
+import { isStripeConfigured } from "@/lib/stripeClient";
 import { getCurrentTier } from "@/lib/subscriptions";
 import { getServerSupabase } from "@/lib/supabaseServer";
 
@@ -9,6 +10,7 @@ const TIER_LABEL = { free: "Free", premium: "Premium", family: "Family" } as con
 
 export default async function SettingsPage() {
   const tier = await getCurrentTier();
+  const stripeReady = isStripeConfigured();
   const supabase = getServerSupabase();
   const { data } = await supabase
     .from("subscriptions")
@@ -69,7 +71,15 @@ export default async function SettingsPage() {
           {tier !== "free" ? ` · ${subscriptionStatus}` : ""}.
         </p>
 
-        {tier === "free" ? (
+        {!stripeReady ? (
+          <p className="mt-3 rounded-xl border border-cream-300 bg-cream-50 p-3 text-xs text-ink-muted">
+            Billing isn&rsquo;t configured in this environment. Set
+            <code className="mx-1">STRIPE_SECRET_KEY</code> +
+            <code className="mx-1">STRIPE_PRICE_PREMIUM</code> +
+            <code className="mx-1">STRIPE_PRICE_FAMILY</code> to enable
+            checkout.
+          </p>
+        ) : tier === "free" ? (
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <form action={upgradeAction("premium")}>
               <button
