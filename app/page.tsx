@@ -59,8 +59,45 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* WHO IS THIS FOR */}
+      <section id="who" className="mt-20 py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <header className="mx-auto mb-10 max-w-2xl text-center">
+            <span className="inline-block rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-forest-600">
+              Who is this for?
+            </span>
+            <h2 className="mt-3 font-serif text-3xl text-ink">
+              Pick the version that <em className="text-forest-500">sounds like you.</em>
+            </h2>
+            <p className="mt-2 text-ink-soft">
+              The same five steps. Tuned for the room you&apos;re standing in.
+            </p>
+          </header>
+          <div className="grid gap-5 md:grid-cols-3">
+            <RoleCard
+              href="/for/parent"
+              tag="Parents"
+              title="My child is in school. I want to help at home."
+              body="Translate report cards, defuse homework, and get a 10-minute kitchen-table plan."
+            />
+            <RoleCard
+              href="/for/homeschooler"
+              tag="Homeschoolers"
+              title="I'm the teacher. I just want a sharper plan."
+              body="Scope-and-sequence aware mini-lessons, full practice sets, and a skill map you control."
+            />
+            <RoleCard
+              href="/for/teacher"
+              tag="Teachers"
+              title="One student keeps getting stuck. What do I do tomorrow?"
+              body="Name the misconception, run a 10-minute mini-lesson, and send home a matching one-pager."
+            />
+          </div>
+        </div>
+      </section>
+
       {/* HOW IT WORKS */}
-      <section id="how" className="mt-20 border-y border-cream-300 bg-cream-50 py-16">
+      <section id="how" className="border-y border-cream-300 bg-cream-50 py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <header className="mx-auto mb-10 max-w-2xl text-center">
             <span className="inline-block rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-forest-600">
@@ -173,6 +210,34 @@ export default function HomePage() {
         </div>
       </section>
     </>
+  );
+}
+
+function RoleCard({
+  href,
+  tag,
+  title,
+  body,
+}: {
+  href: string;
+  tag: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex flex-col rounded-2xl border border-cream-300 bg-white p-6 shadow-card transition hover:border-forest-300 hover:shadow-lift"
+    >
+      <span className="self-start rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-forest-600">
+        {tag}
+      </span>
+      <h3 className="mt-3 font-serif text-lg text-ink">{title}</h3>
+      <p className="mt-2 flex-1 text-sm text-ink-soft">{body}</p>
+      <span className="mt-4 inline-flex items-center text-sm font-semibold text-forest-600 group-hover:text-forest-700">
+        See how it works →
+      </span>
+    </Link>
   );
 }
 
