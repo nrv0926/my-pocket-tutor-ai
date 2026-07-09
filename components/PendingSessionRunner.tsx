@@ -6,19 +6,18 @@ import { useEffect, useRef, useState } from "react";
 /**
  * Drives a pending session to completion.
  *
- * On mount: POSTs once to /api/sessions/[id]/process, which runs the AI
- * and writes the result back. While that's in flight we show a friendly
- * "thinking" state. When the response comes back we router.refresh() so
- * the server-rendered /results/[id] re-reads the new analysis_result.
- *
- * If the user reloads the page mid-flight (or comes back later), we
- * fall back to polling — the API is idempotent and the underlying
- * action returns "in_flight" or "already_done" without re-billing the
- * AI call.
+ * One POST kicks the processing; an independent polling loop re-checks
+ * every few seconds regardless of whether that first request is still
+ * in flight. The endpoint is idempotent (conditional pending→processing
+ * claim), so overlapping calls never double-run the AI — this makes the
+ * UI immune to a dropped connection (e.g. a dev-server recompile
+ * killing the long-lived first request).
  */
 
 const POLL_MS = 4000;
-const MAX_POLLS = 30; // ~2 minutes total.
+const MAX_POLLS = 45; // ~3 minutes total.
+
+type Stage = "working" | "failed";
 
 export default function PendingSessionRunner({
   sessionId,
@@ -28,9 +27,7 @@ export default function PendingSessionRunner({
   initialStatus: "pending" | "processing";
 }) {
   const router = useRouter();
-  const [stage, setStage] = useState<"running" | "polling" | "failed">(
-    initialStatus === "processing" ? "polling" : "running",
-  );
+  const [stage, setStage] = useState<Stage>("working");
   const [errorText, setErrorText] = useState<string | null>(null);
   const startedRef = useRef(false);
 
@@ -39,78 +36,60 @@ export default function PendingSessionRunner({
     startedRef.current = true;
 
     let cancelled = false;
+    let finished = false;
+    let inFlight = false;
     let polls = 0;
 
-    async function kick() {
+    async function check(): Promise<void> {
+      if (cancelled || finished || inFlight) return;
+      inFlight = true;
       try {
         const res = await fetch(`/api/sessions/${sessionId}/process`, {
           method: "POST",
-          headers: { "content-type": "application/json" },
         });
         if (cancelled) return;
         const body = (await res.json().catch(() => ({}))) as {
           status?: string;
           error?: string;
         };
-        if (!res.ok) {
-          setStage("failed");
-          setErrorText(body.error ?? "Processing failed.");
-          return;
-        }
 
         if (body.status === "done" || body.status === "already_done") {
+          finished = true;
           router.refresh();
           return;
         }
-
-        if (body.status === "error") {
+        if (body.status === "error" || (!res.ok && res.status !== 429)) {
+          finished = true;
           setStage("failed");
-          setErrorText("Generation failed. See details below.");
+          setErrorText(body.error ?? "Generation failed — details below.");
           router.refresh();
           return;
         }
-
-        // status === "in_flight" — another tab is processing. Poll.
-        setStage("polling");
-        await pollUntilDone();
-      } catch (err) {
-        if (cancelled) return;
-        setStage("failed");
-        setErrorText(err instanceof Error ? err.message : "Network error.");
+        // "in_flight": someone (possibly our own first call) is working.
+      } catch {
+        // Network hiccup — the next poll retries.
+      } finally {
+        inFlight = false;
       }
     }
 
-    async function pollUntilDone() {
-      while (!cancelled && polls < MAX_POLLS) {
-        polls += 1;
-        await new Promise((r) => setTimeout(r, POLL_MS));
-        if (cancelled) return;
-        const res = await fetch(`/api/sessions/${sessionId}/process`, {
-          method: "POST",
-        });
-        const body = (await res.json().catch(() => ({}))) as { status?: string };
-        if (body.status === "done" || body.status === "already_done") {
-          router.refresh();
-          return;
-        }
-        if (body.status === "error") {
-          setStage("failed");
-          setErrorText("Generation failed. See details below.");
-          router.refresh();
-          return;
-        }
-      }
-      if (!cancelled) {
+    // Kick immediately, then poll on an interval as the safety net.
+    check();
+    const timer = setInterval(() => {
+      if (cancelled || finished) return clearInterval(timer);
+      polls += 1;
+      if (polls > MAX_POLLS) {
+        clearInterval(timer);
         setStage("failed");
-        setErrorText(
-          "Still working… we'll keep trying. Refresh in a minute or two.",
-        );
+        setErrorText("This is taking longer than expected. Refresh in a minute — your plan may already be ready.");
+        return;
       }
-    }
+      check();
+    }, POLL_MS);
 
-    kick();
     return () => {
       cancelled = true;
+      clearInterval(timer);
     };
   }, [router, sessionId]);
 
@@ -132,7 +111,7 @@ export default function PendingSessionRunner({
             Pocket Tutor is thinking…
           </p>
           <p className="text-sm text-ink-soft">
-            {stage === "polling"
+            {initialStatus === "processing"
               ? "Almost there — picking up where we left off."
               : "Reading your input and choosing what to focus on first."}
           </p>
@@ -151,7 +130,7 @@ function Spinner() {
   return (
     <span
       aria-hidden
-      className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-forest-200 border-t-forest-500"
+      className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-forest-100 border-t-forest-500"
     />
   );
 }

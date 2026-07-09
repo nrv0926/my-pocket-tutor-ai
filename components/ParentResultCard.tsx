@@ -1,102 +1,82 @@
 import type { ParentResult } from "@/types/session";
+import {
+  AnswerKeyDisclosure,
+  Callout,
+  DiffBadge,
+  GapChips,
+  PriorityCards,
+  ResultSection,
+  Stepper,
+  TipCards,
+} from "./resultBits";
 
+/**
+ * Parent mode result. Design intent: a tired parent at 9pm should get
+ * the point of each section at a glance — chips and cards over prose,
+ * detail behind disclosure, one section = one idea.
+ */
 export default function ParentResultCard({ result }: { result: ParentResult }) {
   return (
-    <article className="space-y-6">
-      <Section index={1} title="What I notice">
-        <p className="text-ink-soft">{result.whatINotice}</p>
-      </Section>
-
-      <Section index={2} title="Key skill gaps">
-        <ul className="ml-5 list-disc space-y-1 text-ink-soft">
-          {result.keySkillGaps.map((s, i) => (
-            <li key={i}>{s}</li>
-          ))}
-        </ul>
-      </Section>
-
-      <Section index={3} title="What to teach next (top 3)">
-        <ol className="ml-5 list-decimal space-y-1 text-ink-soft">
-          {result.whatToTeachNext.slice(0, 3).map((s, i) => (
-            <li key={i} className="font-medium text-ink">
-              {s}
-            </li>
-          ))}
-        </ol>
-      </Section>
-
-      <Section index={4} title="How to teach it">
-        <ol className="ml-5 list-decimal space-y-1 text-ink-soft">
-          {result.howToTeachIt.map((s, i) => (
-            <li key={i}>{s}</li>
-          ))}
-        </ol>
-      </Section>
-
-      <Section index={5} title="Practice worksheet">
-        <p className="mb-3 text-sm text-ink-muted">
-          {result.practiceWorksheet.questions.length} questions · difficulty:{" "}
-          <strong className="capitalize">{result.practiceWorksheet.difficulty}</strong>
+    <article className="space-y-5">
+      <div className="rounded-2xl bg-gradient-to-br from-forest-600 to-teal-700 p-6 text-white sm:p-7">
+        <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-white/60">
+          What I notice
         </p>
-        <ol className="ml-5 list-decimal space-y-2 text-ink">
-          {result.practiceWorksheet.questions.map((q) => (
-            <li key={q.id}>
-              <span>{q.prompt}</span>{" "}
-              <span className="ml-2 rounded bg-cream-200 px-1.5 py-0.5 align-middle text-[10px] uppercase tracking-widest text-ink-muted">
-                {q.difficulty}
-              </span>
+        <p className="mt-2 max-w-2xl font-serif text-lg leading-relaxed sm:text-xl">
+          {result.whatINotice}
+        </p>
+      </div>
+
+      <ResultSection icon="🔍" title="Key skill gaps">
+        <GapChips gaps={result.keySkillGaps} />
+      </ResultSection>
+
+      <ResultSection icon="🎯" title="What to teach next">
+        <PriorityCards items={result.whatToTeachNext} />
+      </ResultSection>
+
+      <ResultSection icon="🧭" title="How to teach it — tonight's session">
+        <Stepper steps={result.howToTeachIt} />
+      </ResultSection>
+
+      <ResultSection icon="✏️" title="Practice worksheet">
+        <p className="mb-4 text-sm text-ink-muted">
+          {result.practiceWorksheet.title} · {result.practiceWorksheet.questions.length}{" "}
+          questions — the print-ready version is just below.
+        </p>
+        <ol className="space-y-2.5">
+          {result.practiceWorksheet.questions.map((q, i) => (
+            <li
+              key={q.id}
+              className="flex items-start justify-between gap-3 rounded-xl border border-cream-300 bg-cream-50 px-4 py-3"
+            >
+              <p className="text-sm leading-relaxed text-ink">
+                <span className="mr-2 font-semibold text-forest-500">{i + 1}.</span>
+                {q.prompt}
+              </p>
+              <DiffBadge level={q.difficulty} />
             </li>
           ))}
         </ol>
-      </Section>
+        <div className="mt-4">
+          <AnswerKeyDisclosure answers={result.answerKey} />
+        </div>
+      </ResultSection>
 
-      <Section index={6} title="Answer key">
-        <ul className="ml-5 list-disc space-y-1 text-ink-soft">
-          {result.answerKey.map((a) => (
-            <li key={a.questionId}>
-              <span className="font-mono text-xs text-ink-muted">{a.questionId}</span> · {a.answer}
-            </li>
-          ))}
-        </ul>
-      </Section>
+      <ResultSection icon="💛" title="Parent tips">
+        <TipCards tips={result.parentTips.slice(0, 3)} />
+      </ResultSection>
 
-      <Section index={7} title="Parent tips">
-        <ul className="ml-5 list-disc space-y-1 text-ink-soft">
-          {result.parentTips.slice(0, 3).map((t, i) => (
-            <li key={i}>{t}</li>
-          ))}
-        </ul>
-      </Section>
+      <ResultSection icon="🗓️" title="Next step plan">
+        <Callout>{result.nextStepPlan}</Callout>
+      </ResultSection>
 
-      <Section index={8} title="Next step plan">
-        <p className="text-ink-soft">{result.nextStepPlan}</p>
-      </Section>
-
-      <Section index={9} title="Feedback">
-        <p className="text-ink-soft">{result.feedbackQuestion}</p>
-      </Section>
+      <div className="rounded-2xl border border-cream-300 bg-white p-5 text-center shadow-card">
+        <p className="font-serif text-lg text-forest-600">{result.feedbackQuestion}</p>
+        <p className="mt-1 text-xs text-ink-muted">
+          Answer under the worksheet below — it tunes the next session&rsquo;s difficulty.
+        </p>
+      </div>
     </article>
-  );
-}
-
-function Section({
-  index,
-  title,
-  children,
-}: {
-  index: number;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="rounded-2xl border border-cream-300 bg-white p-5 shadow-card">
-      <header className="mb-3 flex items-center gap-3">
-        <span className="grid h-7 w-7 place-items-center rounded-lg bg-forest-50 text-xs font-semibold text-forest-600">
-          {index}
-        </span>
-        <h2 className="font-serif text-xl font-semibold text-forest-600">{title}</h2>
-      </header>
-      {children}
-    </section>
   );
 }

@@ -54,19 +54,29 @@ export default function WorksheetCard({
         </div>
       </header>
 
-      <ol className="ml-5 list-decimal space-y-3 text-ink">
-        {worksheet.questions.map((q) => {
+      <ol className="space-y-4">
+        {worksheet.questions.map((q, i) => {
           const a = answerKey.find((k) => k.questionId === q.id)?.answer;
           return (
-            <li key={q.id} className="leading-relaxed">
-              <p>{q.prompt}</p>
+            <li
+              key={q.id}
+              className="rounded-2xl border border-cream-300 bg-cream-50 p-4 print:rounded-none print:border-0 print:border-b print:bg-white print:p-0 print:pb-4"
+            >
+              <div className="flex items-start gap-3">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-forest-500 font-serif text-base font-semibold text-white print:bg-white print:text-ink">
+                  {i + 1}
+                </span>
+                <p className="pt-0.5 text-base leading-relaxed text-ink sm:text-lg">
+                  {q.prompt}
+                </p>
+              </div>
               {showKey && a && (
-                <p className="mt-1 rounded-lg bg-forest-50 px-3 py-2 text-sm text-forest-600">
+                <p className="ml-11 mt-2 rounded-lg bg-forest-50 px-3 py-2 text-sm text-forest-600">
                   Answer: <span className="font-medium">{a}</span>
                 </p>
               )}
               {!showKey && (
-                <div className="mt-1 h-8 border-b border-dashed border-cream-300 print:h-12" />
+                <div className="ml-11 mt-2 h-9 border-b-2 border-dashed border-cream-300 print:h-12" />
               )}
             </li>
           );
@@ -79,19 +89,23 @@ export default function WorksheetCard({
             Was this too easy, just right, or too hard?
           </p>
           <div className="flex flex-wrap gap-2">
-            {(["too_easy", "just_right", "too_hard"] as ParentFeedback[]).map((f) => (
+            {([
+              { val: "too_easy", label: "😴 Too easy" },
+              { val: "just_right", label: "🙂 Just right" },
+              { val: "too_hard", label: "😖 Too hard" },
+            ] as { val: ParentFeedback; label: string }[]).map((f) => (
               <button
-                key={f}
+                key={f.val}
                 disabled={submitted}
-                onClick={() => setFeedback(f)}
+                onClick={() => setFeedback(f.val)}
                 className={[
-                  "rounded-full border px-4 py-2 text-sm",
-                  feedback === f
-                    ? "border-forest-500 bg-forest-50 text-forest-600"
+                  "rounded-full border px-4 py-2 text-sm transition",
+                  feedback === f.val
+                    ? "border-forest-500 bg-forest-50 font-medium text-forest-600"
                     : "border-cream-300 hover:border-forest-500",
                 ].join(" ")}
               >
-                {f.replaceAll("_", " ")}
+                {f.label}
               </button>
             ))}
           </div>
