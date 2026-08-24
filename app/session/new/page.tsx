@@ -15,7 +15,7 @@ export default async function NewSessionPage() {
   if (error) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-        <p className="text-sm text-amber-700">Could not load children: {error.message}</p>
+        <p className="text-sm text-pop-night">Could not load children: {error.message}</p>
       </div>
     );
   }

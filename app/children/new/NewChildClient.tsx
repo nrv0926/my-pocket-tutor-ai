@@ -12,7 +12,7 @@ export default function NewChildClient() {
   return (
     <>
       {error && (
-        <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-700">
+        <div className="mb-4 rounded-xl border border-pop-night bg-pop-tangerine p-3 text-sm text-pop-night">
           {error}
         </div>
       )}

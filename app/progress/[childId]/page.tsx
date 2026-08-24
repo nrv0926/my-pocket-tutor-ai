@@ -180,7 +180,7 @@ export default async function ChildProgressPage({
                         d.difficulty === "easy"
                           ? "bg-pop-cyan text-pop-magenta"
                           : d.difficulty === "hard"
-                            ? "bg-amber-50 text-amber-700"
+                            ? "bg-pop-tangerine text-pop-night"
                             : "bg-pop-cream text-pop-night/80",
                       ].join(" ")}
                     >

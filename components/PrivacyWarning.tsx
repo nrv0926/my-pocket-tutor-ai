@@ -16,7 +16,7 @@ export default function PrivacyWarning({
 
   return (
     <section
-      className="rounded-2xl border border-amber-300 bg-amber-50 p-5 text-pop-night"
+      className="rounded-2xl border border-pop-night bg-pop-tangerine p-5 text-pop-night"
       aria-label="Privacy reminder"
     >
       <h3 className="font-display text-lg">Before you upload</h3>

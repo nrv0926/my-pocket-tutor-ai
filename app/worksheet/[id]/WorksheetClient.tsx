@@ -43,7 +43,7 @@ export default function WorksheetClient({
       />
 
       {error && (
-        <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-700">
+        <div className="rounded-xl border border-pop-night bg-pop-tangerine p-3 text-sm text-pop-night">
           {error}
         </div>
       )}

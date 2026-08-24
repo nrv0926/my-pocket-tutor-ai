@@ -64,14 +64,14 @@ export default function SettingsPage() {
         </form>
       </section>
 
-      <section className="rounded-2xl border border-amber-300 bg-amber-50 p-5">
+      <section className="rounded-2xl border border-pop-night bg-pop-tangerine p-5">
         <h2 className="font-display text-lg text-pop-night">Delete account</h2>
         <p className="mt-2 text-sm text-pop-night/80">
           Removes your children, sessions, files, and progress records. This cannot be undone.
         </p>
         <button
           type="button"
-          className="mt-3 rounded-full border border-amber-400 bg-white px-4 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100"
+          className="mt-3 rounded-full border border-pop-night bg-white px-4 py-2 text-sm font-medium text-pop-night hover:bg-pop-yellow"
         >
           Delete my account
         </button>

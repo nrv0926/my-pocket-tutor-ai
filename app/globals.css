@@ -16,6 +16,20 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* The palette runs from #fff8ec to #14100f, so a single focus ring colour
+   can't stay visible everywhere. Ink by default; light inside dark sections. */
+:focus-visible {
+  outline: 3px solid #14100f;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+.bg-pop-night :focus-visible,
+.bg-pop-magenta :focus-visible,
+.bg-pop-grape :focus-visible,
+footer :focus-visible {
+  outline-color: #fff8ec;
+}
+
 /* Archivo Black ships a single weight; forcing 900 keeps the fallback stack
    (Arial Black, system-ui) just as heavy when the webfont is slow or blocked. */
 .font-display { font-weight: 900; letter-spacing: -0.01em; }

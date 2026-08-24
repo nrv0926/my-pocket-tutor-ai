@@ -8,9 +8,9 @@ export default function ProgressTracker({
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-3">
-        <Stat label="Practiced"  value={summary.practicedCount}  tone="forest" />
-        <Stat label="Mastered"   value={summary.masteredCount}   tone="forest-strong" />
-        <Stat label="Struggling" value={summary.strugglingCount} tone="amber" />
+        <Stat label="Practiced"  value={summary.practicedCount}  tone="practiced" />
+        <Stat label="Mastered"   value={summary.masteredCount}   tone="mastered" />
+        <Stat label="Struggling" value={summary.strugglingCount} tone="struggling" />
       </div>
 
       <div className="rounded-2xl border-[3px] border-pop-night bg-white p-5 shadow-pop-sm">
@@ -20,7 +20,7 @@ export default function ProgressTracker({
             No sessions yet. Once you create one, recent skills will appear here.
           </p>
         ) : (
-          <ul className="divide-y divide-cream-200">
+          <ul className="divide-y-[2px] divide-pop-night/15">
             {summary.recentSkills.map((s) => (
               <li key={s.skill} className="flex items-center justify-between py-2 text-sm">
                 <span className="text-pop-night">{s.skill}</span>
@@ -43,17 +43,20 @@ function Stat({
 }: {
   label: string;
   value: number;
-  tone: "forest" | "forest-strong" | "amber";
+  tone: "practiced" | "mastered" | "struggling";
 }) {
+  // Ink on every fill: white on pop-pink is 3.34:1, under AA for this size.
   const cls = {
-    forest: "bg-pop-cyan text-pop-magenta",
-    "forest-strong": "bg-pop-pink text-white",
-    amber: "bg-amber-50 text-amber-700",
+    practiced: "bg-pop-cyan",
+    mastered: "bg-pop-lime",
+    struggling: "bg-pop-tangerine",
   }[tone];
 
   return (
-    <div className={`rounded-2xl p-4 shadow-pop-sm ${cls}`}>
-      <p className="text-xs uppercase tracking-widest opacity-80">{label}</p>
+    <div
+      className={`rounded-2xl border-[3px] border-pop-night p-4 text-pop-night shadow-pop-sm ${cls}`}
+    >
+      <p className="font-display text-[10px] uppercase tracking-[0.2em]">{label}</p>
       <p className="mt-1 font-display text-3xl">{value}</p>
     </div>
   );

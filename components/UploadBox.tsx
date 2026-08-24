@@ -35,7 +35,7 @@ export default function UploadBox({
           className={[
             "mt-4 inline-flex cursor-pointer items-center rounded-full px-5 py-2 text-sm font-semibold",
             confirmed
-              ? "bg-pop-pink text-white hover:bg-pop-magenta"
+              ? "bg-pop-pink text-pop-night hover:bg-pop-yellow"
               : "cursor-not-allowed bg-pop-night/25 text-pop-night/60",
           ].join(" ")}
         >
