@@ -45,7 +45,7 @@ export default async function ResultsPage({ params }: { params: { id: string } }
             {new Date(data.created_at).toLocaleString()}
           </p>
         </div>
-        <nav className="flex gap-2">
+        <nav className="flex gap-2 print:hidden">
           <a
             href="#worksheet"
             className="rounded-full border-[3px] border-pop-night bg-white px-4 py-2 text-sm font-medium text-pop-night hover:bg-pop-cream"

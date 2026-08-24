@@ -97,7 +97,7 @@ export function Marquee({ items, tone = "pink" }: { items: string[]; tone?: "pin
   const run = [...items, ...items, ...items];
   return (
     <div
-      className={`overflow-hidden border-y-[3px] border-pop-night py-3 ${tones[tone]}`}
+      className={`overflow-hidden border-y-[3px] border-pop-night py-3 print:hidden ${tones[tone]}`}
       aria-hidden
     >
       <div className="marquee flex w-max gap-10 whitespace-nowrap font-display text-sm uppercase tracking-widest">
@@ -122,7 +122,7 @@ function Star() {
 
 export function Squiggle({ className = "", color = "#14100f" }: { className?: string; color?: string }) {
   return (
-    <svg viewBox="0 0 120 24" className={className} fill="none" aria-hidden>
+    <svg viewBox="0 0 120 24" className={`${className} print:hidden`} fill="none" aria-hidden>
       <path
         d="M2 12c8-10 16 10 24 0s16 10 24 0 16 10 24 0 16 10 24 0"
         stroke={color}
@@ -135,7 +135,7 @@ export function Squiggle({ className = "", color = "#14100f" }: { className?: st
 
 export function Blob({ className = "", color }: { className?: string; color: string }) {
   return (
-    <svg viewBox="0 0 200 200" className={className} aria-hidden>
+    <svg viewBox="0 0 200 200" className={`${className} print:hidden`} aria-hidden>
       <path
         fill={color}
         d="M45.7 -58.5C58.9 -47.9 68.5 -33.1 72.6 -16.8C76.7 -0.5 75.3 17.4 67.2 31.6C59.1 45.8 44.3 56.4 28.4 62.6C12.5 68.8 -4.5 70.7 -20.8 66.6C-37.1 62.5 -52.7 52.4 -62.2 38.1C-71.7 23.8 -75.1 5.3 -71.6 -11.4C-68.1 -28.1 -57.7 -43 -44.2 -53.7C-30.7 -64.4 -14.1 -70.9 1.9 -73.2C17.9 -75.5 32.5 -69.1 45.7 -58.5Z"

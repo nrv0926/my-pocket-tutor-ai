@@ -26,10 +26,49 @@ body {
 }
 .marquee { animation: marquee 26s linear infinite; }
 
-/* Print: keep worksheet clean */
+/* Print: the worksheet is the whole point of this app — a parent printing a
+   page for their kid. Chrome and Safari drop background colours unless the
+   viewer ticks "Background graphics", so anything relying on a coloured fill
+   for contrast (white on magenta, cream on night) prints invisible. Rather
+   than depend on that setting, force the document monochrome. */
 @media print {
-  header, footer, nav, .print\:hidden { display: none !important; }
-  body { background: white; }
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    background-image: none !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    /* straighten the tilted cards */
+    transform: none !important;
+  }
+
+  body { background: #fff !important; }
+
+  /* Only the site chrome — Header and Footer are direct children of body.
+     A bare `header, footer` selector also matches the <header> that wraps
+     every page title and all nine section headings of a plan, which printed
+     the worksheet with no labels on it. */
+  body > header,
+  body > footer,
+  .print\:hidden { display: none !important; }
+
+  /* 3px display borders are ink-hungry; hairlines read better on paper */
+  [class*="border-"] { border-color: #000 !important; }
+  .border-\[3px\] { border-width: 1px !important; }
+
+  /* Don't split a question from the answer line underneath it */
+  li,
+  section,
+  article,
+  details { break-inside: avoid; }
+
+  h1, h2, h3 { break-after: avoid; }
+
+  a { text-decoration: underline; }
+
+  @page { margin: 16mm; }
 }
 
 @media (prefers-reduced-motion: reduce) {
