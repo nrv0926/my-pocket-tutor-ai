@@ -11,11 +11,11 @@ export default function UploadPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <header className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-widest text-forest-600">
+        <p className="text-xs font-semibold uppercase tracking-widest text-pop-magenta">
           Secure upload
         </p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">Share a worksheet or document.</h1>
-        <p className="mt-2 text-ink-soft">
+        <h1 className="mt-1 font-display text-3xl text-pop-night">Share a worksheet or document.</h1>
+        <p className="mt-2 text-pop-night/80">
           Files go to a private storage bucket. We delete them after analysis
           unless you choose to keep them.
         </p>
@@ -34,7 +34,7 @@ export default function UploadPage() {
             setBusy(false);
             alert("Upload pipeline wires up in Phase 1.5.");
           }}
-          className="rounded-full bg-forest-500 px-5 py-3 text-sm font-semibold text-white hover:bg-forest-600 disabled:opacity-50"
+          className="rounded-full bg-pop-pink px-5 py-3 text-sm font-semibold text-pop-night hover:bg-pop-yellow disabled:opacity-50"
         >
           {busy ? "Analyzing..." : "Analyze this"}
         </button>

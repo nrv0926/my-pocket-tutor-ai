@@ -22,21 +22,21 @@ export default function UploadBox({
       <div
         className={[
           "rounded-2xl border-2 border-dashed p-6 text-center transition",
-          confirmed ? "border-forest-500 bg-forest-50" : "border-cream-300 bg-cream-50 opacity-60",
+          confirmed ? "border-pop-night bg-pop-cyan" : "border-pop-night bg-pop-cream opacity-60",
         ].join(" ")}
       >
-        <p className="font-serif text-lg text-ink">
+        <p className="font-display text-lg text-pop-night">
           {file ? `Selected: ${file.name}` : "Drop a worksheet, photo, or PDF"}
         </p>
-        <p className="mt-1 text-sm text-ink-muted">
+        <p className="mt-1 text-sm text-pop-night/60">
           PNG, JPG, WEBP, PDF, or TXT · up to 10&nbsp;MB
         </p>
         <label
           className={[
             "mt-4 inline-flex cursor-pointer items-center rounded-full px-5 py-2 text-sm font-semibold",
             confirmed
-              ? "bg-forest-500 text-white hover:bg-forest-600"
-              : "cursor-not-allowed bg-cream-300 text-ink-muted",
+              ? "bg-pop-pink text-white hover:bg-pop-magenta"
+              : "cursor-not-allowed bg-pop-night/25 text-pop-night/60",
           ].join(" ")}
         >
           Choose file
@@ -54,7 +54,7 @@ export default function UploadBox({
         </label>
       </div>
 
-      <p className="text-xs text-ink-muted">
+      <p className="text-xs text-pop-night/60">
         Your file goes to a private storage bucket. We delete it after analysis
         unless you ask us to keep it. See our <a className="underline" href="/privacy">privacy promise</a>.
       </p>

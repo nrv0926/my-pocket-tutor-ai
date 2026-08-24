@@ -97,17 +97,17 @@ export default async function ChildProgressPage({
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-forest-600">
+          <p className="text-xs font-semibold uppercase tracking-widest text-pop-magenta">
             Progress · {child.nickname}
           </p>
-          <h1 className="mt-1 font-serif text-3xl text-ink">How things are going.</h1>
-          <p className="mt-1 text-sm text-ink-muted">
+          <h1 className="mt-1 font-display text-3xl text-pop-night">How things are going.</h1>
+          <p className="mt-1 text-sm text-pop-night/60">
             Grade {child.grade} · {child.location}
           </p>
         </div>
         <Link
           href="/session/new"
-          className="rounded-full bg-forest-500 px-4 py-2 text-sm font-semibold text-white hover:bg-forest-600"
+          className="rounded-full bg-pop-pink px-4 py-2 text-sm font-semibold text-pop-night hover:bg-pop-yellow"
         >
           New session
         </Link>
@@ -116,21 +116,21 @@ export default async function ChildProgressPage({
       <ProgressTracker summary={summary} />
 
       {records.length === 0 ? (
-        <p className="mt-8 rounded-2xl border border-dashed border-cream-300 bg-white p-8 text-center text-sm text-ink-muted shadow-card">
+        <p className="mt-8 rounded-2xl border border-dashed border-pop-night bg-white p-8 text-center text-sm text-pop-night/60 shadow-pop-sm">
           No sessions yet. Run a learning session and your progress will appear here.
         </p>
       ) : (
         <div className="mt-8 space-y-6">
           {/* 1. Skills practiced */}
-          <section className="rounded-2xl border border-cream-300 bg-white p-5 shadow-card">
-            <h2 className="mb-3 font-serif text-xl text-ink">Skills practiced</h2>
+          <section className="rounded-2xl border-[3px] border-pop-night bg-white p-5 shadow-pop-sm">
+            <h2 className="mb-3 font-display text-xl text-pop-night">Skills practiced</h2>
             <ul className="divide-y divide-cream-200 text-sm">
               {skillsList.map((s) => (
                 <li key={s.skill} className="flex items-center justify-between py-2">
-                  <span className="text-ink">{s.skill}</span>
-                  <span className="flex items-center gap-2 text-ink-muted">
+                  <span className="text-pop-night">{s.skill}</span>
+                  <span className="flex items-center gap-2 text-pop-night/60">
                     <span>×{s.count}</span>
-                    <span className="rounded-full bg-cream-100 px-2 py-0.5 text-xs capitalize">
+                    <span className="rounded-full bg-pop-cream px-2 py-0.5 text-xs capitalize">
                       {s.status}
                     </span>
                   </span>
@@ -140,19 +140,19 @@ export default async function ChildProgressPage({
           </section>
 
           {/* 2. Repeated struggles */}
-          <section className="rounded-2xl border border-cream-300 bg-white p-5 shadow-card">
-            <h2 className="mb-3 font-serif text-xl text-ink">Repeated struggles</h2>
+          <section className="rounded-2xl border-[3px] border-pop-night bg-white p-5 shadow-pop-sm">
+            <h2 className="mb-3 font-display text-xl text-pop-night">Repeated struggles</h2>
             {repeatedStruggles.length === 0 ? (
-              <p className="text-sm text-ink-muted">
+              <p className="text-sm text-pop-night/60">
                 None right now — nothing has come up as struggling three or more times in a row.
               </p>
             ) : (
               <>
-                <p className="mb-3 text-sm text-ink-soft">
+                <p className="mb-3 text-sm text-pop-night/80">
                   These skills have shown up as <strong>struggling</strong> three or
                   more times. Consider stepping back to a simpler micro-skill next session.
                 </p>
-                <ul className="ml-5 list-disc space-y-1 text-sm text-ink">
+                <ul className="ml-5 list-disc space-y-1 text-sm text-pop-night">
                   {repeatedStruggles.map((s) => (
                     <li key={s}>{s}</li>
                   ))}
@@ -162,32 +162,32 @@ export default async function ChildProgressPage({
           </section>
 
           {/* 3. Difficulty history */}
-          <section className="rounded-2xl border border-cream-300 bg-white p-5 shadow-card">
-            <h2 className="mb-3 font-serif text-xl text-ink">Difficulty history</h2>
+          <section className="rounded-2xl border-[3px] border-pop-night bg-white p-5 shadow-pop-sm">
+            <h2 className="mb-3 font-display text-xl text-pop-night">Difficulty history</h2>
             {difficultyHistory.length === 0 ? (
-              <p className="text-sm text-ink-muted">
+              <p className="text-sm text-pop-night/60">
                 Difficulty will appear here as you complete sessions.
               </p>
             ) : (
               <ol className="space-y-2 text-sm">
                 {difficultyHistory.map((d, i) => (
                   <li key={i} className="flex items-center justify-between">
-                    <span className="text-ink-muted">{d.when}</span>
-                    <span className="flex-1 px-3 truncate text-ink">{d.skill}</span>
+                    <span className="text-pop-night/60">{d.when}</span>
+                    <span className="flex-1 px-3 truncate text-pop-night">{d.skill}</span>
                     <span
                       className={[
                         "rounded-full px-2 py-0.5 text-xs capitalize",
                         d.difficulty === "easy"
-                          ? "bg-forest-50 text-forest-600"
+                          ? "bg-pop-cyan text-pop-magenta"
                           : d.difficulty === "hard"
                             ? "bg-amber-50 text-amber-700"
-                            : "bg-cream-100 text-ink-soft",
+                            : "bg-pop-cream text-pop-night/80",
                       ].join(" ")}
                     >
                       {d.difficulty}
                     </span>
                     {d.feedback && (
-                      <span className="ml-2 text-xs text-ink-muted">
+                      <span className="ml-2 text-xs text-pop-night/60">
                         ({d.feedback.replaceAll("_", " ")})
                       </span>
                     )}
@@ -198,14 +198,14 @@ export default async function ChildProgressPage({
           </section>
 
           {/* 4. Independence */}
-          <section className="rounded-2xl border border-cream-300 bg-white p-5 shadow-card">
-            <h2 className="mb-3 font-serif text-xl text-ink">Completed independently</h2>
+          <section className="rounded-2xl border-[3px] border-pop-night bg-white p-5 shadow-pop-sm">
+            <h2 className="mb-3 font-display text-xl text-pop-night">Completed independently</h2>
             <div className="flex flex-wrap items-end gap-6">
               <div>
-                <p className="font-serif text-4xl text-forest-600">{independencePct}%</p>
-                <p className="text-xs text-ink-muted">of sessions answered solo</p>
+                <p className="font-display text-4xl text-pop-magenta">{independencePct}%</p>
+                <p className="text-xs text-pop-night/60">of sessions answered solo</p>
               </div>
-              <div className="text-sm text-ink-soft">
+              <div className="text-sm text-pop-night/80">
                 <p>
                   <strong>{independent}</strong> session{independent === 1 ? "" : "s"} on their own
                 </p>
@@ -215,7 +215,7 @@ export default async function ChildProgressPage({
               </div>
             </div>
             {independencePct < 50 && independent + withHelp > 2 && (
-              <p className="mt-3 text-xs text-ink-muted">
+              <p className="mt-3 text-xs text-pop-night/60">
                 Tip: when independence drops below 50%, the next session's difficulty will
                 step down automatically.
               </p>

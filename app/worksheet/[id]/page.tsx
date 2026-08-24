@@ -25,14 +25,14 @@ export default async function WorksheetPage({ params }: { params: { id: string }
   if (!worksheet) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-        <p className="text-sm text-ink-muted">No worksheet attached to this session.</p>
+        <p className="text-sm text-pop-night/60">No worksheet attached to this session.</p>
       </div>
     );
   }
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-forest-600">
+      <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-pop-magenta">
         Worksheet
       </p>
       <WorksheetClient

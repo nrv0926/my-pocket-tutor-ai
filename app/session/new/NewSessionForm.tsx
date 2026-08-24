@@ -69,11 +69,11 @@ export default function NewSessionForm({ children }: { children: ChildOption[] }
     >
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-ink-soft">Which child?</span>
+          <span className="mb-1 block text-sm font-medium text-pop-night/80">Which child?</span>
           <select
             value={childId}
             onChange={(e) => setChildId(e.target.value)}
-            className="w-full rounded-xl border border-cream-300 bg-cream-50 px-3 py-2.5 outline-none focus:border-forest-500 focus:bg-white focus:ring-4 focus:ring-forest-500/15"
+            className="w-full rounded-xl border-[3px] border-pop-night bg-pop-cream px-3 py-2.5 outline-none focus:border-pop-night focus:bg-white focus:ring-4 focus:ring-forest-500/15"
           >
             {children.map((c) => (
               <option key={c.id} value={c.id}>
@@ -83,11 +83,11 @@ export default function NewSessionForm({ children }: { children: ChildOption[] }
           </select>
         </label>
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-ink-soft">Subject</span>
+          <span className="mb-1 block text-sm font-medium text-pop-night/80">Subject</span>
           <select
             value={subject}
             onChange={(e) => setSubject(e.target.value as Subject)}
-            className="w-full rounded-xl border border-cream-300 bg-cream-50 px-3 py-2.5 outline-none focus:border-forest-500 focus:bg-white focus:ring-4 focus:ring-forest-500/15"
+            className="w-full rounded-xl border-[3px] border-pop-night bg-pop-cream px-3 py-2.5 outline-none focus:border-pop-night focus:bg-white focus:ring-4 focus:ring-forest-500/15"
           >
             <option value="reading">Reading</option>
             <option value="writing">Writing</option>
@@ -104,20 +104,20 @@ export default function NewSessionForm({ children }: { children: ChildOption[] }
             type="button"
             onClick={() => setMode(m.id)}
             className={[
-              "rounded-2xl border p-5 text-left shadow-card transition",
+              "rounded-2xl border p-5 text-left shadow-pop-sm transition",
               mode === m.id
-                ? "border-forest-500 bg-forest-50"
-                : "border-cream-300 bg-white hover:border-forest-500",
+                ? "border-pop-night bg-pop-cyan"
+                : "border-pop-night bg-white hover:border-pop-night",
             ].join(" ")}
           >
-            <p className="font-serif text-lg text-ink">{m.title}</p>
-            <p className="mt-1 text-sm text-ink-soft">{m.desc}</p>
+            <p className="font-display text-lg text-pop-night">{m.title}</p>
+            <p className="mt-1 text-sm text-pop-night/80">{m.desc}</p>
           </button>
         ))}
       </div>
 
       <label className="block">
-        <span className="mb-1 block text-sm font-medium text-ink-soft">
+        <span className="mb-1 block text-sm font-medium text-pop-night/80">
           {MODES.find((m) => m.id === mode)?.title}
         </span>
         <textarea
@@ -128,9 +128,9 @@ export default function NewSessionForm({ children }: { children: ChildOption[] }
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={MODES.find((m) => m.id === mode)?.placeholder}
-          className="w-full rounded-xl border border-cream-300 bg-cream-50 px-3 py-2.5 outline-none focus:border-forest-500 focus:bg-white focus:ring-4 focus:ring-forest-500/15"
+          className="w-full rounded-xl border-[3px] border-pop-night bg-pop-cream px-3 py-2.5 outline-none focus:border-pop-night focus:bg-white focus:ring-4 focus:ring-forest-500/15"
         />
-        <p className="mt-1 text-xs text-ink-muted">
+        <p className="mt-1 text-xs text-pop-night/60">
           Don't include your child's full name, school name, or any other identifying info.
         </p>
       </label>
@@ -145,7 +145,7 @@ export default function NewSessionForm({ children }: { children: ChildOption[] }
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-full bg-forest-500 px-5 py-3 text-sm font-semibold text-white shadow hover:bg-forest-600 disabled:opacity-60"
+          className="rounded-full bg-pop-pink px-5 py-3 text-sm font-semibold text-pop-night shadow hover:bg-pop-yellow disabled:opacity-60"
         >
           {submitting ? "Analyzing..." : "Analyze"}
         </button>

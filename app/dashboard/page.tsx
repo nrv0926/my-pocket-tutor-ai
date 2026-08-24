@@ -53,15 +53,15 @@ export default async function DashboardPage() {
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <header className="mb-8 flex items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-forest-600">
+          <p className="text-xs font-semibold uppercase tracking-widest text-pop-magenta">
             Your dashboard
           </p>
-          <h1 className="mt-1 font-serif text-3xl text-ink">Welcome back.</h1>
-          <p className="mt-1 text-sm text-ink-muted">{user.email}</p>
+          <h1 className="mt-1 font-display text-3xl text-pop-night">Welcome back.</h1>
+          <p className="mt-1 text-sm text-pop-night/60">{user.email}</p>
         </div>
         <Link
           href="/session/new"
-          className="rounded-full bg-forest-500 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-forest-600"
+          className="rounded-full bg-pop-pink px-5 py-2.5 text-sm font-semibold text-pop-night shadow hover:bg-pop-yellow"
         >
           New learning session
         </Link>
@@ -69,7 +69,7 @@ export default async function DashboardPage() {
 
       <div className="grid gap-6 md:grid-cols-3">
         <section className="md:col-span-2">
-          <h2 className="mb-3 font-serif text-xl text-ink">Children</h2>
+          <h2 className="mb-3 font-display text-xl text-pop-night">Children</h2>
           {children.length === 0 ? (
             <EmptyState
               title="No children yet"
@@ -81,31 +81,31 @@ export default async function DashboardPage() {
               {children.map((c) => (
                 <li
                   key={c.id}
-                  className="flex items-center justify-between rounded-2xl border border-cream-300 bg-white p-5 shadow-card"
+                  className="flex items-center justify-between rounded-2xl border-[3px] border-pop-night bg-white p-5 shadow-pop-sm"
                 >
                   <div>
-                    <p className="font-serif text-lg text-ink">{c.nickname}</p>
-                    <p className="text-sm text-ink-muted">
+                    <p className="font-display text-lg text-pop-night">{c.nickname}</p>
+                    <p className="text-sm text-pop-night/60">
                       Grade {c.grade} · {c.location}
                     </p>
                   </div>
                   <Link
                     href={`/progress/${c.id}`}
-                    className="text-sm text-forest-500 hover:underline"
+                    className="text-sm text-pop-magenta hover:underline"
                   >
                     View progress →
                   </Link>
                 </li>
               ))}
-              <li className="flex items-center justify-center rounded-2xl border border-dashed border-cream-300 bg-cream-50 p-5 text-sm text-ink-soft hover:border-forest-500">
+              <li className="flex items-center justify-center rounded-2xl border border-dashed border-pop-night bg-pop-cream p-5 text-sm text-pop-night/80 hover:border-pop-night">
                 <Link href="/children/new">+ Add another child</Link>
               </li>
             </ul>
           )}
 
-          <h2 className="mb-3 mt-8 font-serif text-xl text-ink">Recent sessions</h2>
+          <h2 className="mb-3 mt-8 font-display text-xl text-pop-night">Recent sessions</h2>
           {sessions.length === 0 ? (
-            <p className="text-sm text-ink-muted">
+            <p className="text-sm text-pop-night/60">
               Your recent sessions will appear here.
             </p>
           ) : (
@@ -117,17 +117,17 @@ export default async function DashboardPage() {
                 return (
                   <li
                     key={s.id}
-                    className="flex items-center justify-between rounded-xl border border-cream-300 bg-white p-4 text-sm shadow-card"
+                    className="flex items-center justify-between rounded-xl border-[3px] border-pop-night bg-white p-4 text-sm shadow-pop-sm"
                   >
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-ink">{title}</p>
-                      <p className="text-xs text-ink-muted">
+                      <p className="truncate font-medium text-pop-night">{title}</p>
+                      <p className="text-xs text-pop-night/60">
                         {s.subject} · {new Date(s.created_at).toLocaleString()}
                       </p>
                     </div>
                     <Link
                       href={`/results/${s.id}`}
-                      className="ml-4 shrink-0 text-forest-500 hover:underline"
+                      className="ml-4 shrink-0 text-pop-magenta hover:underline"
                     >
                       Open
                     </Link>
@@ -139,7 +139,7 @@ export default async function DashboardPage() {
         </section>
 
         <aside>
-          <h2 className="mb-3 font-serif text-xl text-ink">Progress</h2>
+          <h2 className="mb-3 font-display text-xl text-pop-night">Progress</h2>
           <ProgressTracker summary={summary} />
         </aside>
       </div>
@@ -157,11 +157,11 @@ function EmptyState({
   ctaLabel: string;
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-cream-300 bg-white p-8 text-center shadow-card">
-      <p className="font-serif text-lg text-ink">{title}</p>
+    <div className="rounded-2xl border border-dashed border-pop-night bg-white p-8 text-center shadow-pop-sm">
+      <p className="font-display text-lg text-pop-night">{title}</p>
       <Link
         href={ctaHref}
-        className="mt-3 inline-flex items-center rounded-full bg-forest-500 px-4 py-2 text-sm font-semibold text-white hover:bg-forest-600"
+        className="mt-3 inline-flex items-center rounded-full bg-pop-pink px-4 py-2 text-sm font-semibold text-pop-night hover:bg-pop-yellow"
       >
         {ctaLabel}
       </Link>

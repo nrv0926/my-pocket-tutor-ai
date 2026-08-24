@@ -9,11 +9,11 @@ export default function AnalysisResultCard({ result }: { result: AnalysisResult 
   return (
     <article className="space-y-8">
       <Section index={1} title="What I notice">
-        <p className="text-ink-soft">{result.whatINotice}</p>
+        <p className="text-pop-night/80">{result.whatINotice}</p>
       </Section>
 
       <Section index={2} title="Key skill gaps">
-        <ul className="ml-5 list-disc space-y-1 text-ink-soft">
+        <ul className="ml-5 list-disc space-y-1 text-pop-night/80">
           {result.keySkillGaps.map((s, i) => (
             <li key={i}>{s}</li>
           ))}
@@ -21,9 +21,9 @@ export default function AnalysisResultCard({ result }: { result: AnalysisResult 
       </Section>
 
       <Section index={3} title="What to teach next (top 3)">
-        <ol className="ml-5 list-decimal space-y-1 text-ink-soft">
+        <ol className="ml-5 list-decimal space-y-1 text-pop-night/80">
           {result.whatToTeachNext.slice(0, 3).map((s, i) => (
-            <li key={i} className="font-medium text-ink">
+            <li key={i} className="font-medium text-pop-night">
               {s}
             </li>
           ))}
@@ -31,7 +31,7 @@ export default function AnalysisResultCard({ result }: { result: AnalysisResult 
       </Section>
 
       <Section index={4} title="How to teach it">
-        <ol className="ml-5 list-decimal space-y-1 text-ink-soft">
+        <ol className="ml-5 list-decimal space-y-1 text-pop-night/80">
           {result.howToTeachIt.map((s, i) => (
             <li key={i}>{s}</li>
           ))}
@@ -39,15 +39,15 @@ export default function AnalysisResultCard({ result }: { result: AnalysisResult 
       </Section>
 
       <Section index={5} title="Practice worksheet">
-        <p className="mb-3 text-sm text-ink-muted">
+        <p className="mb-3 text-sm text-pop-night/60">
           {result.practiceWorksheet.questions.length} questions ·
           difficulty: <strong className="capitalize">{result.practiceWorksheet.difficulty}</strong>
         </p>
-        <ol className="ml-5 list-decimal space-y-2 text-ink">
+        <ol className="ml-5 list-decimal space-y-2 text-pop-night">
           {result.practiceWorksheet.questions.map((q) => (
             <li key={q.id}>
               <span>{q.prompt}</span>{" "}
-              <span className="ml-2 rounded bg-cream-200 px-1.5 py-0.5 align-middle text-[10px] uppercase tracking-widest text-ink-muted">
+              <span className="ml-2 rounded bg-pop-night/15 px-1.5 py-0.5 align-middle text-[10px] uppercase tracking-widest text-pop-night/60">
                 {q.difficulty}
               </span>
             </li>
@@ -56,17 +56,17 @@ export default function AnalysisResultCard({ result }: { result: AnalysisResult 
       </Section>
 
       <Section index={6} title="Answer key">
-        <ul className="ml-5 list-disc space-y-1 text-ink-soft">
+        <ul className="ml-5 list-disc space-y-1 text-pop-night/80">
           {result.answerKey.map((a) => (
             <li key={a.questionId}>
-              <span className="font-mono text-xs text-ink-muted">{a.questionId}</span> · {a.answer}
+              <span className="font-mono text-xs text-pop-night/60">{a.questionId}</span> · {a.answer}
             </li>
           ))}
         </ul>
       </Section>
 
       <Section index={7} title="Parent / teacher tips">
-        <ul className="ml-5 list-disc space-y-1 text-ink-soft">
+        <ul className="ml-5 list-disc space-y-1 text-pop-night/80">
           {result.parentTips.slice(0, 3).map((t, i) => (
             <li key={i}>{t}</li>
           ))}
@@ -74,11 +74,11 @@ export default function AnalysisResultCard({ result }: { result: AnalysisResult 
       </Section>
 
       <Section index={8} title="Next step plan">
-        <p className="text-ink-soft">{result.nextStepPlan}</p>
+        <p className="text-pop-night/80">{result.nextStepPlan}</p>
       </Section>
 
       <Section index={9} title="Feedback">
-        <p className="text-ink-soft">{result.feedbackQuestion}</p>
+        <p className="text-pop-night/80">{result.feedbackQuestion}</p>
       </Section>
     </article>
   );
@@ -94,12 +94,12 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-cream-300 bg-white p-5 shadow-card">
+    <section className="rounded-2xl border-[3px] border-pop-night bg-white p-5 shadow-pop-sm">
       <header className="mb-3 flex items-center gap-3">
-        <span className="grid h-7 w-7 place-items-center rounded-lg bg-forest-50 text-xs font-semibold text-forest-600">
+        <span className="grid h-7 w-7 place-items-center rounded-lg bg-pop-cyan text-xs font-semibold text-pop-magenta">
           {index}
         </span>
-        <h2 className="font-serif text-xl text-ink">{title}</h2>
+        <h2 className="font-display text-xl text-pop-night">{title}</h2>
       </header>
       {children}
     </section>

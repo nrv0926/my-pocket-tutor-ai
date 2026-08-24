@@ -22,7 +22,7 @@ export default function ChildProfileForm({
 
   return (
     <form
-      className="space-y-6 rounded-2xl border border-cream-300 bg-white p-6 shadow-card"
+      className="space-y-6 rounded-2xl border-[3px] border-pop-night bg-white p-6 shadow-pop-sm"
       onSubmit={async (event) => {
         event.preventDefault();
         const f = new FormData(event.currentTarget);
@@ -130,8 +130,8 @@ export default function ChildProfileForm({
                 className={[
                   "rounded-full border px-3 py-1.5 text-sm",
                   active
-                    ? "border-forest-500 bg-forest-50 text-forest-600"
-                    : "border-cream-300 text-ink-soft hover:border-forest-500",
+                    ? "border-pop-night bg-pop-cyan text-pop-magenta"
+                    : "border-pop-night text-pop-night/80 hover:border-pop-night",
                 ].join(" ")}
               >
                 {n.label}
@@ -139,7 +139,7 @@ export default function ChildProfileForm({
             );
           })}
         </div>
-        <p className="mt-2 text-xs text-ink-muted">
+        <p className="mt-2 text-xs text-pop-night/60">
           We use these to soften the plan. We never diagnose.
         </p>
       </Field>
@@ -156,7 +156,7 @@ export default function ChildProfileForm({
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-full bg-forest-500 px-6 py-3 font-semibold text-white shadow hover:bg-forest-600 disabled:opacity-60"
+        className="w-full rounded-full bg-pop-pink px-6 py-3 font-semibold text-pop-night shadow hover:bg-pop-yellow disabled:opacity-60"
       >
         {submitting ? "Creating profile..." : "Create child profile"}
       </button>
@@ -167,7 +167,7 @@ export default function ChildProfileForm({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-ink-soft">{label}</span>
+      <span className="mb-1 block text-sm font-medium text-pop-night/80">{label}</span>
       {children}
     </label>
   );
@@ -179,4 +179,4 @@ function nullable(v: FormDataEntryValue | null): string | null {
 }
 
 const inputCls =
-  "w-full rounded-xl border border-cream-300 bg-cream-50 px-3 py-2.5 text-ink outline-none transition focus:border-forest-500 focus:bg-white focus:ring-4 focus:ring-forest-500/15";
+  "w-full rounded-xl border-[3px] border-pop-night bg-pop-cream px-3 py-2.5 text-pop-night outline-none transition focus:border-pop-night focus:bg-white focus:ring-4 focus:ring-forest-500/15";

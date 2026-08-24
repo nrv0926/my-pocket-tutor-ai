@@ -37,30 +37,30 @@ export default async function ResultsPage({ params }: { params: { id: string } }
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-forest-600">
+          <p className="text-xs font-semibold uppercase tracking-widest text-pop-magenta">
             Analysis · {data.subject}
           </p>
-          <h1 className="mt-1 font-serif text-3xl text-ink">Here's the plan.</h1>
-          <p className="mt-1 text-sm text-ink-muted">
+          <h1 className="mt-1 font-display text-3xl text-pop-night">Here's the plan.</h1>
+          <p className="mt-1 text-sm text-pop-night/60">
             {new Date(data.created_at).toLocaleString()}
           </p>
         </div>
         <nav className="flex gap-2">
           <a
             href="#worksheet"
-            className="rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-medium text-ink hover:bg-cream-50"
+            className="rounded-full border-[3px] border-pop-night bg-white px-4 py-2 text-sm font-medium text-pop-night hover:bg-pop-cream"
           >
             Jump to worksheet
           </a>
           <a
             href="#feedback"
-            className="rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-medium text-ink hover:bg-cream-50"
+            className="rounded-full border-[3px] border-pop-night bg-white px-4 py-2 text-sm font-medium text-pop-night hover:bg-pop-cream"
           >
             Feedback
           </a>
           <Link
             href={`/progress/${data.child_id}`}
-            className="rounded-full bg-forest-500 px-4 py-2 text-sm font-semibold text-white hover:bg-forest-600"
+            className="rounded-full bg-pop-pink px-4 py-2 text-sm font-semibold text-pop-night hover:bg-pop-yellow"
           >
             View progress
           </Link>
@@ -74,7 +74,7 @@ export default async function ResultsPage({ params }: { params: { id: string } }
 
       {/* 2 + 3. Worksheet + feedback (client) */}
       <section id="worksheet" className="scroll-mt-24">
-        <h2 className="mb-3 font-serif text-2xl text-ink">Worksheet</h2>
+        <h2 className="mb-3 font-display text-2xl text-pop-night">Worksheet</h2>
         <WorksheetClient
           sessionId={data.id}
           childId={data.child_id}
@@ -83,12 +83,12 @@ export default async function ResultsPage({ params }: { params: { id: string } }
         />
       </section>
 
-      <section id="feedback" className="mt-10 rounded-2xl border border-cream-300 bg-white p-5 text-sm text-ink-soft shadow-card">
-        <h2 className="font-serif text-lg text-ink">After the session</h2>
+      <section id="feedback" className="mt-10 rounded-2xl border-[3px] border-pop-night bg-white p-5 text-sm text-pop-night/80 shadow-pop-sm">
+        <h2 className="font-display text-lg text-pop-night">After the session</h2>
         <p className="mt-2">
           Once you've worked through the worksheet, save your feedback above.
           We'll use it to choose the next session's difficulty.{" "}
-          <Link className="text-forest-500 underline" href={`/progress/${data.child_id}`}>
+          <Link className="text-pop-magenta underline" href={`/progress/${data.child_id}`}>
             View this child's full progress →
           </Link>
         </p>

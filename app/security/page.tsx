@@ -14,7 +14,7 @@ export default function SecurityPage() {
       eyebrow="Security"
       title={
         <>
-          Built around the two ways this <em className="text-forest-500">could go wrong.</em>
+          Built around the two ways this <em className="text-pop-magenta">could go wrong.</em>
         </>
       }
       lead="The most sensitive thing this app touches is information about a real child. Two failure modes matter most: one family's data becoming readable by another, and a child's details leaking into logs or third-party systems. Everything here is designed around those two."
@@ -82,13 +82,13 @@ export default function SecurityPage() {
 
       <DocSection title="Found a problem?">
         <p>
-          Email <span className="text-ink">security@aipockettutor.app</span>. Tell us
+          Email <span className="text-pop-night">security@aipockettutor.app</span>. Tell us
           what you found and how to reproduce it, and please give us a chance to fix it
           before sharing it publicly. We&apos;ll confirm we got it within a few days.
         </p>
         <p>
           The parent-facing version of all this is our{" "}
-          <Link href="/privacy" className="text-forest-500 underline">
+          <Link href="/privacy" className="text-pop-magenta underline">
             privacy promise
           </Link>
           .

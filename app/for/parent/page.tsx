@@ -12,13 +12,13 @@ export default function ForParentPage() {
     <>
       <section className="px-4 pt-12 sm:px-6 sm:pt-16">
         <div className="mx-auto max-w-3xl">
-          <span className="inline-block rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-forest-600">
+          <span className="inline-block rounded-full bg-pop-cyan px-3 py-1 text-xs font-semibold uppercase tracking-widest text-pop-magenta">
             For parents
           </span>
-          <h1 className="mt-4 font-serif text-4xl leading-tight text-ink sm:text-5xl">
-            Your child goes to school. <em className="text-forest-500">You want to help at home.</em>
+          <h1 className="mt-4 font-display text-4xl leading-tight text-pop-night sm:text-5xl">
+            Your child goes to school. <em className="text-pop-magenta">You want to help at home.</em>
           </h1>
-          <p className="mt-4 text-ink-soft">
+          <p className="mt-4 text-pop-night/80">
             You are not their teacher — and you don&apos;t need to be. Pocket
             Tutor reads what school sends home and tells you, in plain English,
             what to focus on tonight and how to do it without a fight.
@@ -28,14 +28,14 @@ export default function ForParentPage() {
               <input type="hidden" name="role" value="parent" />
               <button
                 type="submit"
-                className="inline-flex items-center rounded-full bg-forest-500 px-5 py-3 text-sm font-semibold text-white shadow hover:bg-forest-600"
+                className="inline-flex items-center rounded-full bg-pop-pink px-5 py-3 text-sm font-semibold text-pop-night shadow hover:bg-pop-yellow"
               >
                 Start a child profile
               </button>
             </form>
             <Link
               href="/try"
-              className="inline-flex items-center rounded-full border border-cream-300 bg-white px-5 py-3 text-sm font-medium text-ink hover:bg-cream-50"
+              className="inline-flex items-center rounded-full border-[3px] border-pop-night bg-white px-5 py-3 text-sm font-medium text-pop-night hover:bg-pop-cream"
             >
               Try a sample · no signup
             </Link>
@@ -43,9 +43,9 @@ export default function ForParentPage() {
         </div>
       </section>
 
-      <section className="mt-16 border-y border-cream-300 bg-cream-50 py-14">
+      <section className="mt-16 border-y-[3px] border-pop-night bg-pop-cream py-14">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <h2 className="font-serif text-2xl text-ink">This is for you if…</h2>
+          <h2 className="font-display text-2xl text-pop-night">This is for you if…</h2>
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">
             {[
               "The report card said something vague and you don't know what to do with it.",
@@ -55,7 +55,7 @@ export default function ForParentPage() {
             ].map((t) => (
               <li
                 key={t}
-                className="rounded-xl border border-cream-300 bg-white p-4 text-sm text-ink shadow-card"
+                className="rounded-xl border-[3px] border-pop-night bg-white p-4 text-sm text-pop-night shadow-pop-sm"
               >
                 {t}
               </li>
@@ -67,10 +67,10 @@ export default function ForParentPage() {
       <section className="py-16">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <header className="mx-auto mb-10 max-w-2xl text-center">
-            <h2 className="font-serif text-3xl text-ink">
-              How it works <em className="text-forest-500">for parents</em>
+            <h2 className="font-display text-3xl text-pop-night">
+              How it works <em className="text-pop-magenta">for parents</em>
             </h2>
-            <p className="mt-2 text-ink-soft">
+            <p className="mt-2 text-pop-night/80">
               Five short steps. Built around a kid who already has a school day.
             </p>
           </header>
@@ -100,17 +100,17 @@ export default function ForParentPage() {
         </div>
       </section>
 
-      <section className="border-y border-cream-300 bg-cream-50 py-14">
+      <section className="border-y-[3px] border-pop-night bg-pop-cream py-14">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <h2 className="font-serif text-2xl text-ink">A real example</h2>
-          <div className="mt-5 rounded-2xl border border-cream-300 bg-white p-6 shadow-card">
-            <p className="text-sm text-ink-muted">Report card said:</p>
-            <p className="mt-1 font-serif text-lg text-ink">
+          <h2 className="font-display text-2xl text-pop-night">A real example</h2>
+          <div className="mt-5 rounded-2xl border-[3px] border-pop-night bg-white p-6 shadow-pop-sm">
+            <p className="text-sm text-pop-night/60">Report card said:</p>
+            <p className="mt-1 font-display text-lg text-pop-night">
               &ldquo;Aaliyah is developing her ability to decode unfamiliar
               words and would benefit from continued practice.&rdquo;
             </p>
-            <p className="mt-4 text-sm text-ink-muted">Pocket Tutor says:</p>
-            <ul className="mt-1 list-inside list-disc text-sm text-ink-soft">
+            <p className="mt-4 text-sm text-pop-night/60">Pocket Tutor says:</p>
+            <ul className="mt-1 list-inside list-disc text-sm text-pop-night/80">
               <li>She likely needs work on <strong>vowel teams</strong> (ai, ee, oa).</li>
               <li>Spend 10 minutes tonight on a sound drill, then 6 short words.</li>
               <li>Don&apos;t move to comprehension yet — decoding first.</li>
@@ -121,8 +121,8 @@ export default function ForParentPage() {
 
       <section className="py-14">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <h2 className="font-serif text-2xl text-ink">It adapts to your child</h2>
-          <p className="mt-2 text-ink-soft">
+          <h2 className="font-display text-2xl text-pop-night">It adapts to your child</h2>
+          <p className="mt-2 text-pop-night/80">
             If you tell us your child has ADHD, dyslexia, or anxiety, we adjust:
             shorter tasks, more repetition, or easier wins first. We never
             diagnose — we just make the plan kinder.
@@ -130,14 +130,14 @@ export default function ForParentPage() {
         </div>
       </section>
 
-      <section className="bg-forest-500 py-14 text-center text-cream-50">
+      <section className="bg-pop-pink py-14 text-center text-pop-night">
         <div className="mx-auto max-w-2xl px-4 sm:px-6">
-          <h2 className="font-serif text-3xl">Ten minutes tonight beats an hour of arguing.</h2>
+          <h2 className="font-display text-3xl">Ten minutes tonight beats an hour of arguing.</h2>
           <form action={selectRole} className="mt-6 inline-block">
             <input type="hidden" name="role" value="parent" />
             <button
               type="submit"
-              className="inline-flex items-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-forest-600 hover:bg-cream-100"
+              className="inline-flex items-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-pop-magenta hover:bg-pop-cream"
             >
               Start child profile
             </button>
@@ -150,12 +150,12 @@ export default function ForParentPage() {
 
 function Step({ n, title, children }: { n: string; title: string; children: React.ReactNode }) {
   return (
-    <li className="rounded-2xl border border-cream-300 bg-white p-6 shadow-card">
-      <span className="grid h-10 w-10 place-items-center rounded-xl bg-forest-50 font-serif text-forest-600">
+    <li className="rounded-2xl border-[3px] border-pop-night bg-white p-6 shadow-pop-sm">
+      <span className="grid h-10 w-10 place-items-center rounded-xl bg-pop-cyan font-display text-pop-magenta">
         {n}
       </span>
-      <h3 className="mt-3 font-serif text-lg text-ink">{title}</h3>
-      <p className="mt-1 text-sm text-ink-soft">{children}</p>
+      <h3 className="mt-3 font-display text-lg text-pop-night">{title}</h3>
+      <p className="mt-1 text-sm text-pop-night/80">{children}</p>
     </li>
   );
 }

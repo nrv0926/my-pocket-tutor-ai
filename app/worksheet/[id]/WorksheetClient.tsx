@@ -49,11 +49,11 @@ export default function WorksheetClient({
       )}
 
       {done && (
-        <div className="rounded-xl border border-cream-300 bg-white p-4 text-sm text-ink-soft shadow-card">
+        <div className="rounded-xl border-[3px] border-pop-night bg-white p-4 text-sm text-pop-night/80 shadow-pop-sm">
           <p>Saved. Your progress is updated for this child.</p>
           <a
             href={`/progress/${childId}`}
-            className="mt-2 inline-block text-forest-500 underline"
+            className="mt-2 inline-block text-pop-magenta underline"
           >
             View progress →
           </a>

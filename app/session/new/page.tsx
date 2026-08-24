@@ -27,11 +27,11 @@ export default async function NewSessionPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <header className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-widest text-forest-600">
+        <p className="text-xs font-semibold uppercase tracking-widest text-pop-magenta">
           New learning session
         </p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">What would you like help with?</h1>
-        <p className="mt-2 text-ink-soft">
+        <h1 className="mt-1 font-display text-3xl text-pop-night">What would you like help with?</h1>
+        <p className="mt-2 text-pop-night/80">
           Pick a child, choose what you have, and we'll do the rest.
         </p>
       </header>
@@ -40,7 +40,7 @@ export default async function NewSessionPage() {
         children={children.map((c) => ({ id: c.id, nickname: c.nickname, grade: c.grade }))}
       />
 
-      <p className="mt-6 text-sm text-ink-muted">
+      <p className="mt-6 text-sm text-pop-night/60">
         Want to upload a worksheet instead? <Link className="underline" href="/upload">Open the upload page</Link>
         {" "}— file uploads land in Phase 1.5.
       </p>

@@ -14,7 +14,7 @@ export default function PrivacyPage() {
       eyebrow="Privacy promise"
       title={
         <>
-          Your child&apos;s information <em className="text-forest-500">stays your child&apos;s.</em>
+          Your child&apos;s information <em className="text-pop-magenta">stays your child&apos;s.</em>
         </>
       }
       lead="We built this for our own kids first. We hold your child's information the way we'd want someone to hold ours: as little as possible, only as long as needed, never sold, never used to train a model."
@@ -54,7 +54,7 @@ export default function PrivacyPage() {
             "Your child's birth date.",
           ]}
         />
-        <p className="rounded-xl bg-cream-50 p-4 text-ink">
+        <p className="rounded-xl bg-pop-cream p-4 text-pop-night">
           There is nowhere in our database that could even hold these. The columns
           don&apos;t exist.
         </p>
@@ -147,8 +147,8 @@ export default function PrivacyPage() {
 
       <DocSection title="Questions">
         <p>
-          Email <span className="text-ink">privacy@aipockettutor.app</span>, or read the{" "}
-          <Link href="/security" className="text-forest-500 underline">
+          Email <span className="text-pop-night">privacy@aipockettutor.app</span>, or read the{" "}
+          <Link href="/security" className="text-pop-magenta underline">
             technical security details
           </Link>{" "}
           if you want to see how this is enforced in the code.
