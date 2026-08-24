@@ -174,7 +174,7 @@ export default function HomePage() {
             <li>· Row-level security: only you can see your children's data.</li>
           </ul>
           <p className="mt-6 text-sm">
-            <Link href="/PRIVACY.md" className="text-forest-500 underline">Read the privacy promise</Link>
+            <Link href="/privacy" className="text-forest-500 underline">Read the privacy promise</Link>
           </p>
         </div>
       </section>

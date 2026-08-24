@@ -19,12 +19,11 @@ export default function Footer() {
           <Link href="/settings">Settings</Link>
         </FooterCol>
         <FooterCol title="Trust">
-          <Link href="/#privacy">Privacy promise</Link>
-          <Link href="/#security">Security</Link>
+          <Link href="/privacy">Privacy promise</Link>
+          <Link href="/security">Security</Link>
         </FooterCol>
         <FooterCol title="Company">
           <a href="mailto:hello@aipockettutor.app">Contact</a>
-          <a href="/PRODUCT_ROADMAP.md">Roadmap</a>
         </FooterCol>
       </div>
       <div className="border-t border-white/10">

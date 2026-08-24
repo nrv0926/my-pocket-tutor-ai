@@ -56,7 +56,7 @@ export default function UploadBox({
 
       <p className="text-xs text-ink-muted">
         Your file goes to a private storage bucket. We delete it after analysis
-        unless you ask us to keep it. See <a className="underline" href="/PRIVACY.md">PRIVACY.md</a>.
+        unless you ask us to keep it. See our <a className="underline" href="/privacy">privacy promise</a>.
       </p>
     </div>
   );

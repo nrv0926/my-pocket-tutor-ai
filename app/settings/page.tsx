@@ -21,9 +21,9 @@ export default function SettingsPage() {
           <span>Keep my uploads in private storage so I can re-open them later.</span>
         </label>
         <p className="mt-3 text-xs">
-          <Link href="/PRIVACY.md" className="text-forest-500 underline">Read the privacy promise</Link>
+          <Link href="/privacy" className="text-forest-500 underline">Read the privacy promise</Link>
           {" · "}
-          <Link href="/SECURITY.md" className="text-forest-500 underline">Security details</Link>
+          <Link href="/security" className="text-forest-500 underline">Security details</Link>
         </p>
       </section>
 

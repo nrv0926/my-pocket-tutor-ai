@@ -80,7 +80,7 @@ export default function LoginPage() {
 
           <p className="text-xs text-ink-muted">
             By signing in you agree to the{" "}
-            <a href="/PRIVACY.md" className="text-forest-500 underline">
+            <a href="/privacy" className="text-forest-500 underline">
               privacy promise
             </a>
             .
