@@ -10,11 +10,21 @@
 html { scroll-behavior: smooth; }
 
 body {
-  background-color: #f5f2ea;
-  color: #19231f;
+  background-color: #fff8ec;
+  color: #14100f;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
+
+/* Archivo Black ships a single weight; forcing 900 keeps the fallback stack
+   (Arial Black, system-ui) just as heavy when the webfont is slow or blocked. */
+.font-display { font-weight: 900; letter-spacing: -0.01em; }
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-33.333%); }
+}
+.marquee { animation: marquee 26s linear infinite; }
 
 /* Print: keep worksheet clean */
 @media print {

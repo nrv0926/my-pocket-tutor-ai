@@ -1,254 +1,284 @@
 import Link from "next/link";
-import PricingCards from "@/components/PricingCards";
+import { Blob, Marquee, PopButton, PopCard, Squiggle, Sticker } from "@/components/pop/PopBits";
+import { HomeFaq } from "@/components/pop/HomeFaq";
+
+const STEPS = [
+  {
+    n: "01",
+    tone: "yellow" as const,
+    rotate: "-2deg",
+    title: "Tell us about your child",
+    body: "Nickname, grade, and what's been hard. Never their real name — we don't have a box for it.",
+  },
+  {
+    n: "02",
+    tone: "cyan" as const,
+    rotate: "1.5deg",
+    title: "Share what you've got",
+    body: "A report card sentence. A worksheet that went badly. Or just what you're worried about.",
+  },
+  {
+    n: "03",
+    tone: "pink" as const,
+    rotate: "-1deg",
+    title: "Get the plan",
+    body: "Nine plain-English sections: what's going on, what to teach next, and exactly how to teach it.",
+  },
+  {
+    n: "04",
+    tone: "lime" as const,
+    rotate: "2deg",
+    title: "Practise tonight",
+    body: "A short worksheet with an answer key. Print it. Ten minutes at the kitchen table.",
+  },
+  {
+    n: "05",
+    tone: "sky" as const,
+    rotate: "-1.5deg",
+    title: "Say how it went",
+    body: "Too easy, just right, or too hard. The next plan adjusts. That's the whole loop.",
+  },
+];
+
+const SUBJECTS = ["Reading", "Phonics", "Writing", "Math", "Spelling", "Comprehension", "Fluency"];
+
+const PROMISES = [
+  { text: "No child's real name", tone: "pink" as const, rotate: "-3deg" },
+  { text: "Ontario curriculum", tone: "cyan" as const, rotate: "2deg" },
+  { text: "Built with teachers", tone: "yellow" as const, rotate: "-1deg" },
+  { text: "Never sold, never trained on", tone: "lime" as const, rotate: "3deg" },
+  { text: "No credit card to start", tone: "tangerine" as const, rotate: "-2deg" },
+];
 
 export default function HomePage() {
   return (
     <>
-      {/* HERO */}
-      <section className="px-4 pt-12 sm:px-6 sm:pt-16">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2">
+      <section className="relative overflow-hidden bg-pop-yellow">
+        <Blob className="absolute -left-24 -top-20 h-80 w-80 opacity-40" color="#ff3d8b" />
+        <Blob className="absolute -bottom-32 -right-16 h-96 w-96 opacity-30" color="#3fe0d0" />
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
-            <span className="inline-block rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-forest-600">
-              For parents and teachers · K–6
-            </span>
-            <h1 className="mt-4 font-serif text-4xl leading-tight text-ink sm:text-5xl">
-              Know exactly how to <em className="text-forest-500">help your child learn.</em>
+            <Sticker tone="pink" rotate="-3deg">For parents &amp; teachers · K–6</Sticker>
+            <h1 className="mt-6 font-display text-5xl uppercase leading-[0.95] text-pop-night sm:text-6xl">
+              Know exactly how to help your kid
             </h1>
-            <p className="mt-4 max-w-prose text-ink-soft">
-              AI Pocket Tutor turns a report card comment, a tricky worksheet,
-              or a worry into a clear plan: what to teach next, how to teach
-              it, and a short worksheet to practice with — in plain English a
-              tired parent at 9 pm can read.
+            <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-pop-night/80">
+              Paste one line from a report card. Get back a plan you can
+              actually do tonight — what to teach, how to teach it, and a
+              worksheet to practise with.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                href="/children/new"
-                className="inline-flex items-center rounded-full bg-forest-500 px-5 py-3 text-sm font-semibold text-white shadow hover:bg-forest-600"
-              >
-                Start a child profile
-              </Link>
-              <Link
-                href="/try"
-                className="inline-flex items-center rounded-full border border-cream-300 bg-white px-5 py-3 text-sm font-medium text-ink hover:bg-cream-50"
-              >
-                Try a sample · no signup
-              </Link>
+            <div className="mt-8 flex flex-wrap gap-4">
+              <PopButton href="/children/new" tone="night">Start a child profile</PopButton>
+              <PopButton href="/try" tone="cream">See a sample plan →</PopButton>
             </div>
-            <p className="mt-3 text-xs text-ink-muted">
-              No credit card required · Built with teachers · Ontario curriculum first
+            <p className="mt-5 font-display text-xs uppercase tracking-widest text-pop-night/70">
+              No credit card · Free to try
             </p>
           </div>
-
-          <aside className="rounded-2xl border border-cream-300 bg-white p-6 shadow-lift">
-            <h2 className="font-serif text-xl text-ink">A 5-minute snapshot</h2>
-            <p className="mt-1 text-sm text-ink-soft">
-              Tell us about your child. We'll show you what to focus on first.
-            </p>
-            <ul className="mt-4 space-y-2 text-sm text-ink-soft">
-              <li>1. Create a private child profile</li>
-              <li>2. Paste a report card sentence or upload a worksheet</li>
-              <li>3. Get a 9-section plan you can act on tonight</li>
-            </ul>
-            <Link
-              href="/children/new"
-              className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-forest-500 px-4 py-3 text-sm font-semibold text-white hover:bg-forest-600"
-            >
-              Start free
-            </Link>
-          </aside>
+          <HeroPreview />
         </div>
       </section>
 
-      {/* WHO IS THIS FOR */}
-      <section id="who" className="mt-20 py-16">
+      <Marquee
+        tone="pink"
+        items={["9-section plan", "Ready in 60 seconds", "Ontario curriculum", "Science of reading"]}
+      />
+
+      <section id="how" className="bg-pop-cream py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <header className="mx-auto mb-10 max-w-2xl text-center">
-            <span className="inline-block rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-forest-600">
-              Who is this for?
-            </span>
-            <h2 className="mt-3 font-serif text-3xl text-ink">
-              Pick the version that <em className="text-forest-500">sounds like you.</em>
+          <div className="flex flex-col items-center text-center">
+            <Sticker tone="cyan" rotate="2deg">How it works</Sticker>
+            <h2 className="mt-5 font-display text-4xl uppercase leading-none tracking-tight text-pop-night sm:text-5xl">
+              Five steps. Ten minutes.
             </h2>
-            <p className="mt-2 text-ink-soft">
-              The same five steps. Tuned for the room you&apos;re standing in.
+            <Squiggle className="mt-5 h-6 w-40" color="#ff3d8b" />
+          </div>
+          <div className="mt-14 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+            {STEPS.map((s) => (
+              <PopCard key={s.n} tone={s.tone} rotate={s.rotate}>
+                <span className="font-display text-4xl">{s.n}</span>
+                <h3 className="mt-3 font-display text-xl uppercase leading-tight">{s.title}</h3>
+                <p className="mt-2 text-sm font-medium leading-relaxed">{s.body}</p>
+              </PopCard>
+            ))}
+            <PopCard tone="cream" rotate="1deg" className="flex flex-col justify-center text-center">
+              <p className="font-display text-xl uppercase leading-tight">Want to see one first?</p>
+              <p className="mt-2 text-sm font-medium">A real sample plan. No signup.</p>
+              <PopButton href="/try" tone="pink" className="mt-5">Try a sample</PopButton>
+            </PopCard>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-pop-magenta py-20 text-center">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+          <p className="font-display text-xs uppercase tracking-[0.3em] text-white/80">
+            Bring us anything
+          </p>
+          <div className="mt-8 space-y-1">
+            {SUBJECTS.map((s) => (
+              <p
+                key={s}
+                className="font-display text-4xl uppercase leading-tight tracking-tight text-white sm:text-6xl"
+              >
+                {s}
+              </p>
+            ))}
+            <p className="pt-2 font-display text-4xl uppercase leading-tight tracking-tight text-pop-yellow sm:text-6xl">
+              and more!
             </p>
-          </header>
-          <div className="grid gap-5 md:grid-cols-3">
+          </div>
+        </div>
+      </section>
+
+      <section id="who" className="bg-pop-grape py-20">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <h2 className="text-center font-display text-4xl uppercase leading-none tracking-tight text-white sm:text-5xl">
+            Pick your corner
+          </h2>
+          <div className="mt-12 grid gap-7 md:grid-cols-3">
             <RoleCard
               href="/for/parent"
-              tag="Parents"
-              title="My child is in school. I want to help at home."
-              body="Translate report cards, defuse homework, and get a 10-minute kitchen-table plan."
+              tone="yellow"
+              rotate="-2deg"
+              label="Parents"
+              body="Translate the report card, defuse homework, and get a 10-minute plan for tonight."
             />
             <RoleCard
               href="/for/homeschooler"
-              tag="Homeschoolers"
-              title="I'm the teacher. I just want a sharper plan."
-              body="Scope-and-sequence aware mini-lessons, full practice sets, and a skill map you control."
+              tone="cyan"
+              rotate="1.5deg"
+              label="Homeschoolers"
+              body="Full mini-lessons and longer practice sets, sequenced so nothing gets skipped."
             />
             <RoleCard
               href="/for/teacher"
-              tag="Teachers"
-              title="One student keeps getting stuck. What do I do tomorrow?"
-              body="Name the misconception, run a 10-minute mini-lesson, and send home a matching one-pager."
+              tone="lime"
+              rotate="-1deg"
+              label="Teachers"
+              body="Sized for a 10-minute rotation. One student, one skill, one page."
             />
           </div>
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
-      <section id="how" className="border-y border-cream-300 bg-cream-50 py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <header className="mx-auto mb-10 max-w-2xl text-center">
-            <span className="inline-block rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-forest-600">
-              How it works
-            </span>
-            <h2 className="mt-3 font-serif text-3xl text-ink">
-              From <em className="text-forest-500">chaos</em> to confident in three steps
-            </h2>
-          </header>
-
-          <ol className="grid gap-5 md:grid-cols-3">
-            <Step n="01" title="Tell us about your child">
-              Nickname, grade, what's going well, what isn't. We never ask for
-              full names, school names, or student numbers.
-            </Step>
-            <Step n="02" title="Share what's happening">
-              Paste a report card sentence, describe the homework battle, or
-              upload a worksheet. We show a privacy reminder before any upload.
-            </Step>
-            <Step n="03" title="Get a clear plan">
-              Top 3 priorities, simple instructions, a short worksheet, an
-              answer key, and what to do next session.
-            </Step>
-          </ol>
-        </div>
-      </section>
-
-      {/* WHAT YOU CAN UPLOAD */}
-      <section className="py-16">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 md:grid-cols-2">
-          <div>
-            <span className="inline-block rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-forest-600">
-              What parents can share
-            </span>
-            <h2 className="mt-3 font-serif text-3xl text-ink">Bring whatever you have.</h2>
-            <p className="mt-3 max-w-prose text-ink-soft">
-              You don't need to be a teacher to use this. Any of the things you
-              already have at home is enough to get started.
-            </p>
-          </div>
-          <ul className="grid gap-3 sm:grid-cols-2">
-            {[
-              "Report card comments",
-              "Homework worksheets",
-              "A photo of an assignment",
-              "Writing samples",
-              "Teacher notes",
-              "Just a description of what's tricky",
-            ].map((t) => (
-              <li
-                key={t}
-                className="rounded-xl border border-cream-300 bg-white p-4 text-sm text-ink shadow-card"
-              >
-                {t}
-              </li>
+      <section id="privacy" className="relative overflow-hidden bg-pop-cyan py-20">
+        <Blob className="absolute -right-24 top-0 h-72 w-72 opacity-30" color="#ffd93d" />
+        <div className="relative mx-auto max-w-5xl px-4 text-center sm:px-6">
+          <Sticker tone="grape" rotate="-2deg">Why trust us</Sticker>
+          <h2 className="mt-5 font-display text-4xl uppercase leading-none tracking-tight text-pop-night sm:text-5xl">
+            Your kid&apos;s stuff stays your kid&apos;s
+          </h2>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            {PROMISES.map((p) => (
+              <Sticker key={p.text} tone={p.tone} rotate={p.rotate}>
+                {p.text}
+              </Sticker>
             ))}
-          </ul>
+          </div>
+          <div className="mt-10">
+            <Link href="/privacy" className="font-display text-sm uppercase tracking-widest text-pop-night underline decoration-[3px] underline-offset-4">
+              Read the privacy promise
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* PRIVACY */}
-      <section id="privacy" className="border-y border-cream-300 bg-cream-50 py-16">
-        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
-          <span className="inline-block rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-forest-600">
-            Our promise
-          </span>
-          <h2 className="mt-3 font-serif text-3xl text-ink">
-            Your child's information stays your child's.
+      <Marquee tone="yellow" items={["Free to start", "Cancel any time", "No ads, ever", "No trackers"]} />
+
+      <section className="bg-pop-cream py-20">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <h2 className="text-center font-display text-4xl uppercase leading-none tracking-tight text-pop-night sm:text-5xl">
+            Common questions
           </h2>
-          <ul className="mx-auto mt-6 grid max-w-xl gap-3 text-left text-sm text-ink-soft">
-            <li>· No full names, no school names, no student numbers stored.</li>
-            <li>· Uploaded files are deleted after analysis unless you opt in to keep them.</li>
-            <li>· We never use your data to train AI models.</li>
-            <li>· Row-level security: only you can see your children's data.</li>
-          </ul>
-          <p className="mt-6 text-sm">
-            <Link href="/privacy" className="text-forest-500 underline">Read the privacy promise</Link>
-          </p>
+          <div className="mt-12">
+            <HomeFaq />
+          </div>
         </div>
       </section>
 
-      {/* PRICING */}
-      <section id="pricing" className="py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <header className="mx-auto mb-10 max-w-2xl text-center">
-            <span className="inline-block rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-forest-600">
-              Pricing
-            </span>
-            <h2 className="mt-3 font-serif text-3xl text-ink">
-              Simple pricing, <em className="text-forest-500">no surprises.</em>
-            </h2>
-            <p className="mt-2 text-ink-soft">Start free. Cancel any time.</p>
-          </header>
-          <PricingCards />
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="bg-forest-500 py-16 text-center text-cream-50">
-        <div className="mx-auto max-w-2xl px-4 sm:px-6">
-          <h2 className="font-serif text-3xl">
-            Five minutes a day. <em>A whole different week.</em>
+      <section className="relative overflow-hidden bg-pop-night py-24 text-center">
+        <Blob className="absolute -left-20 bottom-0 h-72 w-72 opacity-25" color="#ff3d8b" />
+        <Blob className="absolute -right-20 top-0 h-72 w-72 opacity-25" color="#3fe0d0" />
+        <div className="relative mx-auto max-w-3xl px-4 sm:px-6">
+          <h2 className="font-display text-4xl uppercase leading-none tracking-tight text-pop-cream sm:text-6xl">
+            Five minutes a day.
+            <span className="block text-pop-yellow">A whole different week.</span>
           </h2>
-          <Link
-            href="/children/new"
-            className="mt-6 inline-flex items-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-forest-600 hover:bg-cream-100"
-          >
-            Start child profile
-          </Link>
+          <div className="mt-10 flex flex-wrap justify-center gap-4">
+            <PopButton href="/children/new" tone="yellow">Start a child profile</PopButton>
+            <PopButton href="/pricing" tone="cream">See pricing</PopButton>
+          </div>
         </div>
       </section>
     </>
   );
 }
 
-function RoleCard({
-  href,
-  tag,
-  title,
-  body,
-}: {
-  href: string;
-  tag: string;
-  title: string;
-  body: string;
-}) {
+function HeroPreview() {
   return (
-    <Link
-      href={href}
-      className="group flex flex-col rounded-2xl border border-cream-300 bg-white p-6 shadow-card transition hover:border-forest-300 hover:shadow-lift"
-    >
-      <span className="self-start rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-forest-600">
-        {tag}
-      </span>
-      <h3 className="mt-3 font-serif text-lg text-ink">{title}</h3>
-      <p className="mt-2 flex-1 text-sm text-ink-soft">{body}</p>
-      <span className="mt-4 inline-flex items-center text-sm font-semibold text-forest-600 group-hover:text-forest-700">
-        See how it works →
-      </span>
-    </Link>
+    <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
+      <div className="absolute -right-3 -top-4 z-10">
+        <Sticker tone="cyan" rotate="8deg">60 seconds</Sticker>
+      </div>
+      <PopCard tone="cream" rotate="2.5deg" className="shadow-pop-lg">
+        <p className="font-display text-[10px] uppercase tracking-[0.2em] text-pop-magenta">
+          You paste this
+        </p>
+        <p className="mt-2 rounded-xl border-[3px] border-pop-night bg-pop-yellow p-3 text-sm font-medium">
+          &ldquo;Sam is reading below grade level and often guesses at longer
+          words.&rdquo;
+        </p>
+        <p className="mt-5 font-display text-[10px] uppercase tracking-[0.2em] text-pop-magenta">
+          You get this
+        </p>
+        <ul className="mt-2 space-y-2">
+          {[
+            "What I notice",
+            "Key skill gaps",
+            "What to teach next",
+            "How to teach it",
+            "Practice worksheet",
+          ].map((s, i) => (
+            <li key={s} className="flex items-center gap-3 text-sm font-semibold">
+              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border-[3px] border-pop-night bg-pop-cyan font-display text-[10px]">
+                {i + 1}
+              </span>
+              {s}
+            </li>
+          ))}
+          <li className="pl-9 font-display text-[10px] uppercase tracking-widest text-pop-night/60">
+            + 4 more sections
+          </li>
+        </ul>
+      </PopCard>
+    </div>
   );
 }
 
-function Step({ n, title, children }: { n: string; title: string; children: React.ReactNode }) {
+function RoleCard({
+  href,
+  tone,
+  rotate,
+  label,
+  body,
+}: {
+  href: string;
+  tone: "yellow" | "cyan" | "lime";
+  rotate: string;
+  label: string;
+  body: string;
+}) {
   return (
-    <li className="rounded-2xl border border-cream-300 bg-white p-6 shadow-card">
-      <span className="grid h-10 w-10 place-items-center rounded-xl bg-forest-50 font-serif text-forest-600">
-        {n}
-      </span>
-      <h3 className="mt-3 font-serif text-lg text-ink">{title}</h3>
-      <p className="mt-1 text-sm text-ink-soft">{children}</p>
-    </li>
+    <PopCard tone={tone} rotate={rotate} className="flex flex-col">
+      <h3 className="font-display text-2xl uppercase leading-none">{label}</h3>
+      <p className="mt-3 flex-1 text-sm font-medium leading-relaxed">{body}</p>
+      <Link
+        href={href}
+        className="mt-5 font-display text-xs uppercase tracking-widest underline decoration-[3px] underline-offset-4"
+      >
+        See how it works →
+      </Link>
+    </PopCard>
   );
 }
