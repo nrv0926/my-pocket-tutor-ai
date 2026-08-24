@@ -84,9 +84,10 @@ cp .env.example .env.local
 # Then fill in Supabase + AI provider keys.
 
 # 3. Set up the database
-# In the Supabase SQL editor, run the contents of:
-#   supabase/schema.sql
-#   supabase/policies.sql
+# In the Supabase SQL editor, run these in order:
+#   supabase/schema.sql     tables, quota RPC
+#   supabase/policies.sql   Row-Level Security
+#   supabase/storage.sql    private child-uploads bucket + object policy
 
 # 4. Run locally
 npm run dev
@@ -119,6 +120,9 @@ The full schema lives in `supabase/schema.sql` and creates:
 Row-Level Security is enabled on every table — see `supabase/policies.sql`.
 **A parent can only ever read or write rows that belong to their own
 `auth.uid()`.**
+
+`supabase/storage.sql` creates the private `child-uploads` bucket and
+restricts each object to the folder named after its owner's `auth.uid()`.
 
 ## Security notes
 

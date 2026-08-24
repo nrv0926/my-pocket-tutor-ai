@@ -114,18 +114,10 @@ create policy "subs owner read"
   on public.subscriptions for select using (auth.uid() = user_id);
 
 -- =====================================================================
--- Storage bucket policy notes
+-- Storage bucket
 -- ---------------------------------------------------------------------
--- Create the bucket as PRIVATE in the Supabase dashboard:
---   name: child-uploads
---   public: false
---
--- Then add a storage policy so a logged-in user can read/write objects
--- only inside a folder named after their auth.uid():
---
---   bucket_id = 'child-uploads'
---   AND (storage.foldername(name))[1] = auth.uid()::text
---
--- Server actions issue short-lived signed URLs; nothing in this bucket is
--- ever served publicly. See SECURITY.md.
+-- The private `child-uploads` bucket and its owner-scoped object policy
+-- now live in storage.sql — run that next. Nothing in that bucket is
+-- ever served publicly; server actions issue short-lived signed URLs.
+-- See SECURITY.md.
 -- =====================================================================
