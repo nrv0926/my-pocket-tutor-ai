@@ -117,6 +117,24 @@ The full schema lives in `supabase/schema.sql` and creates:
 - `uploads`
 - `subscriptions`
 
+### Testing the database
+
+Two SQL suites live in `supabase/tests/`:
+
+- `rls.sql` — proves one parent cannot read, update or delete another
+  parent's rows. This is the highest-risk bug class in the app.
+- `app-writes.sql` — proves the rows the app actually writes are accepted
+  by the real schema: every NOT NULL, CHECK constraint and enum-ish text
+  value, plus the `consume_ai_quota` cap.
+
+Both are wrapped in `BEGIN; ... ROLLBACK;` so they persist nothing. Paste
+them into the Supabase SQL editor, or run both against a throwaway local
+Postgres with no Supabase project at all:
+
+```bash
+bash supabase/tests/run-local.sh
+```
+
 Row-Level Security is enabled on every table — see `supabase/policies.sql`.
 **A parent can only ever read or write rows that belong to their own
 `auth.uid()`.**
