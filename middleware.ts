@@ -19,6 +19,9 @@ const PROTECTED_PREFIXES = [
 ];
 
 export async function middleware(request: NextRequest) {
+  const rescued = rescueAuthLanding(request);
+  if (rescued) return rescued;
+
   let response = NextResponse.next({ request: { headers: request.headers } });
 
   const supabase = createServerClient(
@@ -59,6 +62,40 @@ export async function middleware(request: NextRequest) {
   }
 
   return response;
+}
+
+/**
+ * Supabase falls back to the project's Site URL when the requested
+ * `emailRedirectTo` isn't in the Redirect URLs allowlist. The magic link then
+ * lands on `/?code=...` instead of `/auth/callback?code=...`, where nothing
+ * exchanges the code and sign-in fails silently with no error shown.
+ *
+ * The allowlist is still the real fix (see SETUP.md step 4). This forwards the
+ * code to the callback anyway so a misconfigured project doesn't look like a
+ * broken product, and surfaces auth errors on /login instead of swallowing them.
+ */
+function rescueAuthLanding(request: NextRequest): NextResponse | null {
+  const { pathname, searchParams } = request.nextUrl;
+  if (pathname === "/auth/callback") return null;
+
+  const error = searchParams.get("error_description") || searchParams.get("error");
+  if (error) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.search = "";
+    url.searchParams.set("error", error);
+    return NextResponse.redirect(url);
+  }
+
+  const code = searchParams.get("code");
+  if (!code) return null;
+
+  const url = request.nextUrl.clone();
+  url.pathname = "/auth/callback";
+  if (!url.searchParams.get("next") && pathname !== "/") {
+    url.searchParams.set("next", pathname);
+  }
+  return NextResponse.redirect(url);
 }
 
 export const config = {

@@ -73,10 +73,32 @@ reference tables the schema creates.
 Still in the dashboard, go to **Authentication → URL Configuration**:
 
 - **Site URL**: `http://localhost:3000`
-- **Redirect URLs**: add `http://localhost:3000/auth/callback`
+- **Redirect URLs**: add **both** of these —
+  - `http://localhost:3000/auth/callback`
+  - `http://localhost:3000/**`
 
-Without that second one the magic link in your email will refuse to sign
-you in.
+Get this wrong and the failure is confusing rather than obvious. Supabase
+does not reject a redirect that isn't on the allowlist — it silently
+falls back to your **Site URL**. So the magic link arrives looking almost
+right:
+
+```
+http://localhost:3000/?code=c63f4432-...     ← landed on the home page
+http://localhost:3000/auth/callback?code=... ← where it should have gone
+```
+
+The code lands on a page with no handler, nothing exchanges it for a
+session, and you end up back on the home page still signed out with no
+error shown.
+
+`middleware.ts` now catches this and forwards any stray `?code=` to
+`/auth/callback`, so sign-in works even if the allowlist is wrong. Fix
+the allowlist anyway — the rescue is a safety net, not the mechanism.
+
+**Deploying too?** Add your production URLs to the same list, e.g.
+`https://your-app.vercel.app/auth/callback` and
+`https://your-app.vercel.app/**`. The allowlist is per project, not per
+environment.
 
 ## 5. Fill in your local environment
 
@@ -156,7 +178,9 @@ per-user daily cap (default 20, override with `AI_DAILY_LIMIT`).
 | Symptom | Cause |
 | --- | --- |
 | Every page 500s with *"Your project's URL and Key are required to create a Supabase client!"* | `NEXT_PUBLIC_SUPABASE_URL` or the anon key is missing or blank. `middleware.ts` runs on every request and needs both. |
-| Magic link says "otp_expired" or bounces to `/login?error=` | Step 4 — the redirect URL isn't allowlisted. |
+| Magic link lands on `/?code=...` and you're still signed out | Step 4 — `/auth/callback` isn't allowlisted, so Supabase fell back to the Site URL. Middleware now rescues this, but fix the allowlist. |
+| Magic link says "otp_expired" | The link was already used, or it's older than an hour. Request a new one. |
+| `PKCE code verifier not found in storage` | The link was opened in a different browser than the one that requested it. Open it in the same browser. |
 | Signed in, but "Child not found" | `supabase/policies.sql` didn't run, or ran before the schema. |
 | Fonts look wrong | Google Fonts is blocked on your network. Cosmetic only; the fallback stack still reads fine. |
 
