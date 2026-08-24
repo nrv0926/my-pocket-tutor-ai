@@ -1,0 +1,138 @@
+# Running AI Pocket Tutor on your own machine
+
+From nothing to a clickable prototype. Budget about 15 minutes, most of
+it waiting for Supabase to finish creating the project.
+
+You need **Node.js 20 or newer** (`node -v` to check) and a free Supabase
+account. You do **not** need an Anthropic API key to click through the
+whole thing — see [step 7](#7-optional-turn-on-the-real-ai).
+
+---
+
+## 1. Get the code running
+
+```bash
+git clone https://github.com/nrv0926/my-pocket-tutor-ai.git
+cd my-pocket-tutor-ai
+npm install
+```
+
+## 2. Create the Supabase project
+
+1. Go to [supabase.com/dashboard](https://supabase.com/dashboard) and click
+   **New project**.
+2. Give it any name. Pick a region near you. Save the database password
+   somewhere — you won't need it below, but you'll want it later.
+3. Wait for provisioning to finish (a couple of minutes).
+
+## 3. Create the database
+
+Open **SQL Editor** in the left sidebar. Run these three files **in this
+order** — paste the contents of each into a new query and hit Run:
+
+| Order | File                    | What it creates                          |
+| ----- | ----------------------- | ---------------------------------------- |
+| 1     | `supabase/schema.sql`   | Tables, indexes, the daily-quota function |
+| 2     | `supabase/policies.sql` | Row-Level Security on every table         |
+| 3     | `supabase/storage.sql`  | The private `child-uploads` bucket        |
+
+Each one should report success with no rows. Order matters — the policies
+reference tables the schema creates.
+
+## 4. Point Supabase back at your machine
+
+Still in the dashboard, go to **Authentication → URL Configuration**:
+
+- **Site URL**: `http://localhost:3000`
+- **Redirect URLs**: add `http://localhost:3000/auth/callback`
+
+Without that second one the magic link in your email will refuse to sign
+you in.
+
+## 5. Fill in your local environment
+
+```bash
+cp .env.example .env.local
+```
+
+Now open `.env.local`. In the dashboard go to **Project Settings → API**
+and copy two values across:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+```
+
+That is genuinely all you need. Both are browser-public by design.
+
+**Leave `SUPABASE_SERVICE_ROLE_KEY` blank.** Nothing in the app reads it
+today (`lib/uploadService.ts` is the only file that would, and no page
+imports it yet). An unset secret can't leak.
+
+`.env.local` is gitignored. Keep it that way.
+
+## 6. Run it
+
+```bash
+npm run dev
+```
+
+Open <http://localhost:3000>.
+
+## 7. Optional: turn on the real AI
+
+Out of the box, with no `ANTHROPIC_API_KEY` set, `lib/aiService.ts`
+returns a deterministic sample plan. Every screen works end to end, the
+data is just always the same reading plan. That's the right mode for
+demos and for poking at the UI.
+
+To make it actually analyze what you type, add a key from
+[console.anthropic.com](https://console.anthropic.com) to `.env.local`:
+
+```
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+Restart `npm run dev`. Real calls cost money per analysis. There's a
+per-user daily cap (default 20, override with `AI_DAILY_LIMIT`).
+
+---
+
+## The path through the app
+
+1. **`/try`** — a fully rendered sample plan, no signup. Good sanity check
+   that the front end is healthy.
+2. **Start a child profile** → bounces you to **`/login`**.
+3. Enter your email, click **Send magic link**, then click the link in
+   your inbox. It lands on `/auth/callback` and drops you at the page you
+   were originally headed for.
+   - Nothing arrives? Check spam. Supabase's built-in email sender is
+     rate-limited on the free tier (a few per hour) — fine for testing,
+     not for real users.
+4. **Create a child profile** — nickname, grade, and anything you want
+   to mention about how they learn. Never a legal full name: the schema
+   stores a nickname on purpose.
+5. **New session** → paste a report-card sentence or describe what you're
+   seeing → you get the nine-section plan at `/results/[id]`.
+6. **`/progress/[childId]`** tracks it over time.
+
+## What isn't wired yet
+
+- **File upload.** `/upload` renders, but the button is a `TODO` — the
+  MVP path is text only. Paste the report-card comment instead.
+- **Stripe.** The pricing page is real; checkout is a placeholder.
+
+## If something breaks
+
+| Symptom | Cause |
+| --- | --- |
+| Every page 500s with *"Your project's URL and Key are required to create a Supabase client!"* | `NEXT_PUBLIC_SUPABASE_URL` or the anon key is missing or blank. `middleware.ts` runs on every request and needs both. |
+| Magic link says "otp_expired" or bounces to `/login?error=` | Step 4 — the redirect URL isn't allowlisted. |
+| Signed in, but "Child not found" | `supabase/policies.sql` didn't run, or ran before the schema. |
+| Fonts look wrong | Google Fonts is blocked on your network. Cosmetic only; the fallback stack still reads fine. |
+
+Only run one `npm run dev` at a time from this folder. Two instances
+share the `.next` build cache and will start serving each other 404s.
+
+Env changes only take effect on restart — Next.js reads `.env.local` at
+boot.
