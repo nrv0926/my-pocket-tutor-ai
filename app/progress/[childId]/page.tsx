@@ -216,7 +216,7 @@ export default async function ChildProgressPage({
             </div>
             {independencePct < 50 && independent + withHelp > 2 && (
               <p className="mt-3 text-xs text-pop-night/60">
-                Tip: when independence drops below 50%, the next session's difficulty will
+                Tip: when independence drops below 50%, the next session&apos;s difficulty will
                 step down automatically.
               </p>
             )}

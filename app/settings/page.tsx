@@ -41,7 +41,7 @@ export default function SettingsPage() {
       <section className="mb-6 rounded-2xl border-[3px] border-pop-night bg-white p-5 shadow-pop-sm">
         <h2 className="font-display text-lg text-pop-night">Subscription</h2>
         <p className="mt-2 text-sm text-pop-night/80">
-          You're on the <strong>Free</strong> plan. Stripe billing wires up in
+          You&apos;re on the <strong>Free</strong> plan. Stripe billing wires up in
           Phase 1.5.
         </p>
         <Link

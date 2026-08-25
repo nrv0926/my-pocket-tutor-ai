@@ -21,7 +21,7 @@ export default function PrivacyWarning({
     >
       <h3 className="font-display text-lg">Before you upload</h3>
       <p className="mt-2 text-sm text-pop-night/80">
-        Please remove or cover any personal information such as your child's
+        Please remove or cover any personal information such as your child&apos;s
         full name, school name, address, student number, phone number, or
         anything else that could identify them. <strong>Is this safe to
         analyze?</strong>
@@ -37,8 +37,8 @@ export default function PrivacyWarning({
           }}
         />
         <span>
-          I've checked the file. It does not contain identifying information,
-          and I'm okay with sharing it for analysis.
+          I&apos;ve checked the file. It does not contain identifying information,
+          and I&apos;m okay with sharing it for analysis.
         </span>
       </label>
     </section>

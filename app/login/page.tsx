@@ -20,7 +20,7 @@ export default function LoginPage() {
         </p>
         <h1 className="mt-2 font-display text-4xl uppercase leading-none text-pop-night">Welcome back</h1>
         <p className="mt-2 text-sm font-medium text-pop-night/80">
-          We'll email you a magic link — no password to remember.
+          We&apos;ll email you a magic link — no password to remember.
         </p>
       </header>
 
@@ -28,7 +28,7 @@ export default function LoginPage() {
         <div className="rounded-2xl border-[3px] border-pop-night bg-pop-lime p-7 shadow-pop">
           <h2 className="font-display text-xl uppercase text-pop-night">Check your inbox</h2>
           <p className="mt-2 text-sm font-medium text-pop-night/80">
-            We sent a sign-in link to <strong>{email}</strong>. It's good for the
+            We sent a sign-in link to <strong>{email}</strong>. It&apos;s good for the
             next hour.
           </p>
         </div>

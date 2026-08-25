@@ -16,10 +16,10 @@ export default function TryPage() {
           Sample plan · no signup needed
         </span>
         <h1 className="mt-4 font-display text-3xl text-pop-night sm:text-4xl">
-          Here's what a plan looks like.
+          Here&apos;s what a plan looks like.
         </h1>
         <p className="mx-auto mt-3 max-w-prose text-pop-night/80">
-          A real parent shares what's happening. We turn it into a clear,
+          A real parent shares what&apos;s happening. We turn it into a clear,
           ten-minute session you can run tonight. Below is one such plan,
           generated for a Grade 3 reading worry.
         </p>
@@ -27,7 +27,7 @@ export default function TryPage() {
 
       <section className="mt-10 rounded-2xl border-[3px] border-pop-night bg-white p-6 shadow-pop-sm">
         <h2 className="text-xs font-semibold uppercase tracking-widest text-pop-night/60">
-          The parent's worry
+          The parent&apos;s worry
         </h2>
         <blockquote className="mt-3 border-l-4 border-pop-night pl-4 text-pop-night">
           {SAMPLE_PARENT_INPUT}
@@ -44,7 +44,7 @@ export default function TryPage() {
         </h2>
         <p className="mx-auto mt-2 max-w-md text-cream-100">
           The sample above is fictional. Your plan will be built from your
-          child's grade, what's been working, and what hasn't.
+          child&apos;s grade, what&apos;s been working, and what hasn&apos;t.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link

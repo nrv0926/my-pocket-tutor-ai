@@ -7,49 +7,6 @@ import type { ParentFeedback, SkillStatus } from "@/types/progress";
 import type { Difficulty } from "@/types/session";
 
 /**
- * Insert a single, ad-hoc progress record. Used by callers that need to log
- * a skill outside the parent-feedback flow (e.g. an admin import later).
- */
-const ProgressInputSchema = z.object({
-  childId: z.string().uuid(),
-  sessionId: z.string().uuid().nullable().optional(),
-  skill: z.string().min(1),
-  status: z.enum(["practiced", "mastered", "struggling"]),
-  difficulty: z.enum(["easy", "medium", "hard"]).nullable().optional(),
-  parentFeedback: z.enum(["too_easy", "just_right", "too_hard"]).nullable().optional(),
-  completedIndependently: z.boolean().nullable().optional(),
-  notes: z.string().nullable().optional(),
-});
-
-export async function createProgressRecord(input: {
-  childId: string;
-  sessionId?: string | null;
-  skill: string;
-  status: SkillStatus;
-  difficulty?: Difficulty | null;
-  parentFeedback?: ParentFeedback | null;
-  completedIndependently?: boolean | null;
-  notes?: string | null;
-}) {
-  const parsed = ProgressInputSchema.parse(input);
-  const supabase = getServerSupabase();
-
-  const { error } = await supabase.from("progress_records").insert({
-    child_id: parsed.childId,
-    session_id: parsed.sessionId ?? null,
-    skill: parsed.skill,
-    status: parsed.status,
-    difficulty: parsed.difficulty ?? null,
-    parent_feedback: parsed.parentFeedback ?? null,
-    completed_independently: parsed.completedIndependently ?? null,
-    notes: parsed.notes ?? null,
-  });
-
-  if (error) throw new Error(`Could not save progress: ${error.message}`);
-  revalidatePath(`/progress/${parsed.childId}`);
-}
-
-/**
  * Save the parent's feedback after a worksheet session.
  * Writes one progress_records row per top skill identified by the analysis,
  * tagging each with the same feedback + completedIndependently signal.

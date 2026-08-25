@@ -34,8 +34,8 @@ const MODES: { id: SessionInputType; title: string; desc: string; placeholder: s
   },
 ];
 
-export default function NewSessionForm({ children }: { children: ChildOption[] }) {
-  const [childId, setChildId] = useState(children[0]?.id ?? "");
+export default function NewSessionForm({ childProfiles }: { childProfiles: ChildOption[] }) {
+  const [childId, setChildId] = useState(childProfiles[0]?.id ?? "");
   const [mode, setMode] = useState<SessionInputType>("paste");
   const [subject, setSubject] = useState<Subject>("reading");
   const [text, setText] = useState("");
@@ -75,7 +75,7 @@ export default function NewSessionForm({ children }: { children: ChildOption[] }
             onChange={(e) => setChildId(e.target.value)}
             className="w-full rounded-xl border-[3px] border-pop-night bg-pop-cream px-3 py-2.5 outline-none focus:border-pop-night focus:bg-white focus:ring-4 focus:ring-forest-500/15"
           >
-            {children.map((c) => (
+            {childProfiles.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.nickname} (Grade {c.grade})
               </option>
@@ -131,7 +131,7 @@ export default function NewSessionForm({ children }: { children: ChildOption[] }
           className="w-full rounded-xl border-[3px] border-pop-night bg-pop-cream px-3 py-2.5 outline-none focus:border-pop-night focus:bg-white focus:ring-4 focus:ring-forest-500/15"
         />
         <p className="mt-1 text-xs text-pop-night/60">
-          Don't include your child's full name, school name, or any other identifying info.
+          Don&apos;t include your child&apos;s full name, school name, or any other identifying info.
         </p>
       </label>
 

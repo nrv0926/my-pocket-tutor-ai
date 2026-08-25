@@ -82,7 +82,7 @@ export default function ChildProfileForm({
         <Field label="Location">
           <select name="location" defaultValue="ON-CA" className={inputCls}>
             <option value="ON-CA">Ontario, Canada</option>
-            <option value="other">Other (we'll default to Ontario)</option>
+            <option value="other">Other (we&apos;ll default to Ontario)</option>
           </select>
         </Field>
       </div>

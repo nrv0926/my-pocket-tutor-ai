@@ -32,12 +32,16 @@ export default async function NewSessionPage() {
         </p>
         <h1 className="mt-1 font-display text-3xl text-pop-night">What would you like help with?</h1>
         <p className="mt-2 text-pop-night/80">
-          Pick a child, choose what you have, and we'll do the rest.
+          Pick a child, choose what you have, and we&apos;ll do the rest.
         </p>
       </header>
 
       <NewSessionForm
-        children={children.map((c) => ({ id: c.id, nickname: c.nickname, grade: c.grade }))}
+        childProfiles={children.map((c) => ({
+          id: c.id,
+          nickname: c.nickname,
+          grade: c.grade,
+        }))}
       />
 
       <p className="mt-6 text-sm text-pop-night/60">

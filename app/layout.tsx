@@ -43,6 +43,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        {/* next/font would self-host these, but it fetches at build time and
+            some CI/sandbox networks block fonts.googleapis.com. The rule below
+            targets the Pages Router's _document.js; a <link> in the App Router
+            root layout is the supported equivalent. */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600&family=Inter:wght@400;500;600;700;800;900&display=swap"
           rel="stylesheet"

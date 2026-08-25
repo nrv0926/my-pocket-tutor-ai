@@ -40,7 +40,7 @@ export default async function ResultsPage({ params }: { params: { id: string } }
           <p className="text-xs font-semibold uppercase tracking-widest text-pop-magenta">
             Analysis · {data.subject}
           </p>
-          <h1 className="mt-1 font-display text-3xl text-pop-night">Here's the plan.</h1>
+          <h1 className="mt-1 font-display text-3xl text-pop-night">Here&apos;s the plan.</h1>
           <p className="mt-1 text-sm text-pop-night/60">
             {new Date(data.created_at).toLocaleString()}
           </p>
@@ -52,6 +52,12 @@ export default async function ResultsPage({ params }: { params: { id: string } }
           >
             Jump to worksheet
           </a>
+          <Link
+            href={`/worksheet/${data.id}`}
+            className="rounded-full border-[3px] border-pop-night bg-pop-yellow px-4 py-2 text-sm font-medium text-pop-night hover:bg-pop-cyan"
+          >
+            Worksheet only · print
+          </Link>
           <a
             href="#feedback"
             className="rounded-full border-[3px] border-pop-night bg-white px-4 py-2 text-sm font-medium text-pop-night hover:bg-pop-cream"
@@ -86,10 +92,10 @@ export default async function ResultsPage({ params }: { params: { id: string } }
       <section id="feedback" className="mt-10 rounded-2xl border-[3px] border-pop-night bg-white p-5 text-sm text-pop-night/80 shadow-pop-sm">
         <h2 className="font-display text-lg text-pop-night">After the session</h2>
         <p className="mt-2">
-          Once you've worked through the worksheet, save your feedback above.
-          We'll use it to choose the next session's difficulty.{" "}
+          Once you&apos;ve worked through the worksheet, save your feedback above.
+          We&apos;ll use it to choose the next session&apos;s difficulty.{" "}
           <Link className="text-pop-magenta underline" href={`/progress/${data.child_id}`}>
-            View this child's full progress →
+            View this child&apos;s full progress →
           </Link>
         </p>
       </section>
