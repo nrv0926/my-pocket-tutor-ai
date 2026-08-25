@@ -91,6 +91,11 @@ update`, and `drop policy if exists`, so running them again on a database
 that already has them changes nothing. If you are unsure whether they ever
 ran, just run them.
 
+These were executed against a clean PostgreSQL 16 database, twice, to
+confirm that: they apply without error, they are idempotent, all eight
+tables come up with row-level security enabled and at least one policy
+each, and `child-uploads` is created private.
+
 > The dashboard's **Last migration: No migrations** only tracks the Supabase
 > CLI. Running the SQL by hand leaves it saying that forever. It is not
 > evidence your tables are missing.
@@ -121,9 +126,41 @@ preview URL.
 
 Do not skip this. Supabase's default template uses `{{ .ConfirmationURL }}`,
 which drops the path and lands the link on `/` instead of `/auth/callback`.
-`SETUP.md` §4b has the replacement HTML — build the URL from `{{ .SiteURL }}`
-plus a literal path. Apply it to **both** the *Magic link* and the
-*Confirm signup* templates.
+Building the URL from `{{ .SiteURL }}` plus a literal path sidesteps it —
+nothing has to survive an allowlist match for the path to be kept.
+
+Go to **Authentication → Emails**. Replace the body of **both** templates.
+
+**Magic link** (`type=magiclink`):
+
+```html
+<h2>Your sign-in link</h2>
+<p>Follow this link to sign in:</p>
+<p>
+  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=magiclink">
+    Sign in
+  </a>
+</p>
+<p>This link expires in an hour and works once.</p>
+```
+
+**Confirm signup** (`type=signup`) — a brand-new address gets this one, not
+the magic-link template, so it needs the same treatment:
+
+```html
+<h2>Confirm your email</h2>
+<p>Follow this link to finish signing up:</p>
+<p>
+  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup">
+    Confirm
+  </a>
+</p>
+```
+
+`app/auth/confirm/route.ts` verifies the token and starts the session. It
+accepts `signup`, `invite`, `magiclink`, `recovery`, `email_change`, and
+`email`, so the same URL shape works for the other templates if you enable
+them later.
 
 `middleware.ts` catches stray `?code=` and `?token_hash=` on the wrong path
 and forwards them, so sign-in survives a wrong template. Fix the template
