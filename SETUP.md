@@ -3,6 +3,10 @@
 From nothing to a clickable prototype. Budget about 15 minutes, most of
 it waiting for Supabase to finish creating the project.
 
+> **Deploying instead of running locally?** See [DEPLOY.md](DEPLOY.md).
+> If you want to show this to someone, deploy — a magic link pointing at
+> `localhost` only works on your machine, while your dev server is running.
+
 You need **Node.js 20 or newer** (`node -v` to check) and a free Supabase
 account. You do **not** need an Anthropic API key to click through the
 whole thing — see [step 7](#7-optional-turn-on-the-real-ai).
