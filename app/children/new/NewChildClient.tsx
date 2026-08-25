@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ChildProfileForm from "@/components/ChildProfileForm";
 import { createChild } from "@/lib/actions/children";
+import type { Role } from "@/types/child";
 
-export default function NewChildClient() {
+export default function NewChildClient({ role }: { role: Role | null }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
@@ -18,6 +19,7 @@ export default function NewChildClient() {
       )}
 
       <ChildProfileForm
+        role={role}
         onSubmit={async (data) => {
           setError(null);
           try {

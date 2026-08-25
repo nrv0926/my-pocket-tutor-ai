@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { isRole, type Role } from "@/types/child";
+import { ROLE_COPY } from "@/lib/roleCopy";
 
 const COOKIE_NAME = "tutor_role";
 const ONE_YEAR = 60 * 60 * 24 * 365;
@@ -32,13 +33,13 @@ export const ROLE_LABEL: Record<Role, string> = {
 };
 
 export const ROLE_HEADLINE: Record<Role, string> = {
-  parent: "Setting up for a parent",
-  homeschooler: "Setting up for a homeschooler",
-  teacher: "Setting up for a teacher",
+  parent: ROLE_COPY.parent.headline,
+  homeschooler: ROLE_COPY.homeschooler.headline,
+  teacher: ROLE_COPY.teacher.headline,
 };
 
 export const ROLE_SUBHEAD: Record<Role, string> = {
-  parent: "We'll size every plan for a 10–15 minute kitchen-table session.",
-  homeschooler: "We'll write full mini-lessons and longer practice sets.",
-  teacher: "We'll size every plan for a 10-minute classroom rotation.",
+  parent: ROLE_COPY.parent.subhead,
+  homeschooler: ROLE_COPY.homeschooler.subhead,
+  teacher: ROLE_COPY.teacher.subhead,
 };

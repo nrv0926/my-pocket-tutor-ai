@@ -34,7 +34,7 @@ export default function ForHomeschoolerPage() {
               </button>
             </form>
             <Link
-              href="/try"
+              href="/try/homeschooler"
               className="inline-flex items-center rounded-full border-[3px] border-pop-night bg-white px-5 py-3 text-sm font-medium text-pop-night hover:bg-pop-cream"
             >
               Try a sample · no signup

@@ -6,7 +6,7 @@ import ProgressTracker from "@/components/ProgressTracker";
 import ChildProfileForm from "@/components/ChildProfileForm";
 import LoadingState from "@/components/LoadingState";
 import UploadBox from "@/components/UploadBox";
-import { SAMPLE_ANALYSIS } from "@/app/try/sampleAnalysis";
+import { SAMPLE_ANALYSIS } from "@/app/try/samples/parent";
 
 export default function PreviewGallery() {
   return (

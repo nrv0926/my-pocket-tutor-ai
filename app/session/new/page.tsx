@@ -2,10 +2,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import NewSessionForm from "./NewSessionForm";
 import { getServerSupabase } from "@/lib/supabaseServer";
+import { getRole } from "@/lib/role";
+import { roleCopy } from "@/lib/roleCopy";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewSessionPage() {
+  const copy = roleCopy(getRole());
   const supabase = getServerSupabase();
   const { data: children, error } = await supabase
     .from("children")
@@ -30,10 +33,8 @@ export default async function NewSessionPage() {
         <p className="text-xs font-semibold uppercase tracking-widest text-pop-magenta">
           New learning session
         </p>
-        <h1 className="mt-1 font-display text-3xl text-pop-night">What would you like help with?</h1>
-        <p className="mt-2 text-pop-night/80">
-          Pick a child, choose what you have, and we&apos;ll do the rest.
-        </p>
+        <h1 className="mt-1 font-display text-3xl text-pop-night">{copy.sessionTitle}</h1>
+        <p className="mt-2 text-pop-night/80">{copy.sessionSubhead}</p>
       </header>
 
       <NewSessionForm

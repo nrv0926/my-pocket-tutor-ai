@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { SAMPLE_ANALYSIS } from "@/app/try/sampleAnalysis";
+import { SAMPLES, SAMPLE_ORDER } from "@/app/try/samples";
 
 /**
  * Schema test for the nine-section AI output.
@@ -48,16 +48,25 @@ const AnalysisResultSchema = z.object({
   feedbackQuestion: z.literal(FEEDBACK_QUESTION),
 });
 
+const SAMPLE_ANALYSIS = SAMPLES.parent.analysis;
+
 describe("nine-section AnalysisResult shape", () => {
-  it("the /try sample plan matches the schema", () => {
-    const parsed = AnalysisResultSchema.safeParse(SAMPLE_ANALYSIS);
+  // Every public sample is a first impression and renders through the same
+  // card, so all three are held to the schema, not just the parent one.
+  it.each(SAMPLE_ORDER)("the %s sample plan matches the schema", (role) => {
+    const parsed = AnalysisResultSchema.safeParse(SAMPLES[role].analysis);
     expect(parsed.success, formatErrors(parsed)).toBe(true);
   });
 
-  it("answerKey questionIds match the worksheet ids one-to-one", () => {
-    const wsIds = SAMPLE_ANALYSIS.practiceWorksheet.questions.map((q) => q.id).sort();
-    const akIds = SAMPLE_ANALYSIS.answerKey.map((a) => a.questionId).sort();
+  it.each(SAMPLE_ORDER)("%s answerKey ids match the worksheet ids one-to-one", (role) => {
+    const { analysis } = SAMPLES[role];
+    const wsIds = analysis.practiceWorksheet.questions.map((q) => q.id).sort();
+    const akIds = analysis.answerKey.map((a) => a.questionId).sort();
     expect(akIds).toEqual(wsIds);
+  });
+
+  it.each(SAMPLE_ORDER)("%s sample carries the input it was built from", (role) => {
+    expect(SAMPLES[role].input.trim().length).toBeGreaterThan(80);
   });
 
   it("rejects an output missing the feedbackQuestion sentinel", () => {

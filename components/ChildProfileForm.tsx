@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { ChildInput, Grade, LearningNeed } from "@/types/child";
+import type { ChildInput, Grade, LearningNeed, Role } from "@/types/child";
+import { roleCopy } from "@/lib/roleCopy";
 
 const GRADES: Grade[] = ["K", "1", "2", "3", "4", "5", "6"];
 const NEEDS: { id: LearningNeed; label: string }[] = [
@@ -14,11 +15,14 @@ const NEEDS: { id: LearningNeed; label: string }[] = [
 
 export default function ChildProfileForm({
   onSubmit,
+  role = null,
 }: {
   onSubmit?: (data: ChildInput) => Promise<void> | void;
+  role?: Role | null;
 }) {
   const [needs, setNeeds] = useState<LearningNeed[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const copy = roleCopy(role);
 
   return (
     <form
@@ -46,12 +50,12 @@ export default function ChildProfileForm({
         }
       }}
     >
-      <Field label="Child nickname (not their full name)">
+      <Field label={copy.nicknameLabel}>
         <input
           name="nickname"
           required
           maxLength={40}
-          placeholder="e.g. Bean, R., Lulu"
+          placeholder={copy.nicknamePlaceholder}
           className={inputCls}
         />
       </Field>
@@ -87,28 +91,28 @@ export default function ChildProfileForm({
         </Field>
       </div>
 
-      <Field label="Main concern (one sentence)">
+      <Field label={copy.concernLabel}>
         <textarea
           name="mainConcern"
           rows={2}
-          placeholder="e.g. Reading aloud is slow and frustrating."
+          placeholder={copy.concernPlaceholder}
           className={inputCls}
         />
       </Field>
       <div className="grid gap-4 md:grid-cols-2">
-        <Field label="Strengths">
+        <Field label={copy.strengthsLabel}>
           <textarea
             name="strengths"
             rows={3}
-            placeholder="e.g. Loves stories, great memory."
+            placeholder={copy.strengthsPlaceholder}
             className={inputCls}
           />
         </Field>
-        <Field label="Weaknesses">
+        <Field label={copy.weaknessesLabel}>
           <textarea
             name="weaknesses"
             rows={3}
-            placeholder="e.g. Struggles to sound out new words."
+            placeholder={copy.weaknessesPlaceholder}
             className={inputCls}
           />
         </Field>
@@ -144,11 +148,11 @@ export default function ChildProfileForm({
         </p>
       </Field>
 
-      <Field label="What's your goal for this child right now?">
+      <Field label={copy.goalLabel}>
         <textarea
           name="parentGoal"
           rows={2}
-          placeholder="e.g. Feel confident reading a chapter book by summer."
+          placeholder={copy.goalPlaceholder}
           className={inputCls}
         />
       </Field>
@@ -158,7 +162,7 @@ export default function ChildProfileForm({
         disabled={submitting}
         className="w-full rounded-full bg-pop-pink px-6 py-3 font-semibold text-pop-night shadow hover:bg-pop-yellow disabled:opacity-60"
       >
-        {submitting ? "Creating profile..." : "Create child profile"}
+        {submitting ? copy.submittingLabel : copy.submitLabel}
       </button>
     </form>
   );
