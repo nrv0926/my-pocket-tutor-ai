@@ -1,3 +1,4 @@
+import LocalTime from "@/components/LocalTime";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AnalysisResultCard from "@/components/AnalysisResultCard";
@@ -42,7 +43,7 @@ export default async function ResultsPage({ params }: { params: { id: string } }
           </p>
           <h1 className="mt-1 font-display text-3xl text-pop-night">Here&apos;s the plan.</h1>
           <p className="mt-1 text-sm text-pop-night/60">
-            {new Date(data.created_at).toLocaleString()}
+            <LocalTime iso={data.created_at} />
           </p>
         </div>
         <nav className="flex gap-2 print:hidden">

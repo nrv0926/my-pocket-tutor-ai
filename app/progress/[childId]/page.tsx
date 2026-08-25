@@ -1,3 +1,4 @@
+import LocalTime from "@/components/LocalTime";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProgressTracker from "@/components/ProgressTracker";
@@ -81,7 +82,7 @@ export default async function ChildProgressPage({
     .filter((r) => r.difficulty)
     .slice(0, 12)
     .map((r) => ({
-      when: new Date(r.createdAt).toLocaleDateString(),
+      when: r.createdAt,
       skill: r.skill,
       difficulty: r.difficulty!,
       feedback: r.parentFeedback,
@@ -172,7 +173,7 @@ export default async function ChildProgressPage({
               <ol className="space-y-2 text-sm">
                 {difficultyHistory.map((d, i) => (
                   <li key={i} className="flex items-center justify-between">
-                    <span className="text-pop-night/60">{d.when}</span>
+                    <span className="text-pop-night/60"><LocalTime iso={d.when} dateOnly /></span>
                     <span className="flex-1 px-3 truncate text-pop-night">{d.skill}</span>
                     <span
                       className={[

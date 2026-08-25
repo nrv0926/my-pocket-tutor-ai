@@ -1,3 +1,4 @@
+import LocalTime from "@/components/LocalTime";
 import Link from "next/link";
 import ProgressTracker from "@/components/ProgressTracker";
 import { getServerSupabase } from "@/lib/supabaseServer";
@@ -122,7 +123,7 @@ export default async function DashboardPage() {
                     <div className="min-w-0">
                       <p className="truncate font-medium text-pop-night">{title}</p>
                       <p className="text-xs text-pop-night/60">
-                        {s.subject} · {new Date(s.created_at).toLocaleString()}
+                        {s.subject} · <LocalTime iso={s.created_at} />
                       </p>
                     </div>
                     <Link
