@@ -36,11 +36,20 @@ const Worksheet = z.object({
   questions: z.array(WorksheetQuestion).min(5).max(8),
 });
 
+const TeachingMaterial = z.object({
+  label: z.string().min(1),
+  kind: z.enum(["cards", "wordList", "sentences", "script"]),
+  step: z.number().int().positive().optional(),
+  note: z.string().min(1).optional(),
+  items: z.array(z.string().min(1)).min(1),
+});
+
 const AnalysisResultSchema = z.object({
   whatINotice: z.string().min(1),
   keySkillGaps: z.array(z.string().min(1)).min(2).max(6),
   whatToTeachNext: z.array(z.string().min(1)).length(3),
   howToTeachIt: z.array(z.string().min(1)).min(3).max(6),
+  teachingMaterials: z.array(TeachingMaterial).optional(),
   practiceWorksheet: Worksheet,
   answerKey: z.array(z.object({ questionId: z.string().min(1), answer: z.string().min(1) })),
   parentTips: z.array(z.string().min(1)).min(2).max(3),
@@ -67,6 +76,37 @@ describe("nine-section AnalysisResult shape", () => {
 
   it.each(SAMPLE_ORDER)("%s sample carries the input it was built from", (role) => {
     expect(SAMPLES[role].input.trim().length).toBeGreaterThan(80);
+  });
+
+  // The teacher's complaint: section 4 described materials instead of
+  // producing them. Every public sample now has to hand over the goods.
+  it.each(SAMPLE_ORDER)("%s sample produces its teaching materials", (role) => {
+    const materials = SAMPLES[role].analysis.teachingMaterials ?? [];
+    expect(materials.length).toBeGreaterThan(0);
+    for (const m of materials) {
+      expect(m.items.length, `${m.label} has no items`).toBeGreaterThan(0);
+    }
+  });
+
+  it.each(SAMPLE_ORDER)("%s materials point at real steps", (role) => {
+    const { analysis } = SAMPLES[role];
+    for (const m of analysis.teachingMaterials ?? []) {
+      if (typeof m.step !== "number") continue;
+      expect(m.step, `${m.label} cites step ${m.step}`).toBeLessThanOrEqual(
+        analysis.howToTeachIt.length
+      );
+    }
+  });
+
+  // "Pick a short passage" is the failure mode we are fixing: an instruction
+  // to go and make something, dressed up as a material.
+  it.each(SAMPLE_ORDER)("%s materials contain no go-and-make-it placeholders", (role) => {
+    const vague = /\b(choose|pick|select|find|write) (some|a few|any|your own|several)\b/i;
+    for (const m of SAMPLES[role].analysis.teachingMaterials ?? []) {
+      for (const item of m.items) {
+        expect(vague.test(item), `${m.label}: "${item}"`).toBe(false);
+      }
+    }
   });
 
   it("rejects an output missing the feedbackQuestion sentinel", () => {

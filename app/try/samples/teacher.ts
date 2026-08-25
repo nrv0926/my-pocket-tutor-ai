@@ -38,6 +38,58 @@ export const TEACHER_ANALYSIS: AnalysisResult = {
     "DICTATION (2 min) — You say napkin and sunset, they write them, then mark their own slash. Writing the split is what moves it from your routine to theirs.",
     "WATCH FOR: dividing before both consonants (ra/bbit). Fix it by having them mark the two consonants FIRST, every time, before any slash goes down — the marking is the strategy, the slash is just the result.",
   ],
+  teachingMaterials: [
+    {
+      label: "Sound drill cards",
+      kind: "cards",
+      step: 1,
+      note: "Print and cut. Hold up one at a time, choral response, fast.",
+      items: ["ai", "ee", "oa", "ou", "ea", "oi", "ay", "igh"],
+    },
+    {
+      label: "Blend practice — you say the syllables, they blend",
+      kind: "wordList",
+      step: 2,
+      note: "Read the halves aloud with a beat between them. Do not show these.",
+      items: ["rab · bit", "nap · kin", "mag · net", "sun · set", "pic · nic"],
+    },
+    {
+      label: "Word reading — mark, split, read",
+      kind: "wordList",
+      step: 3,
+      note: "Model napkin first, then release. They mark both consonants before any slash.",
+      items: ["napkin", "rabbit", "magnet", "muffin", "contest", "insect"],
+    },
+    {
+      label: "Sentence strips",
+      kind: "sentences",
+      step: 4,
+      note: "Same words, now in running text — where the strategy has to survive.",
+      items: [
+        "The rabbit sat in the basket.",
+        "A magnet is in my pocket.",
+        "We had a picnic at sunset.",
+      ],
+    },
+    {
+      label: "Dictation words",
+      kind: "wordList",
+      step: 5,
+      note: "You say it, they write it, then they mark their own split.",
+      items: ["napkin", "sunset"],
+    },
+    {
+      label: "What to say when they guess",
+      kind: "script",
+      step: 6,
+      note: "Redirect to the strategy without correcting the word for them.",
+      items: [
+        "Show me the two consonants in the middle.",
+        "Good — now where does the slash go?",
+        "Read me just the first part.",
+      ],
+    },
+  ],
   practiceWorksheet: {
     title: "Closed-syllable division (VC/CV) — exit ticket",
     difficulty: "medium",

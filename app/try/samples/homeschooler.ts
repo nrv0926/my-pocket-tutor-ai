@@ -31,6 +31,39 @@ export const HOMESCHOOLER_ANALYSIS: AnalysisResult = {
     "SENTENCE WORK (5 min) — 'The cub sat on the cube.' / 'I hope you can hop.' Both words from a pair in one sentence, which is where the contrast has to hold up.",
     "SCOPE AND SEQUENCE NOTE — You are on phonics stage 4 of 7: CVC → digraphs → blends → **silent e** → vowel teams → r-controlled → multisyllabic. Vowel teams are next, and they'll go faster if silent e is solid, because both are asking the same question: which letters change this vowel?",
   ],
+  teachingMaterials: [
+    {
+      label: "Minimal pairs — cover the e, then lift it",
+      kind: "cards",
+      step: 2,
+      note: "Cover the final e with your finger; he reads the short word. Lift it; he reads it again.",
+      items: ["cap / cape", "kit / kite", "hop / hope", "tap / tape", "pin / pine", "cub / cube"],
+    },
+    {
+      label: "Model these three first",
+      kind: "wordList",
+      step: 1,
+      note: "Write the short word, then add the e in a different colour. He watches, he doesn't read yet.",
+      items: ["cap → cape", "hop → hope", "kit → kite"],
+    },
+    {
+      label: "Sentence work",
+      kind: "sentences",
+      step: 4,
+      note: "Both words of a pair in one sentence — that's where the contrast has to hold.",
+      items: ["The cub sat on the cube.", "I hope you can hop.", "Tap it with the tape."],
+    },
+    {
+      label: "The exception, said out loud",
+      kind: "script",
+      step: 5,
+      note: "Name 'have' before he meets it by accident.",
+      items: [
+        "Most of the time the e makes the vowel say its name.",
+        "'Have' breaks that rule — it's one to remember, not one to sound out.",
+      ],
+    },
+  ],
   practiceWorksheet: {
     title: "Silent e — does the vowel say its name?",
     difficulty: "medium",

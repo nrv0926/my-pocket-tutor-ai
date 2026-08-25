@@ -95,6 +95,14 @@ markdown code fences. Each task tells you the exact JSON shape it expects.
  * Worksheet and weekly-plan tasks have their own (smaller) schemas.
  */
 export const NINE_SECTION_OUTPUT_SCHEMA = `
+PRODUCE THE MATERIALS, DO NOT DESCRIBE THEM.
+If a step says to write six cards, put the six words in teachingMaterials.
+If it says to read five sentences, write the five sentences. The reader has
+no prep time: anything they would otherwise have to make first must arrive
+already made. Never write "choose some words" or "pick a short passage" —
+choose them, and list them. Every material must be usable as printed, and
+every item must fit the child's current level, not the grade average.
+
 The JSON object MUST match this TypeScript type EXACTLY:
 
 {
@@ -102,6 +110,13 @@ The JSON object MUST match this TypeScript type EXACTLY:
   "keySkillGaps": string[],                     // 2–6 specific, teachable items
   "whatToTeachNext": [string, string, string],  // EXACTLY 3 priorities
   "howToTeachIt": string[],                     // 3–6 step-by-step instructions
+  "teachingMaterials": Array<{                  // the materials those steps call for
+    "label": string,                            // e.g. "Sound drill cards"
+    "kind": "cards" | "wordList" | "sentences" | "script",
+    "step": number,                             // 1-based index into howToTeachIt
+    "note": string,                             // one line on how to use it
+    "items": string[]                           // the actual cards / words / sentences
+  }>,                                            // omit ONLY if no material is needed
   "practiceWorksheet": {
     "title": string,
     "difficulty": "easy" | "medium" | "hard",

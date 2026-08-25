@@ -1,3 +1,4 @@
+import TeachingMaterials from "@/components/TeachingMaterials";
 import type { AnalysisResult } from "@/types/session";
 
 /**
@@ -36,6 +37,9 @@ export default function AnalysisResultCard({ result }: { result: AnalysisResult 
             <li key={i}>{s}</li>
           ))}
         </ol>
+        {result.teachingMaterials && result.teachingMaterials.length > 0 && (
+          <TeachingMaterials materials={result.teachingMaterials} />
+        )}
       </Section>
 
       <Section index={5} title="Practice worksheet">

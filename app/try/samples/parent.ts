@@ -39,6 +39,33 @@ export const SAMPLE_ANALYSIS: AnalysisResult = {
     "Fluency re-read: pick one short, easy paragraph she's already read once. Read it together first, then she reads it alone. Same paragraph, no pressure to go faster — fluency comes from familiarity.",
     "End on a win: read ONE page of a familiar bedtime book she loves. No teaching, no corrections. This rebuilds the link between reading and comfort.",
   ],
+  teachingMaterials: [
+    {
+      label: "Vowel-team cards",
+      kind: "cards",
+      step: 1,
+      note: "Cut these out, or just read them off the screen. Two minutes, no longer.",
+      items: ["rain", "seat", "boat", "soap", "mean", "paid"],
+    },
+    {
+      label: "Two-syllable words to split",
+      kind: "wordList",
+      step: 2,
+      note: "Draw a line where the word breaks, then read each half.",
+      items: ["rab|bit", "bas|ket", "pic|nic", "sun|set", "hel|met"],
+    },
+    {
+      label: "What to say if she gets stuck",
+      kind: "script",
+      step: 4,
+      note: "Give the answer after one try. Struggle doesn't build decoding; successful repetition does.",
+      items: [
+        "That one's tricky — ai says A. Try it again.",
+        "You worked that out.",
+        "Let's stop here, that was a good one.",
+      ],
+    },
+  ],
   practiceWorksheet: {
     title: "Vowel teams + two-syllable warm-up",
     difficulty: "easy",

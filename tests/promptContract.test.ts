@@ -90,6 +90,22 @@ const NINE_SECTIONS = [
 ] as const;
 
 describe("nine-section output schema", () => {
+  // The nine sections stay nine. Materials belong INSIDE section 4, because
+  // CLAUDE.md §5 fixes the section list and the renderer reads it verbatim.
+  it("carries teachingMaterials without adding a tenth section", () => {
+    expect(NINE_SECTION_OUTPUT_SCHEMA).toContain('"teachingMaterials"');
+    const four = NINE_SECTION_OUTPUT_SCHEMA.indexOf('"howToTeachIt"');
+    const mats = NINE_SECTION_OUTPUT_SCHEMA.indexOf('"teachingMaterials"');
+    const five = NINE_SECTION_OUTPUT_SCHEMA.indexOf('"practiceWorksheet"');
+    expect(four).toBeLessThan(mats);
+    expect(mats).toBeLessThan(five);
+  });
+
+  it("tells the model to produce materials rather than describe them", () => {
+    expect(NINE_SECTION_OUTPUT_SCHEMA).toMatch(/PRODUCE THE MATERIALS/);
+    expect(NINE_SECTION_OUTPUT_SCHEMA).toMatch(/no prep time/i);
+  });
+
   it("names all nine sections", () => {
     for (const key of NINE_SECTIONS) {
       expect(NINE_SECTION_OUTPUT_SCHEMA).toContain(`"${key}"`);
