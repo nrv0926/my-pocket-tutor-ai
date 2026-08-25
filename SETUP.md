@@ -11,28 +11,23 @@ whole thing — see [step 7](#7-optional-turn-on-the-real-ai).
 
 ## Just want to see it? (2 minutes, no Supabase account)
 
-The public pages only need Supabase env vars to *exist* — `middleware.ts`
-reads them on every request and crashes if they're missing, but it never
-has to reach a real project unless you sign in.
+No environment file needed. Every page that doesn't require an account
+renders without Supabase configured at all:
 
 ```bash
 git clone https://github.com/nrv0926/my-pocket-tutor-ai.git
 cd my-pocket-tutor-ai
 npm install
-
-cat > .env.local <<'ENV'
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_DEFAULT_LOCATION=ON-CA
-NEXT_PUBLIC_SUPABASE_URL=https://placeholder.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder-anon-key-for-local-dev
-ENV
-
 npm run dev
 ```
 
 Open <http://localhost:3000>. The landing page, the three audience pages,
-pricing, and **`/try`** — the complete nine-section sample plan — all
-work. Signing in won't, because those credentials point nowhere.
+pricing, privacy, security, and **`/try`** — the complete nine-section
+sample plan — all work.
+
+Anything that needs an account (`/dashboard`, `/session/new`, `/upload`,
+`/settings`) redirects to `/login`, and the sign-in form says sign-in
+isn't configured rather than failing silently.
 
 When you want real login and saved children, do the full setup below.
 

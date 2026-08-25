@@ -9,8 +9,10 @@ import { createBrowserClient } from "@supabase/ssr";
  * because Next bundles the whole module into the browser.
  */
 export function getBrowserSupabase() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) {
+    throw new Error("supabase_not_configured");
+  }
+  return createBrowserClient(url, anonKey);
 }

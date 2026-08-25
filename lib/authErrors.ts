@@ -9,6 +9,13 @@
 
 const RULES: { match: RegExp; message: string }[] = [
   {
+    // Thrown by getBrowserSupabase() when the Supabase env vars are unset.
+    // "Try a fresh link" is useless advice here — no link can be sent at all.
+    match: /supabase_not_configured|project's URL and Key are required/i,
+    message:
+      "Sign-in isn't set up on this site yet. You can still see a full sample plan — no account needed.",
+  },
+  {
     match: /rate limit|too many requests|over_email_send_rate_limit/i,
     message:
       "We've sent too many sign-in emails in the last hour. Give it an hour and try again.",
