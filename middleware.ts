@@ -78,7 +78,12 @@ function rescueAuthLanding(request: NextRequest): NextResponse | null {
   const { pathname, searchParams } = request.nextUrl;
   if (pathname === "/auth/callback" || pathname === "/auth/confirm") return null;
 
-  const error = searchParams.get("error_description") || searchParams.get("error");
+  // Redirecting /login?error=... to /login?error=... loops forever; the login
+  // page renders the message itself.
+  const error =
+    pathname === "/login"
+      ? null
+      : searchParams.get("error_description") || searchParams.get("error");
   if (error) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";

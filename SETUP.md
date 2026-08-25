@@ -148,6 +148,38 @@ bug: nothing has to survive an allow-list match for the path to be kept.
 Do the same in the **Confirm signup** template — a brand-new address gets
 that one rather than the magic-link template — using `type=signup`.
 
+## 4c. Set up custom SMTP before anyone else uses this
+
+Supabase's built-in email sender is explicitly **not for production**. Two
+limits make that concrete:
+
+- **2 emails per hour, project-wide.** Not per user — per project. Testing
+  sign-in a few times exhausts it, and you get
+  `email rate limit exceeded`.
+- **It will only deliver to addresses in your Supabase organisation.**
+  Since September 2024, a project without custom SMTP can only email its
+  own team members. A real parent signing up would simply never receive
+  anything, with no error shown to them.
+
+That second one is a launch blocker, not an inconvenience. Custom SMTP
+raises the limit to 30/hour (adjustable) and lets you email anyone.
+
+Any SMTP provider works — Resend, Postmark, SendGrid, Mailgun, SES.
+Settings go in **Project Settings → Authentication → SMTP Settings**.
+Using Resend as an example:
+
+1. Create an account and verify the domain you'll send from.
+2. Create an API key.
+3. Fill in Supabase:
+   - Host `smtp.resend.com`, Port `465`
+   - Username `resend`
+   - Password: your API key
+   - Sender: an address at your verified domain, e.g. `hello@yourdomain.ca`
+4. Save, then raise the cap on the
+   [Rate Limits page](https://supabase.com/dashboard/project/_/auth/rate-limits).
+
+Until this is done, only your own Supabase org members can sign in.
+
 ## 5. Fill in your local environment
 
 ```bash

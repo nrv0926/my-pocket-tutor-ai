@@ -101,3 +101,20 @@ describe("token-hash landings", () => {
     expect(loc).toContain("/auth/callback");
   });
 });
+
+describe("no redirect loops", () => {
+  it("does not bounce /login?error= back to itself", async () => {
+    expect(await locationOf("/login?error=otp_expired")).toBeNull();
+  });
+
+  it("still forwards an error that lands anywhere else", async () => {
+    const loc = await locationOf("/?error=otp_expired");
+    expect(loc).toContain("/login");
+    expect(new URL(loc!).searchParams.get("error")).toBe("otp_expired");
+  });
+
+  it("does not bounce /login?code= into a loop either", async () => {
+    const loc = await locationOf("/login?code=abc");
+    expect(loc).toContain("/auth/callback");
+  });
+});

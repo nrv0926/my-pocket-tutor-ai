@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getBrowserSupabase } from "@/lib/supabaseBrowser";
+import { friendlyAuthError } from "@/lib/authErrors";
 
 export default function LoginPage() {
   const params = useSearchParams();
@@ -10,7 +11,10 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
-  const [error, setError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  // /auth/callback and /auth/confirm hand their failures back as ?error=.
+  const error = formError ?? friendlyAuthError(params.get("error"));
 
   return (
     <div className="mx-auto max-w-md px-4 py-16 sm:px-6">
@@ -39,7 +43,7 @@ export default function LoginPage() {
           onSubmit={async (event) => {
             event.preventDefault();
             setStatus("sending");
-            setError(null);
+            setFormError(null);
             try {
               const supabase = getBrowserSupabase();
               const origin = window.location.origin;
@@ -52,7 +56,7 @@ export default function LoginPage() {
               setStatus("sent");
             } catch (err) {
               setStatus("error");
-              setError(err instanceof Error ? err.message : "Something went wrong.");
+              setFormError(friendlyAuthError(err instanceof Error ? err.message : null));
             }
           }}
         >
