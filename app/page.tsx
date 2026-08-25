@@ -119,12 +119,12 @@ export default function HomePage() {
             {SUBJECTS.map((s) => (
               <p
                 key={s}
-                className="font-display text-4xl uppercase leading-tight tracking-tight text-white sm:text-6xl"
+                className="font-display text-[clamp(1.75rem,8vw,3.75rem)] uppercase leading-tight tracking-tight text-white"
               >
                 {s}
               </p>
             ))}
-            <p className="pt-2 font-display text-4xl uppercase leading-tight tracking-tight text-pop-yellow sm:text-6xl">
+            <p className="pt-2 font-display text-[clamp(1.75rem,8vw,3.75rem)] uppercase leading-tight tracking-tight text-pop-yellow">
               and more!
             </p>
           </div>
