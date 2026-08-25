@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getBrowserSupabase } from "@/lib/supabaseBrowser";
 
 export default function LoginPage() {
@@ -29,8 +29,9 @@ export default function LoginPage() {
           <h2 className="font-display text-xl uppercase text-pop-night">Check your inbox</h2>
           <p className="mt-2 text-sm font-medium text-pop-night/80">
             We sent a sign-in link to <strong>{email}</strong>. It&apos;s good for the
-            next hour.
+            next hour, and it has to be opened in this browser.
           </p>
+          <ReturnTarget />
         </div>
       ) : (
         <form
@@ -87,6 +88,41 @@ export default function LoginPage() {
           </p>
         </form>
       )}
+    </div>
+  );
+}
+
+/**
+ * Supabase silently falls back to the project's Site URL when the redirect it
+ * was asked for isn't on the Redirect URLs allowlist, which is invisible until
+ * a link lands somewhere with no handler. Showing the address we asked for
+ * makes that mismatch obvious: if the emailed link doesn't match this, the
+ * allowlist is the reason.
+ *
+ * Only shown for local development — on a deployed origin the link is normally
+ * fine, and this is noise for a real parent.
+ */
+function ReturnTarget() {
+  const [origin, setOrigin] = useState<string | null>(null);
+
+  useEffect(() => {
+    const o = window.location.origin;
+    if (/^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(o)) setOrigin(o);
+  }, []);
+
+  if (!origin) return null;
+
+  return (
+    <div className="mt-4 rounded-xl border-[3px] border-pop-night bg-pop-tangerine p-3 text-xs font-medium text-pop-night">
+      <p>
+        Local development: the link should return to{" "}
+        <code className="font-semibold">{origin}/auth/callback</code>.
+      </p>
+      <p className="mt-1">
+        If the emailed link points somewhere else, add that address under
+        Supabase → Authentication → URL Configuration → Redirect URLs. And keep
+        this dev server running — the link needs something to open.
+      </p>
     </div>
   );
 }

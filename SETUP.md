@@ -68,7 +68,25 @@ order** — paste the contents of each into a new query and hit Run:
 Each one should report success with no rows. Order matters — the policies
 reference tables the schema creates.
 
-## 4. Point Supabase back at your machine
+## 4. Point Supabase somewhere the link can actually land
+
+> **If you have deployed to Vercel, use that URL, not localhost.** A magic
+> link pointing at `localhost:3000` only works on the one machine where
+> `npm run dev` is running, at the moment you click it. Open that email on
+> your phone, or after stopping the dev server, and you get
+> `ERR_CONNECTION_REFUSED` — `localhost` means *that* device. Pointing
+> Supabase at your deployed URL makes sign-in work from any device, any
+> time, with no local server involved.
+>
+> Site URL: `https://your-app.vercel.app`
+> Redirect URLs: `https://your-app.vercel.app/**` and
+> `https://your-app.vercel.app/auth/callback`
+>
+> You can list the localhost entries below *as well* — the allowlist takes
+> several. The Site URL is the one that has to be the deployed origin,
+> because that is the fallback Supabase uses.
+
+### For local development
 
 Still in the dashboard, go to **Authentication → URL Configuration**:
 
@@ -178,6 +196,7 @@ per-user daily cap (default 20, override with `AI_DAILY_LIMIT`).
 | Symptom | Cause |
 | --- | --- |
 | Every page 500s with *"Your project's URL and Key are required to create a Supabase client!"* | `NEXT_PUBLIC_SUPABASE_URL` or the anon key is missing or blank. `middleware.ts` runs on every request and needs both. |
+| `ERR_CONNECTION_REFUSED` on the magic link | Nothing is serving port 3000 on the device you opened it from. Start `npm run dev`, and open the email on that same machine — or point Supabase at your deployed URL instead (step 4). |
 | Magic link lands on `/?code=...` and you're still signed out | Step 4 — `/auth/callback` isn't allowlisted, so Supabase fell back to the Site URL. Middleware now rescues this, but fix the allowlist. |
 | Magic link says "otp_expired" | The link was already used, or it's older than an hour. Request a new one. |
 | `PKCE code verifier not found in storage` | The link was opened in a different browser than the one that requested it. Open it in the same browser. |
