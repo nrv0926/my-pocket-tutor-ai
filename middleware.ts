@@ -76,7 +76,7 @@ export async function middleware(request: NextRequest) {
  */
 function rescueAuthLanding(request: NextRequest): NextResponse | null {
   const { pathname, searchParams } = request.nextUrl;
-  if (pathname === "/auth/callback") return null;
+  if (pathname === "/auth/callback" || pathname === "/auth/confirm") return null;
 
   const error = searchParams.get("error_description") || searchParams.get("error");
   if (error) {
@@ -87,11 +87,18 @@ function rescueAuthLanding(request: NextRequest): NextResponse | null {
     return NextResponse.redirect(url);
   }
 
-  const code = searchParams.get("code");
-  if (!code) return null;
+  // ?code= belongs to the PKCE flow, ?token_hash= to the emailed-token flow.
+  // Either can arrive on the wrong path when Supabase strips the requested
+  // redirect down to the bare Site URL.
+  const target = searchParams.get("code")
+    ? "/auth/callback"
+    : searchParams.get("token_hash")
+      ? "/auth/confirm"
+      : null;
+  if (!target) return null;
 
   const url = request.nextUrl.clone();
-  url.pathname = "/auth/callback";
+  url.pathname = target;
   if (!url.searchParams.get("next") && pathname !== "/") {
     url.searchParams.set("next", pathname);
   }

@@ -82,3 +82,22 @@ describe("magic-link landing rescue", () => {
     expect(new URL(loc!).searchParams.get("next")).toBe("/dashboard");
   });
 });
+
+describe("token-hash landings", () => {
+  it("forwards a stray token_hash to /auth/confirm", async () => {
+    const loc = await locationOf("/?token_hash=abc&type=magiclink");
+    expect(loc).toContain("/auth/confirm");
+    expect(loc).toContain("token_hash=abc");
+    expect(loc).toContain("type=magiclink");
+  });
+
+  it("leaves /auth/confirm itself alone", async () => {
+    const loc = await locationOf("/auth/confirm?token_hash=abc&type=magiclink");
+    expect(loc == null || !loc.includes("/auth/confirm?token_hash")).toBe(true);
+  });
+
+  it("prefers the code flow when both are somehow present", async () => {
+    const loc = await locationOf("/?code=xyz&token_hash=abc&type=magiclink");
+    expect(loc).toContain("/auth/callback");
+  });
+});

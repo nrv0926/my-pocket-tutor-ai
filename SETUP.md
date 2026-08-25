@@ -118,6 +118,36 @@ the allowlist anyway — the rescue is a safety net, not the mechanism.
 `https://your-app.vercel.app/**`. The allowlist is per project, not per
 environment.
 
+## 4b. Fix the magic-link email template
+
+Supabase's default template uses `{{ .ConfirmationURL }}`, which drops the
+path from the redirect it was asked for and falls back to the bare Site
+URL ([supabase/auth#2722](https://github.com/supabase/auth/issues/2722)).
+The link then lands on `/` instead of `/auth/callback`, nothing exchanges
+it, and sign-in fails with no error shown. Fixing the Redirect URLs
+allow-list does **not** help — the reporter tested both an exact entry and
+a wildcard.
+
+Go to **Authentication → Emails → Magic link or OTP** and replace the body:
+
+```html
+<h2>Magic Link</h2>
+
+<p>Follow this link to login:</p>
+<p>
+  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=magiclink">
+    Log In
+  </a>
+</p>
+```
+
+Building the URL from `{{ .SiteURL }}` plus a literal path sidesteps the
+bug: nothing has to survive an allow-list match for the path to be kept.
+`app/auth/confirm/route.ts` verifies the token and starts the session.
+
+Do the same in the **Confirm signup** template — a brand-new address gets
+that one rather than the magic-link template — using `type=signup`.
+
 ## 5. Fill in your local environment
 
 ```bash
