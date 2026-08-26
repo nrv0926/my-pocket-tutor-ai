@@ -85,7 +85,21 @@ If you change the structure, change both — and bump the prompt version.
 
 - **Default location**: Ontario, Canada.
 - **Grades**: K, 1, 2, 3, 4, 5, 6.
-- **Subjects**: Language, Reading, Writing, Math.
+- **Subjects**, named as Ontario names them: **Language**, **Mathematics**,
+  **Science and Technology**, **French as a Second Language**.
+  - Reading and Writing are **not** subjects — both are strands inside
+    Language (C: Comprehension, D: Composition). A teacher notices the
+    difference immediately. Sessions saved under the old names still resolve
+    via `LEGACY_SUBJECTS` in `lib/curriculum.ts`.
+  - The other four Ontario subjects (Social Studies, Health and Physical
+    Education, The Arts, Native Languages) are listed in
+    `data/ontario/subjects.json` with `supported: false`. Don't generate
+    plans for them yet, and don't delete them — "not yet" beats pretending
+    they don't exist.
+- **Curriculum expectations are transcribed, never generated.** Never write an
+  expectation code or its text from memory. An invented `B1.3` is worse than
+  a missing one, because a teacher will trust it. See
+  `data/ontario/README.md`.
 - Skill maps live in `/data`. Look there before inventing a skill name.
 - If the curriculum data does not cover a skill yet, add it to the JSON file
   rather than hard-coding it in a prompt.

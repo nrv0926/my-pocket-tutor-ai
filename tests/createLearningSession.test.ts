@@ -81,12 +81,13 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { createLearningSession } from "@/lib/actions/sessions";
+import type { StoredSubject } from "@/types/child";
 
-async function runPaste() {
+async function runPaste(subject: StoredSubject = "reading") {
   return createLearningSession({
     childId: CHILD_ID,
     inputType: "paste",
-    subject: "reading",
+    subject,
     text: "Reads grade-level text but hesitates on words with blends.",
   }).catch((e: Error) => e);
 }
@@ -128,7 +129,8 @@ describe("createLearningSession", () => {
 
     expect(row.child_id).toBe(CHILD_ID);
     expect(row.input_type).toBe("paste");
-    expect(row.subject).toBe("reading");
+    // "reading" was never a subject — it is a Language strand.
+    expect(row.subject).toBe("language");
   });
 
   it("stores a complete nine-section analysis", async () => {
@@ -171,7 +173,7 @@ describe("createLearningSession", () => {
     const err = (await createLearningSession({
       childId: "not-a-uuid",
       inputType: "paste",
-      subject: "reading",
+      subject: "reading" as StoredSubject,
       text: "hello there",
     }).catch((e: Error) => e)) as Error;
 

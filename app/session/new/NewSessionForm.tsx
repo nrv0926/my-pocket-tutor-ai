@@ -37,7 +37,7 @@ const MODES: { id: SessionInputType; title: string; desc: string; placeholder: s
 export default function NewSessionForm({ childProfiles }: { childProfiles: ChildOption[] }) {
   const [childId, setChildId] = useState(childProfiles[0]?.id ?? "");
   const [mode, setMode] = useState<SessionInputType>("paste");
-  const [subject, setSubject] = useState<Subject>("reading");
+  const [subject, setSubject] = useState<Subject>("language");
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,10 +89,10 @@ export default function NewSessionForm({ childProfiles }: { childProfiles: Child
             onChange={(e) => setSubject(e.target.value as Subject)}
             className="w-full rounded-xl border-[3px] border-pop-night bg-pop-cream px-3 py-2.5 outline-none focus:border-pop-night focus:bg-white focus:ring-4 focus:ring-forest-500/15"
           >
-            <option value="reading">Reading</option>
-            <option value="writing">Writing</option>
             <option value="language">Language</option>
-            <option value="math">Math</option>
+            <option value="mathematics">Mathematics</option>
+            <option value="science-technology">Science and Technology</option>
+            <option value="french">French</option>
           </select>
         </label>
       </div>

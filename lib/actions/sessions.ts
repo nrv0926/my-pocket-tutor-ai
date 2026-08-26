@@ -15,6 +15,7 @@ import { getRole } from "@/lib/role";
 import { mapToSkillIds } from "@/lib/skillGapEngine";
 import { getServerSupabase } from "@/lib/supabaseServer";
 import type { Grade, LearningNeed, Subject } from "@/types/child";
+import { STORED_SUBJECTS, normalizeSubject, type StoredSubject } from "@/types/child";
 import type {
   AnalysisResult,
   Difficulty,
@@ -38,14 +39,15 @@ import type { ParentFeedback } from "@/types/progress";
 const InputSchema = z.object({
   childId: z.string().uuid(),
   inputType: z.enum(["paste", "upload", "description", "plan"]),
-  subject: z.enum(["language", "reading", "writing", "math"]),
+  subject: z.enum(STORED_SUBJECTS),
   text: z.string().min(5).max(8000),
 });
 
 export async function createLearningSession(input: {
   childId: string;
   inputType: SessionInputType;
-  subject: Subject;
+  /** Accepts the legacy names too; normalised before anything downstream. */
+  subject: StoredSubject;
   text: string;
 }) {
   const parsed = InputSchema.parse(input);
@@ -95,6 +97,9 @@ export async function createLearningSession(input: {
 
   const role = getRole();
 
+  // Rows written before the taxonomy fix stored Reading/Writing as subjects.
+  const subject = normalizeSubject(parsed.subject);
+
   const prompt =
     parsed.inputType === "paste"
       ? buildReportCardPrompt({
@@ -105,7 +110,7 @@ export async function createLearningSession(input: {
         })
       : buildAnalysisPrompt({
           child: childForPrompt,
-          subject: parsed.subject,
+          subject: subject,
           parentInput: parsed.text,
           role,
           recentFeedback,
@@ -168,7 +173,7 @@ export async function createLearningSession(input: {
     .insert({
       child_id: parsed.childId,
       input_type: parsed.inputType,
-      subject: parsed.subject,
+      subject,
       raw_input: parsed.text,
       analysis_result: result,
       top_skill_gaps: skillIds.length > 0 ? skillIds : result.whatToTeachNext,

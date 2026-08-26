@@ -60,7 +60,8 @@ create table if not exists public.learning_sessions (
   id                uuid primary key default uuid_generate_v4(),
   child_id          uuid not null references public.children(id) on delete cascade,
   input_type        text not null,         -- 'paste' | 'upload' | 'description' | 'plan'
-  subject           text not null,         -- 'language' | 'reading' | 'writing' | 'math'
+  subject           text not null,         -- see STORED_SUBJECTS in types/child.ts;
+                                           -- 'reading'/'writing'/'math' are pre-2026-08 rows
   raw_input         text,                  -- the parent's text (no PII please)
   upload_id         uuid references public.uploads(id) on delete set null,
   analysis_result   jsonb not null,        -- the full 9-section structured output

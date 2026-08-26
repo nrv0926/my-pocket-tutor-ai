@@ -1,0 +1,322 @@
+{
+  "region": "ON-CA",
+  "expectationsVerified": false,
+  "note": "Structure only. Subject names, policy years and strand names are recorded here so the app can be built against the real taxonomy; every `overall` list is deliberately empty because the expectation text and codes must be transcribed from each subject's `source` URL, never generated. See data/ontario/README.md before filling these in.",
+  "subjects": [
+    {
+      "id": "language",
+      "name": "Language",
+      "policyYear": 2023,
+      "supported": true,
+      "source": "https://www.dcp.edu.gov.on.ca/en/curriculum/elementary-language",
+      "strands": [
+        {
+          "code": "A",
+          "name": "Literacy Connections and Applications",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        },
+        {
+          "code": "B",
+          "name": "Foundations of Language",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        },
+        {
+          "code": "C",
+          "name": "Comprehension: Understanding and Responding to Texts",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        },
+        {
+          "code": "D",
+          "name": "Composition: Expressing Ideas and Creating Texts",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        }
+      ]
+    },
+    {
+      "id": "mathematics",
+      "name": "Mathematics",
+      "policyYear": 2020,
+      "supported": true,
+      "source": "https://www.dcp.edu.gov.on.ca/en/curriculum/elementary-mathematics",
+      "strands": [
+        {
+          "code": "A",
+          "name": "Social-Emotional Learning Skills and the Mathematical Processes",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        },
+        {
+          "code": "B",
+          "name": "Number",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        },
+        {
+          "code": "C",
+          "name": "Algebra",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        },
+        {
+          "code": "D",
+          "name": "Data",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        },
+        {
+          "code": "E",
+          "name": "Spatial Sense",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        },
+        {
+          "code": "F",
+          "name": "Financial Literacy",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        }
+      ]
+    },
+    {
+      "id": "science-technology",
+      "name": "Science and Technology",
+      "policyYear": 2022,
+      "supported": true,
+      "source": "https://www.dcp.edu.gov.on.ca/en/curriculum/science-technology",
+      "strands": [
+        {
+          "code": "A",
+          "name": "STEM Skills and Connections",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        },
+        {
+          "code": "B",
+          "name": "Life Systems",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        },
+        {
+          "code": "C",
+          "name": "Matter and Energy",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        },
+        {
+          "code": "D",
+          "name": "Structures and Mechanisms",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        },
+        {
+          "code": "E",
+          "name": "Earth and Space Systems",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        }
+      ]
+    },
+    {
+      "id": "french",
+      "name": "French as a Second Language",
+      "policyYear": 2013,
+      "supported": true,
+      "source": "https://www.dcp.edu.gov.on.ca/en/curriculum/elementary-french-as-a-second-language",
+      "strands": [
+        {
+          "code": "A",
+          "name": "Listening",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        },
+        {
+          "code": "B",
+          "name": "Speaking",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        },
+        {
+          "code": "C",
+          "name": "Reading",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        },
+        {
+          "code": "D",
+          "name": "Writing",
+          "grades": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "overall": []
+        }
+      ]
+    },
+    {
+      "id": "social-studies",
+      "name": "Social Studies",
+      "policyYear": 2018,
+      "supported": false,
+      "source": "https://www.dcp.edu.gov.on.ca/en/curriculum/elementary-social-studies-history-geography",
+      "strands": []
+    },
+    {
+      "id": "health-physical-education",
+      "name": "Health and Physical Education",
+      "policyYear": 2019,
+      "supported": false,
+      "source": "https://www.dcp.edu.gov.on.ca/en/curriculum/elementary-health-and-physical-education",
+      "strands": []
+    },
+    {
+      "id": "arts",
+      "name": "The Arts",
+      "policyYear": 2009,
+      "supported": false,
+      "source": "https://www.dcp.edu.gov.on.ca/en/curriculum/elementary-the-arts",
+      "strands": []
+    },
+    {
+      "id": "native-languages",
+      "name": "Native Languages",
+      "policyYear": 2001,
+      "supported": false,
+      "source": "https://www.dcp.edu.gov.on.ca/en/curriculum/elementary-native-languages",
+      "strands": []
+    }
+  ]
+}
