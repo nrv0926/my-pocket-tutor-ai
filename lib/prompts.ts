@@ -293,3 +293,83 @@ export function expectationContext(
     "say plainly which one and why.",
   ].join("\n");
 }
+
+/** The previous session for this child, as far as the prompt needs it. */
+export interface PreviousSession {
+  createdAt: string;
+  subject: string;
+  /** The top-3 priorities that plan set. */
+  taught: string[];
+  /** What that plan promised to do next — the thread this session picks up. */
+  nextStepPlan: string;
+  difficulty: Difficulty | null;
+}
+
+/**
+ * Make this session continue the last one instead of starting cold.
+ *
+ * Recent feedback already tells the model whether to go easier or harder.
+ * What it never had was the content: which three things were taught, and
+ * what that plan promised to do next. Without it, session two re-teaches
+ * session one, which is exactly what a teacher notices first.
+ */
+export function continuityContext(previous: PreviousSession | null, now: Date = new Date()): string {
+  if (!previous) {
+    return [
+      "FIRST SESSION",
+      "There is no earlier session for this child. Establish a baseline: pick",
+      "the most foundational gap you can see and say, in NEXT STEP PLAN, what",
+      "the next session should pick up.",
+    ].join("\n");
+  }
+
+  const days = Math.max(
+    0,
+    Math.round((now.getTime() - new Date(previous.createdAt).getTime()) / 86_400_000)
+  );
+  const when = days === 0 ? "today" : days === 1 ? "yesterday" : `${days} days ago`;
+
+  return [
+    `CONTINUING FROM THE LAST SESSION (${when}, ${previous.subject})`,
+    "It taught:",
+    ...previous.taught.slice(0, 3).map((t) => `- ${t}`),
+    "",
+    "And it promised to do this next:",
+    `"""${previous.nextStepPlan}"""`,
+    "",
+    "Continue that thread. Do NOT re-teach what is listed above unless the",
+    "feedback says it did not land. Move to the next thing that plan named,",
+    "or the next rung of the progression, and open WHAT I NOTICE by saying in",
+    "one sentence how this session follows on from the last.",
+  ].join("\n");
+}
+
+/**
+ * The published progression for this grade, so "the next rung" is Ontario's
+ * and not the model's invention.
+ *
+ * Only the step DOWN is ever taken automatically (CLAUDE.md §4). The next
+ * grade is included as context for the adult, never as a target to jump to.
+ */
+export function progressionContext(
+  current: { section: string; label: string; text: string }[],
+  next: { section: string; label: string; text: string }[]
+): string {
+  if (current.length === 0) return "";
+  const fmt = (rows: { section: string; label: string; text: string }[]) =>
+    rows.slice(0, 8).map((r) => `- [${r.section}] ${r.label}: ${r.text}`);
+  return [
+    "ONTARIO LANGUAGE FOUNDATIONS CONTINUUM — where this grade sits",
+    ...fmt(current),
+    ...(next.length
+      ? [
+          "",
+          "The rung above, for your reference only — do NOT jump to it:",
+          ...fmt(next).slice(0, 4),
+        ]
+      : []),
+    "",
+    "Use this to choose the next step. Step DOWN a rung when the child is",
+    "struggling; never up past one that is not secure.",
+  ].join("\n");
+}

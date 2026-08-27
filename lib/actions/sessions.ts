@@ -15,6 +15,12 @@ import { getRole } from "@/lib/role";
 import { mapToSkillIds } from "@/lib/skillGapEngine";
 import { getServerSupabase } from "@/lib/supabaseServer";
 import { findExpectation } from "@/lib/curriculum";
+import {
+  continuumCovers,
+  continuumFor,
+  nextGradeFor,
+} from "@/lib/foundationsContinuum";
+import type { PreviousSession } from "@/lib/prompts";
 import type { GradeId } from "@/types/curriculum";
 import type { Grade, LearningNeed, Subject } from "@/types/child";
 import { STORED_SUBJECTS, normalizeSubject, type StoredSubject } from "@/types/child";
@@ -103,6 +109,39 @@ export async function createLearningSession(input: {
     completedIndependently: (r.completed_independently ?? null) as boolean | null,
   }));
 
+  // The last plan for this child. Session two should continue session one,
+  // not re-teach it — feedback alone never carried what was actually taught.
+  const { data: lastRows } = await supabase
+    .from("learning_sessions")
+    .select("created_at, subject, analysis_result")
+    .eq("child_id", parsed.childId)
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  const lastRow = lastRows?.[0];
+  const lastAnalysis = lastRow?.analysis_result as AnalysisResult | undefined;
+  const previous: PreviousSession | null = lastRow && lastAnalysis
+    ? {
+        createdAt: lastRow.created_at as string,
+        subject: String(lastRow.subject),
+        taught: lastAnalysis.whatToTeachNext ?? [],
+        nextStepPlan: lastAnalysis.nextStepPlan ?? "",
+        difficulty: lastAnalysis.practiceWorksheet?.difficulty ?? null,
+      }
+    : null;
+
+  // Ontario's own K-4 reading progression, so "the next rung" is theirs.
+  const grade = child.grade as string;
+  const progression = continuumCovers(grade)
+    ? {
+        current: continuumFor(grade),
+        next: (() => {
+          const up = nextGradeFor(grade);
+          return up ? continuumFor(up) : [];
+        })(),
+      }
+    : null;
+
   const role = getRole();
 
   // Rows written before the taxonomy fix stored Reading/Writing as subjects.
@@ -134,6 +173,8 @@ export async function createLearningSession(input: {
           parentInput: parsed.text,
           role,
           expectation,
+          previous,
+          progression,
           recentFeedback,
         });
 
