@@ -31,6 +31,16 @@ export const HOMESCHOOLER_ANALYSIS: AnalysisResult = {
     "SENTENCE WORK (5 min) — 'The cub sat on the cube.' / 'I hope you can hop.' Both words from a pair in one sentence, which is where the contrast has to hold up.",
     "SCOPE AND SEQUENCE NOTE — You are on phonics stage 4 of 7: CVC → digraphs → blends → **silent e** → vowel teams → r-controlled → multisyllabic. Vowel teams are next, and they'll go faster if silent e is solid, because both are asking the same question: which letters change this vowel?",
   ],
+  differentiation: {
+    wholeGroup:
+      "The model / guided / independent sequence as written, at the pace he sets. If you are teaching siblings together, they all watch the model — seeing the vowel change three times costs nothing and helps everyone.",
+    needsSupport:
+      "If he is still coin-flipping after the guided round, stop before independent work and do the finger-lift on three pairs only — cap/cape, hop/hope, kit/kite — until he hears the change every time. Three pairs done right beats ten done half-right.",
+    readyForMore:
+      "A younger sibling who is already secure on silent e can start marking long and short vowels in words he reads well, which is the same question one step on. Do not start vowel teams until silent e is first-try correct three days running.",
+    watchFor:
+      "Reading 'cape' correctly straight after 'cap' can be the pattern rather than the rule — check by giving the silent-e word first, on its own, later in the session.",
+  },
   teachingMaterials: [
     {
       label: "Minimal pairs — cover the e, then lift it",

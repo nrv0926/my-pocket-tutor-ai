@@ -8,7 +8,7 @@ import {
 } from "@/lib/prompts";
 import type { Child, Role } from "@/types/child";
 
-export const REPORT_CARD_PROMPT_VERSION = "report-card@2026-08-25.1";
+export const REPORT_CARD_PROMPT_VERSION = "report-card@2026-08-27.1";
 
 /**
  * Specialised analysis for a school report card comment / teacher note.

@@ -95,6 +95,15 @@ markdown code fences. Each task tells you the exact JSON shape it expects.
  * Worksheet and weekly-plan tasks have their own (smaller) schemas.
  */
 export const NINE_SECTION_OUTPUT_SCHEMA = `
+DIFFERENTIATE WHEN THERE IS A RANGE TO DIFFERENTIATE FOR.
+Include "differentiation" when the reader is a teacher or a homeschooler
+with more than one learner: one lesson, run three ways — the whole group,
+the child who is behind, and whoever finishes early. Each track must be
+runnable in the same room at the same time, and needsSupport must be a
+SMALLER STEP of the same skill, never a different lesson and never busywork.
+Omit the field entirely for a parent teaching one child, who has nobody to
+differentiate between.
+
 PRODUCE THE MATERIALS, DO NOT DESCRIBE THEM.
 If a step says to write six cards, put the six words in teachingMaterials.
 If it says to read five sentences, write the five sentences. The reader has
@@ -117,6 +126,12 @@ The JSON object MUST match this TypeScript type EXACTLY:
     "note": string,                             // one line on how to use it
     "items": string[]                           // the actual cards / words / sentences
   }>,                                            // omit ONLY if no material is needed
+  "differentiation": {                          // one lesson, three tracks
+    "wholeGroup": string,                       // the core lesson as written
+    "needsSupport": string,                     // smaller step for the child who is behind
+    "readyForMore": string,                     // extension for anyone already secure
+    "watchFor": string                          // the signal a child is in the wrong track
+  },                                             // TEACHERS AND HOMESCHOOLERS ONLY
   "practiceWorksheet": {
     "title": string,
     "difficulty": "easy" | "medium" | "hard",

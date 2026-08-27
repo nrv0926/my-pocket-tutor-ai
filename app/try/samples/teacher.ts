@@ -38,6 +38,16 @@ export const TEACHER_ANALYSIS: AnalysisResult = {
     "DICTATION (2 min) — You say napkin and sunset, they write them, then mark their own slash. Writing the split is what moves it from your routine to theirs.",
     "WATCH FOR: dividing before both consonants (ra/bbit). Fix it by having them mark the two consonants FIRST, every time, before any slash goes down — the marking is the strategy, the slash is just the result.",
   ],
+  differentiation: {
+    wholeGroup:
+      "The five steps as written, all four students together. Everyone marks both medial consonants before any slash goes down — that routine is the lesson, and it is the same routine in every track.",
+    needsSupport:
+      "Same words, but you mark the two consonants and they draw the slash. Drop to four words instead of six and keep both syllables closed — napkin, sunset, rabbit, magnet. If a student cannot hear the two parts, go back to the blend step and do it orally before anything goes on paper. Smaller step, same skill, not a different lesson.",
+    readyForMore:
+      "Once VC/CV is automatic, hand them three-syllable closed words — fan/tas/tic, bas/ket/ball — and have them mark every consonant pair. Do not give open syllables yet; that pattern is the next unit and mixing it in now is what sends a group backwards.",
+    watchFor:
+      "A student who reads the word correctly but never marks the consonants is guessing from memory, not decoding — move them to the support track even though the answer was right. The reverse is also true: slow and correct with the marking is the track working.",
+  },
   teachingMaterials: [
     {
       label: "Sound drill cards",

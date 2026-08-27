@@ -106,6 +106,26 @@ describe("nine-section output schema", () => {
     expect(NINE_SECTION_OUTPUT_SCHEMA).toMatch(/no prep time/i);
   });
 
+  it("carries differentiation inside section 4, not as a tenth section", () => {
+    // The prose rule above the type also names the field, so positions are
+    // measured inside the type block rather than across the whole string.
+    const typeBlock = NINE_SECTION_OUTPUT_SCHEMA.slice(
+      NINE_SECTION_OUTPUT_SCHEMA.indexOf("The JSON object MUST match")
+    );
+    expect(typeBlock).toContain('"differentiation"');
+    const four = typeBlock.indexOf('"howToTeachIt"');
+    const diff = typeBlock.indexOf('"differentiation"');
+    const five = typeBlock.indexOf('"practiceWorksheet"');
+    expect(four).toBeLessThan(diff);
+    expect(diff).toBeLessThan(five);
+  });
+
+  it("tells the model the support track is a smaller step, not busywork", () => {
+    expect(NINE_SECTION_OUTPUT_SCHEMA).toMatch(/SMALLER STEP of the same skill/);
+    expect(NINE_SECTION_OUTPUT_SCHEMA).toMatch(/never busywork/i);
+    expect(NINE_SECTION_OUTPUT_SCHEMA).toMatch(/Omit the field entirely for a parent/i);
+  });
+
   it("names all nine sections", () => {
     for (const key of NINE_SECTIONS) {
       expect(NINE_SECTION_OUTPUT_SCHEMA).toContain(`"${key}"`);

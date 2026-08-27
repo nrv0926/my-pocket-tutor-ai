@@ -12,7 +12,7 @@ import {
 } from "@/lib/prompts";
 import type { Child, Role, Subject } from "@/types/child";
 
-export const ANALYSIS_PROMPT_VERSION = "analysis@2026-08-27.2";
+export const ANALYSIS_PROMPT_VERSION = "analysis@2026-08-27.3";
 
 /**
  * Main analysis: parent input → 9-section structured plan + worksheet.

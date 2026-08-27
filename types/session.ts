@@ -41,6 +41,28 @@ export interface TeachingMaterial {
   items: string[];
 }
 
+/**
+ * The same lesson, adapted for the range in front of the adult.
+ *
+ * A teacher plans one lesson and runs it three ways: the whole group, the
+ * student who is behind, and the ones who finish early. Asking her to
+ * generate three plans is asking her to do the differentiating herself,
+ * which is the work she wanted help with.
+ *
+ * This lives inside HOW TO TEACH IT rather than becoming a tenth section —
+ * CLAUDE.md §5 fixes the nine and the renderer reads them verbatim.
+ */
+export interface Differentiation {
+  /** The core lesson, as the whole class or group runs it. */
+  wholeGroup: string;
+  /** Adapted for the child who is struggling — smaller step, more support. */
+  needsSupport: string;
+  /** For anyone who is already secure and finishes early. */
+  readyForMore: string;
+  /** What to watch for that tells you a child belongs in another track. */
+  watchFor?: string;
+}
+
 /** The structured nine-section AI output. Order is fixed — see CLAUDE.md §5. */
 export interface AnalysisResult {
   whatINotice: string;
@@ -54,6 +76,14 @@ export interface AnalysisResult {
    * allowed to omit it rather than invent one.
    */
   teachingMaterials?: TeachingMaterial[];
+  /**
+   * One lesson, three tracks — what a teacher actually writes.
+   *
+   * Optional, because a parent teaching one child at the kitchen table has
+   * nobody to differentiate between, and inventing two extra tracks for
+   * them would be noise.
+   */
+  differentiation?: Differentiation;
   practiceWorksheet: Worksheet;
   answerKey: { questionId: string; answer: string }[];
   parentTips: string[];      // 2–3

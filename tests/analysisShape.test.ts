@@ -44,12 +44,20 @@ const TeachingMaterial = z.object({
   items: z.array(z.string().min(1)).min(1),
 });
 
+const DifferentiationSchema = z.object({
+  wholeGroup: z.string().min(20),
+  needsSupport: z.string().min(20),
+  readyForMore: z.string().min(20),
+  watchFor: z.string().min(10).optional(),
+});
+
 const AnalysisResultSchema = z.object({
   whatINotice: z.string().min(1),
   keySkillGaps: z.array(z.string().min(1)).min(2).max(6),
   whatToTeachNext: z.array(z.string().min(1)).length(3),
   howToTeachIt: z.array(z.string().min(1)).min(3).max(6),
   teachingMaterials: z.array(TeachingMaterial).optional(),
+  differentiation: DifferentiationSchema.optional(),
   practiceWorksheet: Worksheet,
   answerKey: z.array(z.object({ questionId: z.string().min(1), answer: z.string().min(1) })),
   parentTips: z.array(z.string().min(1)).min(2).max(3),
@@ -140,3 +148,41 @@ function formatErrors(parsed: z.SafeParseReturnType<unknown, unknown>): string {
     .map((i) => `  ${i.path.join(".") || "(root)"}: ${i.message}`)
     .join("\n");
 }
+
+/**
+ * "A whole lesson plan for the class, and for the kid that has problems."
+ * One lesson, three tracks — not three plans, and not busywork for the
+ * child who is behind.
+ */
+describe("differentiation", () => {
+  it("is present for the teacher and homeschooler samples", () => {
+    for (const role of ["teacher", "homeschooler"] as const) {
+      expect(SAMPLES[role].analysis.differentiation, `${role} has none`).toBeDefined();
+    }
+  });
+
+  it("is absent for the parent sample — one child, nobody to differentiate", () => {
+    expect(SAMPLES.parent.analysis.differentiation).toBeUndefined();
+  });
+
+  it("gives three distinct tracks, never the same text repeated", () => {
+    for (const role of ["teacher", "homeschooler"] as const) {
+      const d = SAMPLES[role].analysis.differentiation!;
+      const tracks = [d.wholeGroup, d.needsSupport, d.readyForMore];
+      expect(new Set(tracks).size, `${role} repeats a track`).toBe(3);
+    }
+  });
+
+  it("keeps the support track on the same skill, not a different lesson", () => {
+    // The whole point: a smaller step, not a substitute activity.
+    const d = SAMPLES.teacher.analysis.differentiation!;
+    expect(d.needsSupport.toLowerCase()).toMatch(/same (words|skill)|smaller step/);
+  });
+
+  it("survives the nine-section schema unchanged", () => {
+    for (const role of SAMPLE_ORDER) {
+      const parsed = AnalysisResultSchema.safeParse(SAMPLES[role].analysis);
+      expect(parsed.success, formatErrors(parsed)).toBe(true);
+    }
+  });
+});
