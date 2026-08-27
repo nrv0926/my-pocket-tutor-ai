@@ -43,6 +43,7 @@ const InputSchema = z.object({
   inputType: z.enum(["paste", "upload", "description", "plan"]),
   subject: z.enum(STORED_SUBJECTS),
   expectationCode: z.string().max(12).nullable().optional(),
+  expectationProgram: z.enum(["core", "extended", "immersion"]).nullable().optional(),
   text: z.string().min(5).max(8000),
 });
 
@@ -53,6 +54,8 @@ export async function createLearningSession(input: {
   subject: StoredSubject;
   /** Optional Ontario expectation code the adult chose to target, e.g. "B2.1". */
   expectationCode?: string | null;
+  /** FSL only — which program that code belongs to. */
+  expectationProgram?: "core" | "extended" | "immersion" | null;
   text: string;
 }) {
   const parsed = InputSchema.parse(input);
@@ -109,7 +112,12 @@ export async function createLearningSession(input: {
   // passed through, so the prompt can never carry a code the curriculum does
   // not actually contain (CLAUDE.md §6).
   const expectation = parsed.expectationCode
-    ? findExpectation(subject, child.grade as GradeId, parsed.expectationCode)
+    ? findExpectation(
+        subject,
+        child.grade as GradeId,
+        parsed.expectationCode,
+        parsed.expectationProgram ?? undefined
+      )
     : null;
 
   const prompt =

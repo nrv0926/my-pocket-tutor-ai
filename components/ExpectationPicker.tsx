@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getExpectations, type ExpectationGroup } from "@/lib/actions/curriculum";
-import type { GradeId, SubjectId } from "@/types/curriculum";
+import {
+  getExpectations,
+  getPrograms,
+  type ExpectationGroup,
+  type ProgramOption,
+} from "@/lib/actions/curriculum";
+import type { GradeId, Program, SubjectId } from "@/types/curriculum";
 
 /**
  * Optional Ontario expectation selector.
@@ -24,14 +29,31 @@ export default function ExpectationPicker({
   subject: SubjectId;
   grade: GradeId;
   value: string;
-  onChange: (code: string) => void;
+  onChange: (code: string, program?: Program["id"]) => void;
 }) {
   const [groups, setGroups] = useState<ExpectationGroup[] | null>(null);
+  const [programs, setPrograms] = useState<ProgramOption[]>([]);
+  const [program, setProgram] = useState<Program["id"] | undefined>(undefined);
+
+  // FSL is the only subject that asks which program you teach.
+  useEffect(() => {
+    let live = true;
+    getPrograms(subject)
+      .then((p) => {
+        if (!live) return;
+        setPrograms(p);
+        setProgram(p.length ? p[p.length - 1].id : undefined);
+      })
+      .catch(() => live && setPrograms([]));
+    return () => {
+      live = false;
+    };
+  }, [subject]);
 
   useEffect(() => {
     let live = true;
     setGroups(null);
-    getExpectations(subject, grade)
+    getExpectations(subject, grade, program)
       .then((g) => {
         if (live) setGroups(g);
       })
@@ -41,14 +63,14 @@ export default function ExpectationPicker({
     return () => {
       live = false;
     };
-  }, [subject, grade]);
+  }, [subject, grade, program]);
 
   // Clear a selection that the new subject or grade doesn't contain.
   useEffect(() => {
     if (!groups || !value) return;
     const has = groups.some((g) => g.options.some((o) => o.code === value));
-    if (!has) onChange("");
-  }, [groups, value, onChange]);
+    if (!has) onChange("", program);
+  }, [groups, value, onChange, program]);
 
   const total = groups?.reduce((n, g) => n + g.options.length, 0) ?? 0;
 
@@ -57,6 +79,26 @@ export default function ExpectationPicker({
       <span className="mb-1 block text-sm font-medium text-pop-night/80">
         Ontario expectation <span className="text-pop-night/50">(optional)</span>
       </span>
+
+      {programs.length > 0 && (
+        <div className="mb-2 flex flex-wrap gap-2">
+          {programs.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => {
+                setProgram(p.id);
+                onChange("", p.id);
+              }}
+              className={`rounded-full border-[3px] border-pop-night px-3 py-1 font-display text-[11px] uppercase tracking-wide ${
+                program === p.id ? "bg-pop-night text-pop-cream" : "bg-white text-pop-night"
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {groups === null ? (
         <div className="h-[46px] animate-pulse rounded-xl border-[3px] border-pop-night bg-pop-cream" />
@@ -67,7 +109,7 @@ export default function ExpectationPicker({
       ) : (
         <select
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(e.target.value, program)}
           className="w-full rounded-xl border-[3px] border-pop-night bg-pop-cream px-3 py-2.5 outline-none focus:border-pop-night focus:bg-white focus:ring-4 focus:ring-pop-pink/30"
         >
           <option value="">No specific expectation</option>

@@ -5,7 +5,7 @@ import LoadingState from "@/components/LoadingState";
 import ExpectationPicker from "@/components/ExpectationPicker";
 import { createLearningSession } from "@/lib/actions/sessions";
 import type { Grade, Subject } from "@/types/child";
-import type { GradeId, SubjectId } from "@/types/curriculum";
+import type { GradeId, Program, SubjectId } from "@/types/curriculum";
 import type { SessionInputType } from "@/types/session";
 
 /** Server actions throw this internal signal when they call redirect(). */
@@ -41,6 +41,7 @@ export default function NewSessionForm({ childProfiles }: { childProfiles: Child
   const [mode, setMode] = useState<SessionInputType>("paste");
   const [subject, setSubject] = useState<Subject>("language");
   const [expectation, setExpectation] = useState("");
+  const [expectationProgram, setExpectationProgram] = useState<Program["id"] | null>(null);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +65,7 @@ export default function NewSessionForm({ childProfiles }: { childProfiles: Child
             inputType: mode,
             subject,
             expectationCode: expectation || null,
+            expectationProgram: expectation ? expectationProgram : null,
             text: text.trim(),
           });
           // createLearningSession redirects to /results/[id] internally.
@@ -110,7 +112,10 @@ export default function NewSessionForm({ childProfiles }: { childProfiles: Child
           subject={subject as SubjectId}
           grade={selectedGrade}
           value={expectation}
-          onChange={setExpectation}
+          onChange={(code, program) => {
+            setExpectation(code);
+            setExpectationProgram(program ?? null);
+          }}
         />
       )}
 

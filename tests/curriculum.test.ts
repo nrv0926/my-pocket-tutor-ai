@@ -6,9 +6,11 @@ import {
   SUPPORTED_SUBJECTS,
   expectationOptions,
   loadedExpectationCount,
+  allStrands,
   findExpectation,
   overallFor,
   resolveSubject,
+  programsFor,
   strandsFor,
   subjectsWithExpectations,
 } from "@/lib/curriculum";
@@ -48,12 +50,20 @@ describe("Ontario curriculum structure", () => {
 
   it("every supported subject has strands", () => {
     for (const s of SUPPORTED_SUBJECTS) {
-      expect(s.strands.length, `${s.id} has no strands`).toBeGreaterThan(0);
+      // FSL keeps its strands per program, so count across both shapes.
+      expect(allStrands(s).length, `${s.id} has no strands`).toBeGreaterThan(0);
     }
   });
 
   it("strand codes are unique within a subject", () => {
     for (const s of SUBJECTS) {
+      if (s.programs?.length) {
+        for (const p of s.programs) {
+          const codes = p.strands.map((st) => st.code);
+          expect(new Set(codes).size, `${s.id}/${p.id} duplicate strands`).toBe(codes.length);
+        }
+        continue;
+      }
       const codes = s.strands.map((st) => st.code);
       expect(new Set(codes).size, `${s.id} has duplicate strand codes`).toBe(codes.length);
     }
@@ -70,7 +80,7 @@ describe("expectations are transcribed, never generated", () => {
 
   it("every expectation carries a well-formed Ontario code", () => {
     for (const s of SUBJECTS) {
-      for (const strand of s.strands) {
+      for (const strand of allStrands(s)) {
         for (const overall of strand.overall) {
           expect(overall.code, `${s.id} overall has no code`).toMatch(/^[A-Z]\d+$/);
           expect(overall.code.startsWith(strand.code)).toBe(true);
@@ -90,7 +100,7 @@ describe("expectations are transcribed, never generated", () => {
   it("carries no page furniture from the source PDFs", () => {
     const furniture = /\|\s*\d+\s*Strand|Strand [A-F]\.\s*$|\b(NUMBER|ALGEBRA|DATA)\s*$/;
     for (const s of SUBJECTS) {
-      for (const strand of s.strands) {
+      for (const strand of allStrands(s)) {
         for (const list of Object.values(strand.specific ?? {})) {
           for (const spec of list ?? []) {
             expect(furniture.test(spec.text), `${spec.code}: ${spec.text.slice(-45)}`).toBe(false);
@@ -102,7 +112,7 @@ describe("expectations are transcribed, never generated", () => {
 
   it("codes are unique within a grade", () => {
     for (const s of SUBJECTS) {
-      for (const strand of s.strands) {
+      for (const strand of allStrands(s)) {
         for (const [grade, list] of Object.entries(strand.specific ?? {})) {
           const codes = (list ?? []).map((e) => e.code);
           expect(new Set(codes).size, `${s.id} ${strand.code} G${grade}`).toBe(codes.length);
@@ -124,7 +134,7 @@ describe("expectations are transcribed, never generated", () => {
 
   it("does not surface grades 7 and 8, which are outside K-6", () => {
     for (const s of SUBJECTS) {
-      for (const strand of s.strands) {
+      for (const strand of allStrands(s)) {
         expect(strand.grades).not.toContain("7");
         expect(strand.grades).not.toContain("8");
       }
@@ -189,6 +199,54 @@ describe("findExpectation", () => {
   it("rejects a fabricated code rather than inventing wording", () => {
     for (const bogus of ["Z1.1", "B1.999", "'; drop table --", ""]) {
       expect(findExpectation("language", "3", bogus)).toBeNull();
+    }
+  });
+});
+
+/**
+ * FSL is the only subject with programs: Core, Extended and Immersion each
+ * publish their own expectations for the same strand and grade.
+ */
+describe("French as a Second Language", () => {
+  it("carries three programs", () => {
+    const ids = programsFor("french").map((p) => p.id);
+    expect(ids).toEqual(["core", "extended", "immersion"]);
+  });
+
+  it("only Immersion runs below Grade 4, as Ontario publishes it", () => {
+    expect(expectationOptions("french", "1", "immersion").length).toBeGreaterThan(0);
+    expect(expectationOptions("french", "1", "core")).toEqual([]);
+    expect(expectationOptions("french", "5", "core").length).toBeGreaterThan(0);
+  });
+
+  it("the same code means different things in different programs", () => {
+    const core = findExpectation("french", "5", "A1.1", "core");
+    const imm = findExpectation("french", "5", "A1.1", "immersion");
+    expect(core).not.toBeNull();
+    expect(imm).not.toBeNull();
+    expect(core!.text).not.toBe(imm!.text);
+  });
+
+  it("defaults to Immersion, the only program covering the whole K-6 range", () => {
+    const fallback = expectationOptions("french", "2");
+    expect(fallback.length).toBeGreaterThan(0);
+    expect(fallback).toEqual(expectationOptions("french", "2", "immersion"));
+  });
+
+  it("is flagged as the French edition, so the UI can say so", () => {
+    expect(SUBJECTS.find((s) => s.id === "french")?.language).toBe("fr");
+  });
+
+  it("carries no teacher prompts or instructional tips", () => {
+    const support = /Questions incitatives|Conseils p[ée]dagogiques/i;
+    for (const p of programsFor("french")) {
+      for (const st of p.strands) {
+        for (const list of Object.values(st.specific ?? {})) {
+          for (const e of list ?? []) {
+            expect(support.test(e.text), `${p.id} ${e.code}`).toBe(false);
+          }
+        }
+      }
     }
   });
 });

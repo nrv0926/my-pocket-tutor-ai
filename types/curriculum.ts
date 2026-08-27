@@ -60,6 +60,20 @@ export interface Strand {
   specific: Partial<Record<SourceGrade, SpecificExpectation[]>>;
 }
 
+/**
+ * FSL publishes three programs — Core, Extended and Immersion — and each
+ * gives its own expectations for the same strand and grade. No other
+ * elementary subject has this dimension, so it is optional: a subject
+ * without programs is read directly from `strands`.
+ */
+export interface Program {
+  id: "core" | "extended" | "immersion";
+  /** Name as published, in the document's own language. */
+  name: string;
+  nameEn: string;
+  strands: Strand[];
+}
+
 export interface Subject {
   id: SubjectId;
   /** Ontario's published name. */
@@ -76,6 +90,10 @@ export interface Subject {
   /** Official URL the expectations must be transcribed from. */
   source: string;
   strands: Strand[];
+  /** Set only for FSL. When present, `strands` is empty and lives per program. */
+  programs?: Program[];
+  /** Language the transcription is in — FSL is currently the French edition. */
+  language?: "en" | "fr";
 }
 
 export interface CurriculumFile {

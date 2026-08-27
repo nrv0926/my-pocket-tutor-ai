@@ -1,7 +1,7 @@
 "use server";
 
-import { expectationOptions, type ExpectationOption } from "@/lib/curriculum";
-import type { GradeId, SubjectId } from "@/types/curriculum";
+import { expectationOptions, programsFor, type ExpectationOption } from "@/lib/curriculum";
+import type { GradeId, Program, SubjectId } from "@/types/curriculum";
 
 export interface ExpectationGroup {
   strandCode: string;
@@ -19,10 +19,11 @@ export interface ExpectationGroup {
  */
 export async function getExpectations(
   subject: SubjectId,
-  grade: GradeId
+  grade: GradeId,
+  program?: Program["id"]
 ): Promise<ExpectationGroup[]> {
   const groups = new Map<string, ExpectationGroup>();
-  for (const o of expectationOptions(subject, grade)) {
+  for (const o of expectationOptions(subject, grade, program)) {
     const g = groups.get(o.strandCode) ?? {
       strandCode: o.strandCode,
       strandName: o.strandName,
@@ -32,4 +33,14 @@ export async function getExpectations(
     groups.set(o.strandCode, g);
   }
   return [...groups.values()];
+}
+
+export interface ProgramOption {
+  id: Program["id"];
+  label: string;
+}
+
+/** Programs a subject offers. Empty for everything except FSL. */
+export async function getPrograms(subject: SubjectId): Promise<ProgramOption[]> {
+  return programsFor(subject).map((p) => ({ id: p.id, label: p.nameEn }));
 }

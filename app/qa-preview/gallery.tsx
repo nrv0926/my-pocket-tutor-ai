@@ -18,7 +18,7 @@ function ExpectationPickerDemo() {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
-        {(["language", "mathematics", "science-technology"] as SubjectId[]).map((s) => (
+        {(["language", "mathematics", "french", "science-technology"] as SubjectId[]).map((s) => (
           <button
             key={s}
             type="button"

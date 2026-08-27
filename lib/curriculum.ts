@@ -1,8 +1,10 @@
 import index from "@/data/ontario/subjects.json";
 import languageData from "@/data/ontario/language.json";
 import mathematicsData from "@/data/ontario/mathematics.json";
+import frenchData from "@/data/ontario/french.json";
 import type {
   CurriculumFile,
+  Program,
   GradeId,
   OverallExpectation,
   SourceGrade,
@@ -42,26 +44,62 @@ const TRANSCRIBED: Record<string, TranscribedSubject> = {
   mathematics: mathematicsData as TranscribedSubject,
 };
 
+interface TranscribedProgramFile {
+  subject: string;
+  policyYear: number;
+  language: "en" | "fr";
+  source: string;
+  programs: {
+    id: Program["id"];
+    name: string;
+    nameEn: string;
+    strands: (TranscribedStrand & { nameEn?: string })[];
+  }[];
+}
+
+const FRENCH = frenchData as unknown as TranscribedProgramFile;
+
 /** Grades the product covers. Ontario publishes 1-8; we surface K-6. */
 export const APP_GRADES: GradeId[] = ["K", "1", "2", "3", "4", "5", "6"];
+
+function toStrands(list: TranscribedStrand[]): Strand[] {
+  return list.map((ts) => ({
+    code: ts.code,
+    name: ts.name,
+    grades: ts.grades.filter((g): g is GradeId => (APP_GRADES as string[]).includes(g)),
+    overall: ts.overall,
+    specific: ts.specific as Partial<Record<SourceGrade, SpecificExpectation[]>>,
+  }));
+}
 
 function build(): Subject[] {
   const file = index as unknown as CurriculumFile;
   return file.subjects.map((subject) => {
+    if (subject.id === "french") {
+      return {
+        ...subject,
+        policyYear: FRENCH.policyYear,
+        source: FRENCH.source,
+        language: FRENCH.language,
+        strands: [],
+        programs: FRENCH.programs.map((p) => ({
+          id: p.id,
+          name: p.name,
+          nameEn: p.nameEn,
+          strands: toStrands(p.strands),
+        })),
+      };
+    }
+
     const t = TRANSCRIBED[subject.id];
     if (!t) return subject;
 
-    const strands: Strand[] = t.strands.map((ts) => ({
-      code: ts.code,
-      name: ts.name,
-      grades: ts.grades.filter((g): g is GradeId =>
-        (APP_GRADES as string[]).includes(g)
-      ),
-      overall: ts.overall,
-      specific: ts.specific as Partial<Record<SourceGrade, SpecificExpectation[]>>,
-    }));
-
-    return { ...subject, policyYear: t.policyYear, source: t.source, strands };
+    return {
+      ...subject,
+      policyYear: t.policyYear,
+      source: t.source,
+      strands: toStrands(t.strands),
+    };
   });
 }
 
@@ -97,9 +135,33 @@ export function getSubject(id: SubjectId): Subject | undefined {
   return SUBJECTS.find((s) => s.id === id);
 }
 
-/** Strands that apply at a given grade — Ontario phases some in partway. */
-export function strandsFor(id: SubjectId, grade: GradeId): Strand[] {
-  return getSubject(id)?.strands.filter((s) => s.grades.includes(grade)) ?? [];
+/** Programs a subject offers, or [] when it has none (every subject but FSL). */
+export function programsFor(id: SubjectId): Program[] {
+  return getSubject(id)?.programs ?? [];
+}
+
+/**
+ * Strands that apply at a given grade — Ontario phases some in partway.
+ *
+ * For FSL a program must be named, because Core, Extended and Immersion set
+ * different expectations for the same grade. Passing none falls back to
+ * Immersion, which is the only program that runs the full K-6 range.
+ */
+export function strandsFor(
+  id: SubjectId,
+  grade: GradeId,
+  program?: Program["id"]
+): Strand[] {
+  const subject = getSubject(id);
+  if (!subject) return [];
+  if (subject.programs?.length) {
+    const chosen =
+      subject.programs.find((p) => p.id === program) ??
+      subject.programs.find((p) => p.id === "immersion") ??
+      subject.programs[0];
+    return chosen.strands.filter((s) => s.grades.includes(grade));
+  }
+  return subject.strands.filter((s) => s.grades.includes(grade));
 }
 
 export interface ExpectationOption {
@@ -113,9 +175,13 @@ export interface ExpectationOption {
  * Every specific expectation for a subject at a grade, flattened for a
  * picker and grouped by strand in the order Ontario publishes them.
  */
-export function expectationOptions(id: SubjectId, grade: GradeId): ExpectationOption[] {
+export function expectationOptions(
+  id: SubjectId,
+  grade: GradeId,
+  program?: Program["id"]
+): ExpectationOption[] {
   const out: ExpectationOption[] = [];
-  for (const strand of strandsFor(id, grade)) {
+  for (const strand of strandsFor(id, grade, program)) {
     for (const spec of strand.specific?.[grade as SourceGrade] ?? []) {
       out.push({
         code: spec.code,
@@ -129,15 +195,19 @@ export function expectationOptions(id: SubjectId, grade: GradeId): ExpectationOp
 }
 
 /** Overall expectations for a subject, which are shared across its grades. */
-export function overallFor(id: SubjectId, grade: GradeId): OverallExpectation[] {
-  return strandsFor(id, grade).flatMap((s) => s.overall);
+export function overallFor(
+  id: SubjectId,
+  grade: GradeId,
+  program?: Program["id"]
+): OverallExpectation[] {
+  return strandsFor(id, grade, program).flatMap((s) => s.overall);
 }
 
 /** How many expectations are loaded — used by the UI and by tests. */
 export function loadedExpectationCount(): number {
   let n = 0;
   for (const s of SUBJECTS) {
-    for (const strand of s.strands) {
+    for (const strand of allStrands(s)) {
       for (const list of Object.values(strand.specific ?? {})) n += list?.length ?? 0;
     }
   }
@@ -147,10 +217,15 @@ export function loadedExpectationCount(): number {
 /** Which subjects actually have transcribed expectations behind them. */
 export function subjectsWithExpectations(): SubjectId[] {
   return SUBJECTS.filter((s) =>
-    s.strands.some((st) =>
+    allStrands(s).some((st) =>
       Object.values(st.specific ?? {}).some((l) => (l?.length ?? 0) > 0)
     )
   ).map((s) => s.id);
+}
+
+/** Every strand of a subject, across programs when it has them. */
+export function allStrands(s: Subject): Strand[] {
+  return s.programs?.length ? s.programs.flatMap((p) => p.strands) : s.strands;
 }
 
 export interface ResolvedExpectation {
@@ -171,9 +246,10 @@ export interface ResolvedExpectation {
 export function findExpectation(
   subject: SubjectId,
   grade: GradeId,
-  code: string
+  code: string,
+  program?: Program["id"]
 ): ResolvedExpectation | null {
-  for (const strand of strandsFor(subject, grade)) {
+  for (const strand of strandsFor(subject, grade, program)) {
     for (const spec of strand.specific?.[grade as SourceGrade] ?? []) {
       if (spec.code === code) {
         return {

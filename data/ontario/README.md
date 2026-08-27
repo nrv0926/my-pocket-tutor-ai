@@ -9,10 +9,26 @@ The expectations themselves live beside it, one file per subject:
 | --- | --- | --- | --- |
 | `language.json` | A, B, C, D | 478 | Ontario Language, 2023 |
 | `mathematics.json` | A, B, C, D, E, F | 369 | Ontario Mathematics, 2020 |
+| `french.json` | A, B, C, D × 3 programs | 342 | Ontario FSL, 2013 |
 
-847 in total, covering Grades 1-8 as published; the loader narrows to K-6.
-Science and Technology, French, and the four unsupported subjects have
-structure but no expectations yet.
+1,189 in total, covering Grades 1-8 as published; the loader narrows to K-6.
+Science and Technology and the four unsupported subjects have structure but
+no expectations yet.
+
+### FSL is shaped differently, twice over
+
+**Three programs.** Core, Extended and Immersion each publish their own
+expectations for the same strand and grade, so `french.json` nests strands
+under `programs` and `subjects.json` leaves its `strands` empty. Core and
+Extended begin at Grade 4; only Immersion runs from Grade 1, which is why
+the picker defaults to Immersion — it is the one program covering the whole
+K-6 range.
+
+**It is the French edition.** Both FSL PDFs supplied were
+`Traduction de French as a Second Language` — the same French translation,
+despite one being named `FSL_...`. The English edition publishes the same
+codes with English wording. Drop it in, point `SOURCES` at it, and re-run;
+the `language` field on the file is what the UI reads to know which it has.
 
 ## The rule
 
@@ -38,7 +54,10 @@ python3 -m venv .venv && .venv/bin/pip install pdfplumber
 ```
 
 Register the subject and its strand PDFs in that script's `SOURCES` table
-first. Two layouts exist and both are handled: per-grade tables with eight
+first. FSL uses a second script, `scripts/extract_ontario_fsl.py`, because
+it is running prose rather than a continuum table — each expectation is
+followed by teacher prompts and instructional tips that are support
+material, not the expectation, and are dropped. Two layouts exist and both are handled: per-grade tables with eight
 columns (`Grade 1` … `Grade 8`) and banded tables with three
 (`Grades 1-3`, `Grades 4-6`, `Grades 7-8`), which are expanded to individual
 grades.
