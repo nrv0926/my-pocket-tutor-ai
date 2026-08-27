@@ -7,7 +7,7 @@ suggesting changes to this repository. **Treat it as binding.**
 
 ## 1. Project purpose
 
-AI Pocket Tutor is a quiet co-pilot for **parents and teachers** of K–6
+AI Pocket Tutor is a quiet co-pilot for **parents and teachers** of K–8
 children. It analyzes a child's learning data and returns a clear, kind plan
 of what to teach next.
 
@@ -84,7 +84,9 @@ If you change the structure, change both — and bump the prompt version.
 ## 6. Curriculum alignment
 
 - **Default location**: Ontario, Canada.
-- **Grades**: K, 1, 2, 3, 4, 5, 6.
+- **Grades**: K through 8 — the full Ontario elementary range. The
+  curriculum documents are published for Grades 1-8, and elementary schools
+  run to Grade 8.
 - **Subjects**, named as Ontario names them: **Language**, **Mathematics**,
   **Science and Technology**, **French as a Second Language**.
   - Reading and Writing are **not** subjects — both are strands inside

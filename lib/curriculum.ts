@@ -59,8 +59,8 @@ interface TranscribedProgramFile {
 
 const FRENCH = frenchData as unknown as TranscribedProgramFile;
 
-/** Grades the product covers. Ontario publishes 1-8; we surface K-6. */
-export const APP_GRADES: GradeId[] = ["K", "1", "2", "3", "4", "5", "6"];
+/** Grades the product covers — the full Ontario elementary range. */
+export const APP_GRADES: GradeId[] = ["K", "1", "2", "3", "4", "5", "6", "7", "8"];
 
 function toStrands(list: TranscribedStrand[]): Strand[] {
   return list.map((ts) => ({

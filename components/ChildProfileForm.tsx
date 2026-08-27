@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import type { ChildInput, Grade, LearningNeed, Role } from "@/types/child";
+import { GRADES } from "@/types/child";
 import { roleCopy } from "@/lib/roleCopy";
 
-const GRADES: Grade[] = ["K", "1", "2", "3", "4", "5", "6"];
+
 const NEEDS: { id: LearningNeed; label: string }[] = [
   { id: "adhd", label: "ADHD" },
   { id: "dyslexia", label: "Dyslexia" },

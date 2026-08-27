@@ -1,4 +1,11 @@
-export type Grade = "K" | "1" | "2" | "3" | "4" | "5" | "6";
+/**
+ * Ontario publishes the elementary curriculum for Grades 1-8, and elementary
+ * schools run to Grade 8. K-8 is the whole of it — the earlier K-6 cut was
+ * ours, not the Ministry's.
+ */
+export type Grade = "K" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
+
+export const GRADES: Grade[] = ["K", "1", "2", "3", "4", "5", "6", "7", "8"];
 
 /**
  * Subjects the app generates plans for, named as Ontario names them.

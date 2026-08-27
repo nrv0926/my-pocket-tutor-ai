@@ -126,7 +126,7 @@ export default function ForHomeschoolerPage() {
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <h2 className="font-display text-2xl text-pop-night">Curriculum, not just content</h2>
           <p className="mt-2 text-pop-night/80">
-            Defaults to Ontario K–6 unless your profile says otherwise. Reading
+            Defaults to Ontario K–8 unless your profile says otherwise. Reading
             follows the science of reading order: phonemic awareness → phonics
             → fluency → vocabulary → comprehension. K–3 lessons follow a
             UFLI-style structure (sound drill → blend → word → sentence →

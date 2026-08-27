@@ -8,7 +8,7 @@ import type { ChildInput } from "@/types/child";
 const ChildInputSchema = z.object({
   nickname: z.string().min(1).max(40),
   age: z.number().int().min(4).max(14).nullable(),
-  grade: z.enum(["K", "1", "2", "3", "4", "5", "6"]),
+  grade: z.enum(["K", "1", "2", "3", "4", "5", "6", "7", "8"]),
   location: z.string().min(2).default("ON-CA"),
   curriculum: z.enum(["ontario", "common-core", "other"]).default("ontario"),
   learningNeeds: z.array(z.enum(["adhd", "dyslexia", "anxiety", "esl", "other"])).default([]),

@@ -13,7 +13,7 @@ const FAQS = [
   },
   {
     q: "What curriculum do you follow?",
-    a: "Ontario by default, K through 6. If your child is behind, we step down a grade level rather than pushing ahead.",
+    a: "Ontario by default, K through 8. If your child is behind, we step down a grade level rather than pushing ahead.",
   },
   {
     q: "What does it cost?",

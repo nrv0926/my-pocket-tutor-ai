@@ -132,12 +132,21 @@ describe("expectations are transcribed, never generated", () => {
     expect(expectationOptions("science-technology", "3")).toEqual([]);
   });
 
-  it("does not surface grades 7 and 8, which are outside K-6", () => {
-    for (const s of SUBJECTS) {
-      for (const strand of allStrands(s)) {
-        expect(strand.grades).not.toContain("7");
-        expect(strand.grades).not.toContain("8");
-      }
+  it("surfaces the full elementary range, including Grades 7 and 8", () => {
+    const lang = SUBJECTS.find((s) => s.id === "language")!;
+    for (const g of ["7", "8"] as const) {
+      expect(
+        allStrands(lang).some((st) => st.grades.includes(g)),
+        `Language is missing Grade ${g}`
+      ).toBe(true);
+      expect(expectationOptions("language", g).length).toBeGreaterThan(10);
+      expect(expectationOptions("mathematics", g).length).toBeGreaterThan(10);
+    }
+  });
+
+  it("Grade 8 French is available in every program", () => {
+    for (const p of ["core", "extended", "immersion"] as const) {
+      expect(expectationOptions("french", "8", p).length).toBeGreaterThan(0);
     }
   });
 });

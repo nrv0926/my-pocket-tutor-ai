@@ -20,7 +20,7 @@ export type SubjectId =
   | "arts"
   | "native-languages";
 
-export type GradeId = "K" | "1" | "2" | "3" | "4" | "5" | "6";
+export type GradeId = "K" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
 
 export interface SpecificExpectation {
   /** Ontario's own code, e.g. "B1.3". Never invent one. */
@@ -34,11 +34,7 @@ export interface OverallExpectation {
   text: string;
 }
 
-/**
- * Grades as the source documents publish them. Ontario writes the elementary
- * curriculum for Grades 1-8; the product covers K-6, so the loader narrows
- * this rather than the transcription throwing data away.
- */
+/** Grades as the source documents publish them: Ontario elementary is 1-8. */
 export type SourceGrade = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
 
 export interface Strand {

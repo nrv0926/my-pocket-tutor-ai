@@ -104,7 +104,7 @@ export default function ExpectationPicker({
         <div className="h-[46px] animate-pulse rounded-xl border-[3px] border-pop-night bg-pop-cream" />
       ) : total === 0 ? (
         <p className="rounded-xl border-[3px] border-dashed border-pop-night/40 bg-pop-cream px-3 py-2.5 text-sm text-pop-night/70">
-          Not transcribed for this subject yet — the plan still works without one.
+          {emptyReason(subject, grade)} The plan still works without one.
         </p>
       ) : (
         <select
@@ -132,6 +132,22 @@ export default function ExpectationPicker({
       )}
     </label>
   );
+}
+
+/**
+ * Why the list is empty, said plainly. Ontario publishes Kindergarten as its
+ * own program document rather than as a grade inside each subject, and Core
+ * and Extended French only start at Grade 4 — neither is a gap in our data,
+ * and saying "not transcribed yet" for them would be wrong.
+ */
+function emptyReason(subject: SubjectId, grade: GradeId): string {
+  if (grade === "K") {
+    return "Ontario publishes Kindergarten as its own program, not as expectations inside each subject.";
+  }
+  if (subject === "french" && ["1", "2", "3"].includes(grade)) {
+    return "This French program starts at Grade 4 — only Immersion runs earlier.";
+  }
+  return "Not transcribed for this subject yet.";
 }
 
 function truncate(s: string, max = 90): string {

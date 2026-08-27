@@ -2,6 +2,7 @@ import ontario from "@/data/ontario-curriculum-k6.json";
 import literacy from "@/data/literacy-progression.json";
 import math from "@/data/math-progression.json";
 import skills from "@/data/skill-map.json";
+import { GRADES } from "@/types/child";
 import type { Grade, StoredSubject, Subject } from "@/types/child";
 
 export interface SkillEntry {
@@ -56,7 +57,7 @@ export function mathProgression() {
  * Returns the same grade if already at K.
  */
 export function stepDown(grade: Grade): Grade {
-  const order: Grade[] = ["K", "1", "2", "3", "4", "5", "6"];
+  const order: Grade[] = GRADES;
   const idx = order.indexOf(grade);
   if (idx <= 0) return "K";
   return order[idx - 1];

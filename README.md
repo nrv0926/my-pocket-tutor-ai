@@ -25,7 +25,7 @@ already trying their best.
 
 ## Who it's for
 
-- Parents of K–6 children in Ontario (default), expanding to other provinces
+- Parents of K–8 children in Ontario (default), expanding to other provinces
   and US states later.
 - Teachers who want quick, structured small-group plans.
 - Tutors who need ready-to-print worksheets aligned to a real curriculum.

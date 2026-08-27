@@ -57,11 +57,11 @@ begin
   begin
     insert into public.children (user_id, nickname, grade)
       select uid, 'G-' || g, g
-      from unnest(array['K','1','2','3','4','5','6']) as g;
+      from unnest(array['K','1','2','3','4','5','6','7','8']) as g;
     ok := ok + 1;
-    raise notice 'ok: all seven K-6 grade values accepted';
+    raise notice 'ok: all nine K-8 grade values accepted';
   exception when others then
-    raise exception 'FAIL: a K-6 grade value was rejected: %', sqlerrm;
+    raise exception 'FAIL: a K-8 grade value was rejected: %', sqlerrm;
   end;
 
   -- age is CHECK (between 4 and 14) — the form allows 4..14

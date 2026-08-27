@@ -25,7 +25,7 @@ create table if not exists public.children (
   user_id         uuid not null references public.users(id) on delete cascade,
   nickname        text not null check (char_length(nickname) between 1 and 40),
   age             smallint check (age between 4 and 14),
-  grade           text not null,                 -- 'K','1','2','3','4','5','6'
+  grade           text not null,                 -- 'K' through '8'
   location        text not null default 'ON-CA', -- e.g. 'ON-CA' (Ontario, Canada)
   curriculum      text not null default 'ontario',
   learning_needs  text[] not null default '{}',  -- e.g. {'adhd','dyslexia','anxiety'}

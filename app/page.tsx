@@ -58,7 +58,7 @@ export default function HomePage() {
         <Blob className="absolute -bottom-32 -right-16 h-96 w-96 opacity-30" color="#3fe0d0" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
-            <Sticker tone="pink" rotate="-3deg">For parents &amp; teachers · K–6</Sticker>
+            <Sticker tone="pink" rotate="-3deg">For parents &amp; teachers · K–8</Sticker>
             <h1 className="mt-6 font-display text-5xl uppercase leading-[0.95] text-pop-night sm:text-6xl">
               Know exactly how to help your kid
             </h1>
