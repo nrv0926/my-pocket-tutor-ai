@@ -1,14 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  EXPECTATIONS_VERIFIED,
   LEGACY_SUBJECTS,
   SUBJECTS,
   SUPPORTED_SUBJECTS,
   expectationOptions,
   loadedExpectationCount,
+  overallFor,
   resolveSubject,
   strandsFor,
+  subjectsWithExpectations,
 } from "@/lib/curriculum";
 import { SUBJECTS as APP_SUBJECTS, normalizeSubject } from "@/types/child";
 
@@ -59,37 +60,76 @@ describe("Ontario curriculum structure", () => {
 });
 
 describe("expectations are transcribed, never generated", () => {
-  it("is not marked verified while nothing is loaded", () => {
-    if (loadedExpectationCount() === 0) {
-      expect(EXPECTATIONS_VERIFIED).toBe(false);
-    }
+  it("Language and Mathematics are loaded from the Ministry PDFs", () => {
+    expect(subjectsWithExpectations()).toEqual(
+      expect.arrayContaining(["language", "mathematics"])
+    );
+    expect(loadedExpectationCount()).toBeGreaterThan(500);
   });
 
-  it("any expectation that exists carries an Ontario code", () => {
+  it("every expectation carries a well-formed Ontario code", () => {
     for (const s of SUBJECTS) {
       for (const strand of s.strands) {
         for (const overall of strand.overall) {
           expect(overall.code, `${s.id} overall has no code`).toMatch(/^[A-Z]\d+$/);
-          for (const spec of overall.specific) {
-            expect(spec.code, `${s.id} specific has no code`).toMatch(/^[A-Z]\d+\.\d+$/);
-            expect(spec.text.trim().length).toBeGreaterThan(0);
+          expect(overall.code.startsWith(strand.code)).toBe(true);
+        }
+        for (const [grade, list] of Object.entries(strand.specific ?? {})) {
+          for (const spec of list ?? []) {
+            expect(spec.code, `${s.id} ${grade} specific`).toMatch(/^[A-Z]\d+\.\d+$/);
+            expect(spec.code.startsWith(strand.code)).toBe(true);
+            expect(spec.text.trim().length).toBeGreaterThan(14);
           }
         }
       }
     }
   });
 
-  it("expectationOptions is empty until data is loaded, never invented", () => {
-    expect(expectationOptions("language", "3")).toHaveLength(loadedExpectationCountFor("language", "3"));
+  // The parser used to sweep running headers into the last entry on a page.
+  it("carries no page furniture from the source PDFs", () => {
+    const furniture = /\|\s*\d+\s*Strand|Strand [A-F]\.\s*$|\b(NUMBER|ALGEBRA|DATA)\s*$/;
+    for (const s of SUBJECTS) {
+      for (const strand of s.strands) {
+        for (const list of Object.values(strand.specific ?? {})) {
+          for (const spec of list ?? []) {
+            expect(furniture.test(spec.text), `${spec.code}: ${spec.text.slice(-45)}`).toBe(false);
+          }
+        }
+      }
+    }
+  });
+
+  it("codes are unique within a grade", () => {
+    for (const s of SUBJECTS) {
+      for (const strand of s.strands) {
+        for (const [grade, list] of Object.entries(strand.specific ?? {})) {
+          const codes = (list ?? []).map((e) => e.code);
+          expect(new Set(codes).size, `${s.id} ${strand.code} G${grade}`).toBe(codes.length);
+        }
+      }
+    }
+  });
+
+  it("a real grade returns real options", () => {
+    const g3 = expectationOptions("language", "3");
+    expect(g3.length).toBeGreaterThan(20);
+    expect(g3[0].code).toMatch(/^[A-D]\d+\.\d+$/);
+    expect(overallFor("language", "3").length).toBeGreaterThan(0);
+  });
+
+  it("a subject with no transcription yet returns nothing, not guesses", () => {
+    expect(expectationOptions("science-technology", "3")).toEqual([]);
+  });
+
+  it("does not surface grades 7 and 8, which are outside K-6", () => {
+    for (const s of SUBJECTS) {
+      for (const strand of s.strands) {
+        expect(strand.grades).not.toContain("7");
+        expect(strand.grades).not.toContain("8");
+      }
+    }
   });
 });
-
-function loadedExpectationCountFor(id: "language", grade: "3"): number {
-  return strandsFor(id, grade).reduce(
-    (n, s) => n + s.overall.reduce((m, o) => m + o.specific.length, 0),
-    0
-  );
-}
 
 describe("sessions saved under the old subject names still resolve", () => {
   it.each(Object.keys(LEGACY_SUBJECTS))("%s resolves to a real subject", (stored) => {

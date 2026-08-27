@@ -1,8 +1,18 @@
 # Ontario curriculum data
 
-`subjects.json` holds the **structure** of the Ontario elementary curriculum:
-the eight subjects, their policy years, and the strands inside each supported
-subject. Every `overall` array is empty on purpose.
+`subjects.json` is the taxonomy index: the eight elementary subjects, their
+policy years, and the strands inside each supported subject.
+
+The expectations themselves live beside it, one file per subject:
+
+| File | Strands | Specific expectations | Source |
+| --- | --- | --- | --- |
+| `language.json` | A, B, C, D | 478 | Ontario Language, 2023 |
+| `mathematics.json` | A, B, C, D, E, F | 369 | Ontario Mathematics, 2020 |
+
+847 in total, covering Grades 1-8 as published; the loader narrows to K-6.
+Science and Technology, French, and the four unsupported subjects have
+structure but no expectations yet.
 
 ## The rule
 
@@ -17,21 +27,46 @@ strand is honest; a hallucinated one is not.
 So: no expectation goes into this file unless it was copied from the
 `source` URL recorded on its subject.
 
-## Filling one in
+## Adding a subject
 
-1. Open the subject's `source` URL and find the grade and strand.
-2. Add the overall expectation with Ontario's own code (`B1`) and text.
-3. Add each specific expectation beneath it (`B1.1`, `B1.2`, …).
-4. Leave `expectationsVerified` false until a subject is complete and
-   someone has checked it against the source a second time.
+`scripts/extract_ontario.py` does the transcription. Point it at a directory
+of the Ministry's own PDFs:
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install pdfplumber
+.venv/bin/python scripts/extract_ontario.py ./ministry-pdfs data/ontario
+```
+
+Register the subject and its strand PDFs in that script's `SOURCES` table
+first. Two layouts exist and both are handled: per-grade tables with eight
+columns (`Grade 1` … `Grade 8`) and banded tables with three
+(`Grades 1-3`, `Grades 4-6`, `Grades 7-8`), which are expanded to individual
+grades.
+
+Three things the parser has to get right, and which the tests check:
+
+- **Columns.** The PDFs put eight grades side by side on one landscape page,
+  so flat text extraction interleaves them into nonsense. Words are assigned
+  to a column by x-position.
+- **Sub-headings.** "Effective Listening Skills" is navigation, not an
+  expectation. They are set in a bold cut of the body face and end the entry
+  above them.
+- **Page furniture.** The running footer would otherwise be swallowed by the
+  last expectation on each page.
+
+Adding one by hand is fine too — same shape, same rule about wording.
 
 ```jsonc
 {
-  "code": "B1",
-  "text": "<overall expectation, verbatim>",
-  "specific": [
-    { "code": "B1.1", "text": "<specific expectation, verbatim>" }
-  ]
+  "code": "B",
+  "name": "Foundations of Language",
+  "grades": ["1", "2", "3", "4", "5", "6", "7", "8"],
+  "overall": [{ "code": "B1", "text": "<verbatim>" }],
+  // Specific expectations are keyed by grade: B1.1 in Grade 2 is a
+  // different expectation from B1.1 in Grade 5.
+  "specific": {
+    "1": [{ "code": "B1.1", "text": "<verbatim>" }]
+  }
 }
 ```
 
@@ -40,13 +75,12 @@ match `^[A-Z]\d+$`, a specific one `^[A-Z]\d+\.\d+$`, and text cannot be
 blank. It cannot tell whether the wording is real — that part is on the
 person pasting it.
 
-## Why the structure is here without the data
+## Source PDFs are not in the repo
 
-The app is built against the real taxonomy so that loading the expectations
-later is data entry rather than a refactor. `lib/curriculum.ts` already
-resolves subjects, filters strands by grade, and flattens expectations for a
-picker; all of it returns empty today and starts working the moment this file
-is populated.
+They are ~28 MB of government publications, freely available from each
+subject's `source` URL. `transcribedFrom` in each file records exactly which
+filenames a transcription came from, so a re-run is reproducible without
+carrying the binaries in git.
 
 ## Subjects we do not generate plans for
 

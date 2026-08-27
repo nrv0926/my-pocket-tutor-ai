@@ -1,7 +1,12 @@
-import file from "@/data/ontario/subjects.json";
+import index from "@/data/ontario/subjects.json";
+import languageData from "@/data/ontario/language.json";
+import mathematicsData from "@/data/ontario/mathematics.json";
 import type {
   CurriculumFile,
   GradeId,
+  OverallExpectation,
+  SourceGrade,
+  SpecificExpectation,
   Strand,
   Subject,
   SubjectId,
@@ -10,18 +15,60 @@ import type {
 /**
  * Ontario curriculum lookups.
  *
- * Structure is real; expectation text is not loaded yet. Anything that would
- * claim curriculum alignment to a user must check `expectationsVerified`
- * first — an empty strand is honest, an invented expectation is not.
+ * subjects.json holds the taxonomy; the per-subject files hold expectations
+ * transcribed from the Ministry PDFs by scripts/extract_ontario.py. Subjects
+ * with no file yet resolve with empty strands, which is honest — see
+ * data/ontario/README.md on why nothing here is ever written from memory.
  */
-const CURRICULUM = file as CurriculumFile;
+interface TranscribedStrand {
+  code: string;
+  name: string;
+  grades: string[];
+  sourceFile: string;
+  overall: OverallExpectation[];
+  specific: Record<string, SpecificExpectation[]>;
+}
 
-export const SUBJECTS: Subject[] = CURRICULUM.subjects;
+interface TranscribedSubject {
+  subject: string;
+  policyYear: number;
+  source: string;
+  transcribedFrom: string[];
+  strands: TranscribedStrand[];
+}
+
+const TRANSCRIBED: Record<string, TranscribedSubject> = {
+  language: languageData as TranscribedSubject,
+  mathematics: mathematicsData as TranscribedSubject,
+};
+
+/** Grades the product covers. Ontario publishes 1-8; we surface K-6. */
+export const APP_GRADES: GradeId[] = ["K", "1", "2", "3", "4", "5", "6"];
+
+function build(): Subject[] {
+  const file = index as unknown as CurriculumFile;
+  return file.subjects.map((subject) => {
+    const t = TRANSCRIBED[subject.id];
+    if (!t) return subject;
+
+    const strands: Strand[] = t.strands.map((ts) => ({
+      code: ts.code,
+      name: ts.name,
+      grades: ts.grades.filter((g): g is GradeId =>
+        (APP_GRADES as string[]).includes(g)
+      ),
+      overall: ts.overall,
+      specific: ts.specific as Partial<Record<SourceGrade, SpecificExpectation[]>>,
+    }));
+
+    return { ...subject, policyYear: t.policyYear, source: t.source, strands };
+  });
+}
+
+export const SUBJECTS: Subject[] = build();
 
 /** Subjects the product actually generates plans for today. */
 export const SUPPORTED_SUBJECTS: Subject[] = SUBJECTS.filter((s) => s.supported);
-
-export const EXPECTATIONS_VERIFIED = CURRICULUM.expectationsVerified;
 
 /**
  * Sessions saved before the taxonomy was corrected stored Reading and Writing
@@ -55,33 +102,53 @@ export function strandsFor(id: SubjectId, grade: GradeId): Strand[] {
   return getSubject(id)?.strands.filter((s) => s.grades.includes(grade)) ?? [];
 }
 
+export interface ExpectationOption {
+  code: string;
+  text: string;
+  strandCode: string;
+  strandName: string;
+}
+
 /**
  * Every specific expectation for a subject at a grade, flattened for a
- * picker. Empty until the official text is transcribed, which is why the
- * caller should render "not loaded yet" rather than an empty dropdown.
+ * picker and grouped by strand in the order Ontario publishes them.
  */
-export function expectationOptions(
-  id: SubjectId,
-  grade: GradeId
-): { code: string; text: string; strand: string }[] {
-  const out: { code: string; text: string; strand: string }[] = [];
+export function expectationOptions(id: SubjectId, grade: GradeId): ExpectationOption[] {
+  const out: ExpectationOption[] = [];
   for (const strand of strandsFor(id, grade)) {
-    for (const overall of strand.overall) {
-      for (const spec of overall.specific) {
-        out.push({ code: spec.code, text: spec.text, strand: strand.name });
-      }
+    for (const spec of strand.specific?.[grade as SourceGrade] ?? []) {
+      out.push({
+        code: spec.code,
+        text: spec.text,
+        strandCode: strand.code,
+        strandName: strand.name,
+      });
     }
   }
   return out;
 }
 
-/** How many expectations are actually loaded — used by the UI and by tests. */
+/** Overall expectations for a subject, which are shared across its grades. */
+export function overallFor(id: SubjectId, grade: GradeId): OverallExpectation[] {
+  return strandsFor(id, grade).flatMap((s) => s.overall);
+}
+
+/** How many expectations are loaded — used by the UI and by tests. */
 export function loadedExpectationCount(): number {
   let n = 0;
   for (const s of SUBJECTS) {
     for (const strand of s.strands) {
-      for (const o of strand.overall) n += o.specific.length;
+      for (const list of Object.values(strand.specific ?? {})) n += list?.length ?? 0;
     }
   }
   return n;
+}
+
+/** Which subjects actually have transcribed expectations behind them. */
+export function subjectsWithExpectations(): SubjectId[] {
+  return SUBJECTS.filter((s) =>
+    s.strands.some((st) =>
+      Object.values(st.specific ?? {}).some((l) => (l?.length ?? 0) > 0)
+    )
+  ).map((s) => s.id);
 }

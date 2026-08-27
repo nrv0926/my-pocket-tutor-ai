@@ -29,11 +29,17 @@ export interface SpecificExpectation {
 }
 
 export interface OverallExpectation {
-  /** e.g. "B1". */
+  /** e.g. "B1". Shared across every grade in the strand. */
   code: string;
   text: string;
-  specific: SpecificExpectation[];
 }
+
+/**
+ * Grades as the source documents publish them. Ontario writes the elementary
+ * curriculum for Grades 1-8; the product covers K-6, so the loader narrows
+ * this rather than the transcription throwing data away.
+ */
+export type SourceGrade = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
 
 export interface Strand {
   /** Ontario's strand letter, e.g. "B". */
@@ -44,8 +50,14 @@ export interface Strand {
    * through elementary, so this is per-strand rather than per-subject.
    */
   grades: GradeId[];
-  /** Empty until the official text is loaded — see data/ontario/README.md. */
+  /** Overall expectations — the same set across the strand's grades. */
   overall: OverallExpectation[];
+  /**
+   * Specific expectations, keyed by grade, because they are what actually
+   * changes from one grade to the next: B1.1 in Grade 2 is a different
+   * expectation from B1.1 in Grade 5.
+   */
+  specific: Partial<Record<SourceGrade, SpecificExpectation[]>>;
 }
 
 export interface Subject {
