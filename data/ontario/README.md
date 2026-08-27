@@ -15,6 +15,28 @@ The expectations themselves live beside it, one file per subject:
 Science and Technology and the four unsupported subjects have structure but
 no expectations yet.
 
+### The Language Foundations Continuum
+
+`language-foundations-continuum.json` is a different kind of document: not
+expectations, but the K-4 progression of the foundational reading and
+writing skills, in the science-of-reading order CLAUDE.md §4 already
+requires — Phonemic Awareness, Alphabetic Knowledge, Phonics, Word-Level
+Reading and Spelling, Vocabulary, Reading Fluency. Each section records the
+expectation codes it serves in both curricula.
+
+It is also the only place Kindergarten codes appear in our data. The full
+Kindergarten curriculum is a separate document we do not have; this covers
+its literacy foundations, which is the part this product is about.
+
+`scripts/extract_ontario_continuum.py` reads it. The layout is a landscape
+table with five grade columns plus a label margin, and three traps that all
+produced wrong data before they were handled: a full-width intro paragraph
+above the table (bucketing it by column slices one sentence into five), a
+running footer that reads as a row label, and pages that hold the tail of
+one section and the head of the next. Roughly 96% of the words inside the
+grade columns are captured; the rest is the cover text, the intro prose and
+the code lines, which are kept as section metadata rather than as cells.
+
 ### FSL is shaped differently, twice over
 
 **Three programs.** Core, Extended and Immersion each publish their own

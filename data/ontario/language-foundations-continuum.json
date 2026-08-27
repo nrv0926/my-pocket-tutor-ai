@@ -1,0 +1,264 @@
+{
+  "title": "Language Foundations Continuum for Reading and Writing",
+  "region": "ON-CA",
+  "grades": [
+    "K",
+    "1",
+    "2",
+    "3",
+    "4"
+  ],
+  "policyYear": 2026,
+  "source": "https://www.dcp.edu.gov.on.ca/en/curriculum/elementary-language",
+  "transcribedFrom": [
+    "6a79efa6-AODA_compliant__Language_Foundations_Continuum_2026_2_1.pdf"
+  ],
+  "note": "Kindergarten to Grade 4 progression of the foundational reading and writing skills, in the science-of-reading order. Each section records the expectation codes it serves in the Kindergarten curriculum and in Language, Grades 1-8.",
+  "sections": [
+    {
+      "name": "Phonemic Awareness",
+      "codes": "Kindergarten: A2.3; Grade 1: B2.1",
+      "rows": [
+        {
+          "label": "isolating phonemes",
+          "byGrade": {
+            "K": "Isolating the phonemes they hear in words – an important skill to support segmentation"
+          }
+        },
+        {
+          "label": "Looks like…",
+          "byGrade": {
+            "K": "identifying phonemes orally in spoken ∙ words (e.g., prompt: “What is the first sound in the word sun ?”), first with continuous sounds, and then with stop sounds identifying phonemes in different ∙ positions in a word, first with initial phonemes, then with final, and then with medial, with prompting noticing and describing the oral-motor ∙ movements used to produce a sound when helpful, including placement, manner, and voicing (e.g., lips popping with a quiet voice box for /p/ or tongue tapping the back of the teeth with a noisy voice box for /d/) ∙ orally blending phonemes in VC/CV, CVC, and CCVC/CVCC words (e.g., prompt: “To blend the sounds /o/ /n/ → I say them quickly, to say on ”; “To blend the sounds /s/ /n/ /o/, I say them quickly → snow .”), starting with continuous sounds, and then progressing to stop sounds segmenting CV/VC and CVC words, ∙ starting with continuous sounds, and then progressing to stop sounds",
+            "1": "∙ orally blending phonemes in words containing up to five phonemes (e.g., teacher says /sh/ /o/ /p/, student responds shop; /s/ /p/ /l/ /i/ /t/ split ) → segmenting the sounds of spoken ∙ words containing up to five phonemes ∘ segmenting CVC and CCVC/CVCC words (e.g., prompt: “To segment the word wish , say each sound like this: /w/ /i/ /sh/”), starting with continuous sounds, and then progressing to stop sounds splitting a multisyllabic word into its ∙ syllables and then segmenting each phoneme in each syllable"
+          }
+        },
+        {
+          "label": "blending phonemes",
+          "byGrade": {
+            "K": "Orally blending phonemes to form spoken words, starting with blending two to three phonemes into a word (with a simple syllable structure) and progressing to more complex structures (Note: C stands for consonant; V stands for vowel .)",
+            "1": "Orally blending phonemes to form spoken words, beginning with two phonemes and progressing to words with up to five sounds with teacher support"
+          }
+        },
+        {
+          "label": "segmenting phonemes",
+          "byGrade": {
+            "K": "Segmenting spoken words into phonemes, starting with simple structures with two phonemes and progressing to more complex structures with more phonemes",
+            "1": "Segmenting spoken words with structures that have more than two phonemes (Note: C stands for consonant ; V stands for vowel .)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alphabetic Knowledge",
+      "codes": "Kindergarten: A2.1, A2.2; Grade 1: B2.2",
+      "rows": [
+        {
+          "label": "continued",
+          "byGrade": {
+            "K": "Naming and forming upperand",
+            "1": "Naming and forming upperand"
+          }
+        },
+        {
+          "label": "letter recognition",
+          "byGrade": {
+            "K": "lowercase letters both in and out of order",
+            "1": "lowercase letters both in and out of order, and demonstrating knowledge of alphabetic order"
+          }
+        },
+        {
+          "label": "Looks like…",
+          "byGrade": {
+            "K": "naming upperand lowercase ∙ letters both in and out of order, with increasing automaticity beginning to print upperand ∙ lowercase letters with appropriate formation patterns",
+            "1": "naming upperand lowercase ∙ letters both in and out of order, with automaticity recognizing and naming upperand ∙ lowercase letters in various fonts printing upperand lowercase letters ∙ with appropriate formation patterns, size, orientation, placement, and spacing"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Phonics: Grapheme-Phoneme Correspondence",
+      "codes": "Kindergarten: A2.4; Grade 1: B2.3",
+      "rows": [
+        {
+          "label": "grapheme-phoneme",
+          "byGrade": {
+            "K": "Understanding the relationship between simple and high-frequency graphemes",
+            "1": "Understanding the relationship between simple, high-frequency, and complex"
+          }
+        },
+        {
+          "label": "correspondence",
+          "byGrade": {
+            "K": "(letters or combinations of letters) and the phonemes (units of sound) they represent producing the most common ∙ grapheme for each consonant sound, and the most common phoneme for each consonant grapheme, including: single consonants <s> as in s at, ha s ∘ ∘ <ch> <ck> ∘ <sh> ∘ ∘ <th> as in th ick <wh> ∘ producing the most common ∙ grapheme for each short vowel sound and the most common phoneme for each vowel grapheme: short vowels: /a/, /i/, /o/, /u/, ∘ /e/",
+            "1": "graphemes (letters or combinations of letters) and the phonemes (units of sound) they represent (Note: e in “VCe” below represents the silent e at the end of a word.) applying previously learned GPC ∙ concepts identifying: ∙ <–all>, <–oll>, <–ull> ∘ consonant patterns: <ph>, <nk>, ∘ soft <c> and soft <g> variation VCe patterns ∘ ∘ VCe exceptions long vowel sounds in VCC words: ∘ <–ild>, <–old>, <–ind>, <–olt>, <–ost> long vowel <y> /ī/; <i> /ī/; ∘ = = <e> /ē/ = <–le> words (e.g., bundle ) ∘ r-controlled vowels ∘ ∘ long vowel teams: <ai>, <ay> = /ā/; <ee>, <ea>, <ey> /ē/; <oa>, <ow>, = <oe> /ō/; <ie>, <igh> /ī/; <oo>, = = <u> = /oo/; <oo> = /ū/; <ew>, <ui>, <ue> /ū/ = <au>, <aw>, <augh> /o/ ∘ = <ea> /ē/, /ā/, /e/ ∘ = <air>, <are>, <ear> /air/ ∘ = diphthongs: <oi>, <oy> /oi/; <ou>, ∘ = <ow> /ow/ = ∘ silent letters: <kn> = /n/; <wr> = /r/; <mb> /m/ ="
+          }
+        }
+      ]
+    },
+    {
+      "name": "Word-Level Reading and Spelling: Applying Phonics, Orthographic, and Morphological Knowledge",
+      "codes": "Kindergarten: A1.3, A2.5; Grade 1: B2.4, B2.5, B2.6; Grades 2–3: B2.1, B2.2, B2.3; Grade 4: B2.1",
+      "rows": [
+        {
+          "label": "applying phonics",
+          "byGrade": {
+            "K": "Reading and spelling CV, VC, and CVC words made of phonics patterns they",
+            "1": "Reading and spelling CVC, CCVC, CVCC, CCVCC, and CVCe words made of",
+            "2": "Consolidating phonics knowledge in word reading and spelling increasingly",
+            "3": "Applying word reading and spelling skills to complex multisyllabic words, with"
+          }
+        },
+        {
+          "label": "knowledge in reading",
+          "byGrade": {
+            "K": "have learned",
+            "1": "phonics patterns they have learned",
+            "2": "complex multisyllabic words, with",
+            "3": "increasing automaticity"
+          }
+        },
+        {
+          "label": "and spelling",
+          "byGrade": {
+            "2": "developing automaticity the “most common spelling” grapheme knowledge cannot be taught in isolation",
+            "K": "(Note: Instruction in grapheme-phoneme correspondence to support students in making the correct choices in word decoding and spelling.)",
+            "1": "should focus on teaching students when reading and spelling. Orthographic",
+            "3": "for that phoneme in that position and needs to be practised and applied"
+          }
+        },
+        {
+          "label": "Looks like…",
+          "byGrade": {
+            "K": "∙ applying grapheme-phoneme correspondences (see A2.4) to word reading and spelling: when reading a word, identifying ∘ the graphemes of the word, saying the corresponding phonemes, and blending them together when spelling a word, identifying ∘ the phonemes they hear in the word and representing each phoneme with a grapheme Developing an understanding that there are ∙ reading and spelling words using ∙ phonemes and corresponding graphemes that have been explicitly taught ∙ beginning to use suffixes, including: –s, –es, –ed, –ing ∙ recognizing that some suffixes can be pronounced in different ways (e.g., –s can be /s/ as in “cats” and /z/ as in “dogs”) ∙ orally working with groups of words with the same base (e.g., play, playing, playdate) recognizing affixes in oral or written ∙ language ∙ recognizing compound words during oral activities applying phonological, orthographic, and ∙ that are regular learning the unexpected portions of these ∙ orthographic knowledge to decode and encode pattern. For example, in the word put , students memorize that the <u> has an unexpected",
+            "1": "∙ applying grapheme-phoneme correspondences (see B2.3) to word reading and spelling: when reading a word, identifying ∘ the graphemes of the word, saying the corresponding phonemes, and blending them together when spelling a word, identifying ∘ the phonemes they hear in the word and representing each phoneme with a grapheme identifying the vowels of a ∘ multisyllabic word, splitting the word into its syllables, blending each syllable, and then blending each word multiple ways to spell some phonemes and reading and spelling words using ∙ phonemes and corresponding graphemes that have been explicitly taught beginning to use the most common ∙ spellings for phonemes with multiple graphemes. For example, for a /k/ sound at the end of a word after a short vowel, the most common spelling is <–ck> ∙ learning common endings in spelling patterns: long VCC (<–ild>, <–old>, <–ind>, ∘ <–olt>, <–ost>) long vowel <y>, <ī>, and <ē> ∘ ∘ consonant <–le> (e.g., bundle ) learning spellings of graphemes ∙ related to the /k/ sound (<k> before <e>, <i>, <y>; <c> before all other letters; <ck> follows a short vowel at the end of one-syllable words) ∙ learning the most frequent spellings for some final consonant sounds directly after a short vowel: <-tch> /ch/ ∘ = <-dge> /j/ ∘ = ∘ the FLSZ spelling rule (i.e., <-ff>, <-ll>, <-ss>, <-zz>) ∙ learning the I J U V spelling rule (these letters do not generally end a word) and that words ending in /v/ will end in <e> ∙ learning plural <–s> vs. <–es> ∙ learning irregular plurals ∙ learning positional spellings: ∘ <ai> vs. <ay> <oi> vs. <oy> ∘ <ou> vs. <ow> ∘ ∙ learning suffix spelling changes: ∘ doubling rule for <–ed>, <–ing> doubling rule for <–er>, <–est> ∘ dropping <–e> rule ∘ ∘ <–y> to <i> rule ∙ using prefixes, including: un–, re–, in– (not), dis– using suffixes, including: –ing, –er/–or, ∙ –est, –ly ∙ applying suffixes with and without base changes, including three common suffixing patterns: doubling, e-drop, and changing y to i understanding the three sounds of –ed ∙ and applying them to spelling using compounding to join bases ∙ (e.g., for book , note + book = notebook , book shelf bookshelf ), and affixing + = when appropriate morphological knowledge to decode and encode words to support word reading and spelling. the first and last sound of the word what use grapheme-phoneme correspondences pronunciation",
+            "2": "∙ applying phonics to read the individual syllables of multisyllabic words adjusting for close approximations ∙ when reading words, such as by flexing vowel sounds, adjusting syllable stress and schwa (unstressed vowel sound), known as set for variability choosing between multiple graphemes reading and spelling words using ∙ phonemes and corresponding graphemes that have been explicitly taught using the most common spellings for ∙ phonemes with multiple graphemes. For example, for a long /o/ in the middle of a word, <o-e> is the most common spelling, followed by <oa> consolidating common ending spelling ∙ patterns and suffix spelling changes through systematic review becoming familiar with low-frequency ∙ spellings: <–ar>, <–or> /er/ (e.g., dollar , ∘ = doctor ) <air>, <are>, <ear> /air/ ∘ = <ear> /ear/ (e.g., bear ) ∘ = ∘ alternate long /ā/: <ei>, <ey>, <eigh>, <ea> ∘ alternate long /u/: <ew>, <eu>, <ue> /yū/; <ou> /ü/ (e.g., soup ) = = ∘ <ough> = /aw/ signal vowels (<e>, <i>, <y>) for soft ∘ <c> and soft <g> <ch> /sh/, /k/; <gn> /n/; ∘ = = <gh> /g/ = ∙ using prefixes, including: pre–, de–, a– (schwa), co–, uni–, bi–, tri–, mis–, dis– using suffixes, including: –ion, –ure, –er, ∙ –or, –ist, –ish, –y, –ness, –less, –able/ –ible, –ful ∙ understanding that derivational affixes not only change the meaning of the word, but also can change the part of speech ∙ recognizing that as affixes are added, pronunciation may shift adjusting syllable stress and schwa to ∙ produce the correct pronunciation exploring derivational word families ∙ while adding affixes to a learned base (e.g., changing a verb to a noun: instruct ion instruction ) + = the parts of irregular words For example, students could use , but they would memorize the vowel to decode the <p> and <t> and",
+            "3": "∙ adjusting for close approximations when reading words such as by flexing vowel sounds, adjusting syllable stress and schwa (unstressed vowel sound), known as set for variability to spell a phoneme consolidating the concepts learned in ∙ previous grades through systematic review ∙ using the most common spellings for phonemes with multiple graphemes. For example, for a long /ē/ in the middle of the word, <ee> is the most common spelling, followed by <ea> ∙ using prefixes, including: trans–, post–, inter–, intra–, over–, under–, sub–, non–, in–/im– (in/into), anti–, mid– using suffixes, including: –ic, –al/–ial, ∙ –ous, –ive using adverbs (e.g., recognizing and ∙ using suffixes to form adverbs that describe a specific manner, period of time, or order: –y, –ly, –ful, –less) recognizing and using bound bases ∙ understanding how words move across ∙ grammatical boundaries depending on their use and context (e.g., The students enjoyed their success (noun). → The successful (adjective) student aced the test . → We are successful (adjective). She successfully (adverb) climbed → the mountain .) using derivational families to support ∙ spelling words with a schwa sound (e.g., students can use define to choose a grapheme for the schwa in definition ) applying phonological, orthographic, and ∙ and encode the parts of irregular words that learning the unexpected portions of these ∙ spelling. For example, students could use and encode the first and last sound of the the vowel pattern. For the word should , students correspondence to spell the /sh/ and apply in common words such as could and would",
+            "4": "∙ using prefixes, including: fore–, super–, semi–, en–/em– using suffixes, including: –ant, –ent, ∙ –ate, –ism ∙ understanding how words move across grammatical boundaries depending on their use and context (e.g., The students enjoyed their success (noun). → The student was successful (adjective) and passed the test . → We are successful (adjective). → She successfully (adverb) climbed the mountain .) ∙ using derivational families to support spelling words with a schwa sound (e.g., students can use define to choose a grapheme for the schwa in definition ) morphological knowledge to decode are regular words to support word reading and orthographic knowledge to decode word what , but they would memorize could use grapheme-phoneme the <-ould> spelling pattern found"
+          }
+        },
+        {
+          "label": "applying orthographic knowledge in reading",
+          "byGrade": {
+            "K": "Using the position of the grapheme or phoneme ∙ pronunciation when reading",
+            "1": "and their knowledge of position-based",
+            "2": "tendencies, as necessary, to support spelling",
+            "3": "and determine accurate"
+          }
+        },
+        {
+          "label": "applying morphological",
+          "byGrade": {
+            "K": "Understanding that words consist of bases ∙ three other impacts on the resulting words:",
+            "1": "that convey meaning and that can be modified",
+            "2": "with affixes (prefixes and suffixes) to change",
+            "3": "the meaning of the word. Adding prefixes",
+            "4": "and/or suffixes may have"
+          }
+        },
+        {
+          "label": "knowledge in reading and spelling",
+          "byGrade": {
+            "K": "changing the word’s function or role in ∘ changing the word’s pronunciation (e.g., ∘ ∘ uncommonly, changing the word’s spelling Developing the ability to segment words ∙ Applying developing phonological, grapheme-phoneme ∙",
+            "1": "a sentence (e.g., changing a verb to a noun); medic vs. medicine); and/or (e.g., hop vs. hopping, divide vs. division) into recognizable morphemes and to apply correspondence, orthographic,",
+            "2": "their morphological knowledge to spell and and morphological knowledge to decode",
+            "3": "read longer and more complex words and spell words with irregularities"
+          }
+        },
+        {
+          "label": "words with irregularities",
+          "byGrade": {
+            "K": "Memorizing irregular grapheme-phoneme ∙ to the word, and explicit instruction, instead",
+            "1": "correspondences for instances where phonological, of memorizing words as whole units",
+            "2": "orthographic, and morphological information",
+            "3": "cannot be used through meaningful",
+            "4": "practice, multiple exposures"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vocabulary",
+      "codes": "Kindergarten: A1.3; Grade 1: B2.7; Grades 2–3: B2.4; Grade 4: B2.2",
+      "rows": [
+        {
+          "label": "continued",
+          "byGrade": {
+            "K": "Linking the meanings and features of new",
+            "1": "words, such as linking semantic features to",
+            "2": "their existing word schemas"
+          }
+        },
+        {
+          "label": "Looks like…",
+          "byGrade": {
+            "K": "learning the meaning of new words and deepening ∙ demonstrating an understanding of the meaning ∙ linking new words to previously learned words ∙ recognizing that certain words have multiple ∙ ∙ using words flexibly, adding new meanings learning the meaning of unfamiliar words ∙ structural analysis) ∙ applying their developing morphological more spacious . Students can use the sentence ∙ beginning to build an awareness and self-monitoring of when they do not understand new spoken words and beginning to clarify the meanings, with teacher support using Tier 2 words (e.g., analyze, compare) ∙ using Tier 2 words when engaging in conversations, ∙ beginning to recognize and use their ∙ understanding of high-frequency morphemes (e.g., –s) to gain a deeper understanding of words (e.g., the word dogs means there is more than one dog because it ends in –s)",
+            "1": "understanding of somewhat familiar of words by sorting, categorizing, and based on their semantic features meanings, which may cross over various to previously learned words, enhancing the through looking outside the word (i.e., using knowledge to support their understanding of context, as well as morphological information ∙ demonstrating an awareness of when they do not understand new spoken words and clarifying the meanings (e.g., spontaneously state that they do not understand a word and ask for a definition) that have been explicitly taught in various subject asking and answering questions, beginning to recognize and use an ∙ understanding of high-frequency morphemes (e.g., re–, –ly) to figure out the meaning of unknown words they hear, with teacher support",
+            "2": "words by relating these to known words classifying them based on semantic features parts of speech or grammatical functions. For depth of their vocabulary context, including examples, synonyms, and the meaning of new words (e.g., take the sentence about the base space, to determine ∙ clarifying the meanings when they do not understand spoken or written words by accessing resources such as a dictionary, a thesaurus, or a glossary (printed or digital) areas (e.g., science, social studies) across and using new vocabulary in different contexts using morphological knowledge, as ∙ well as understanding of grammar and sentence structure, to infer the meanings of words",
+            "3": "and concepts (knowledge networks) example, I tripped on some rocks (noun). This antonyms) and looking inside the word (i.e., Ted’s backyard was too small, so he wanted the meaning of the unknown word) ∙ independently seeking clarification of the phrases by accessing resources such as a (printed or digital) multiple contexts using morphological knowledge, as ∙ well as understanding of grammar and sentence structure, to determine the meaning of unfamiliar content words (e.g., evaporate-evaporation-vapour)",
+            "4": "movie rocks (verb) using morphological and to look for one that was meanings of unfamiliar words and dictionary, a thesaurus, or a glossary using morphological knowledge, as ∙ well as understanding of grammar and sentence structure, to determine the meaning of unfamiliar content words (e.g., evaporate-evaporation-vapour)"
+          }
+        },
+        {
+          "label": "Looks like… (cont’d)",
+          "byGrade": {
+            "K": "With teacher support and direct ∙ instruction, demonstrating an understanding of categories by being able to sort and resort pictures, objects, photographs, or written words into various categories and then sorting the items into subcategories (e.g., sorting pictures of foods and clothing into two different categories and then sorting each category further into food groups or clothing worn during different seasons) demonstrating an understanding of ∙ antonyms that relate to everyday events and refer to attributes, position, location, size, age, and some simple concepts of time and quantity (e.g., on-off, hot-cold, winter-summer, day-night, large-small, full-empty, all-none, beginning-end) ∙ with teacher support, demonstrating an increasing awareness and understanding of words with multiple meanings (e.g., a bat is an animal but also a tool for playing baseball)",
+            "1": "demonstrating an understanding of ∙ categories by being able to sort and resort pictures, objects, photographs, or written words into various categories and then sorting the items into subcategories (e.g., sorting pictures of foods and clothing into two different categories and then sorting each category further into food groups or clothing worn during different seasons) ∙ providing definitions, including a category and an example, for routine or content-based words that they have learned through explicit instruction (e.g., Happy is a feeling. You feel happy when you see your friend .) demonstrating an understanding of ∙ antonyms that relate to everyday events and refer to attributes, position, location, size, age, time, and quantity (e.g., yesterday-tomorrow, first-last, cool-warm, add-subtract, abovebeneath) ∙ with teacher support, beginning to develop an understanding of synonyms with teacher support, demonstrating ∙ an increasing understanding of words with multiple meanings (e.g., pop) and an understanding that different meanings may serve different functions in a sentence (e.g., pop can be a noun or a verb) with teacher support, beginning to ∙ demonstrate an understanding that words can vary slightly in meaning and are used in specific situations (e.g., jog, sprint, run), and that words may be organized on a scale (e.g., freezing, cold, cool, tepid, warm, hot, scalding)",
+            "2": "demonstrating an understanding of, ∙ and generating, a variety of synonyms and antonyms ∙ shifting between the multiple meanings of words depending on context, with some support from the teacher ∙ demonstrating an understanding that words can vary slightly in meaning (e.g., eat vs. devour) and increasing their ability to use words accurately in specific contexts (e.g., I ate my pizza at lunch vs. I was so hungry at lunch that I devoured my pizza )",
+            "3": "building awareness and understanding ∙ that words can have a literal as well as a figurative meaning and using context to distinguish between the meanings (e.g., My sister is a night owl .) shifting between the multiple ∙ meanings of words depending on context distinguishing shades of meaning ∙ between cognitive verbs (e.g., know vs. believe vs. suspect) ∙ demonstrating an understanding of puns",
+            "4": "demonstrating an understanding that ∙ words can have a literal as well as a figurative meaning and using context to distinguish between the meanings (e.g., My finger was cut by a sharp blade of grass .) shifting between the multiple ∙ meanings of words depending on context recognizing, and continuing to acquire ∙ the meanings of, various metaphors, similes, idioms, and other figures of speech explaining words with figurative ∙ meanings, such as metaphors distinguishing between synonyms that ∙ have similar but not exactly the same meanings (e.g., say, speak, tell, state)"
+          }
+        },
+        {
+          "label": "independent word-",
+          "byGrade": {
+            "K": "Developing strategies to determine the meaning",
+            "1": "of words in oral language and text"
+          }
+        },
+        {
+          "label": "Tier 2 words",
+          "byGrade": {
+            "K": "Developing and integrating their understanding",
+            "1": "of Tier 2 words (those used in written language",
+            "2": "as well as in oral language) in the classroom",
+            "3": "across different content areas"
+          }
+        },
+        {
+          "label": "applying morphological",
+          "byGrade": {
+            "K": "Applying an understanding that words are",
+            "1": "composed of morphemes, which are units of",
+            "2": "meaning within a word, and using knowledge",
+            "3": "of morphemes to support learning of the",
+            "4": "meaning of words"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reading Fluency: Accuracy, Rate, and Prosody",
+      "codes": "Kindergarten: A2.6; Grade 1: B2.8; Grades 2–3: B2.5; Grade 4: B2.3",
+      "rows": [
+        {
+          "label": "accuracy, rate, and",
+          "byGrade": {
+            "K": "∙ Integrating fluent word recognition to read ∙ Reading texts with appropriate pacing, with",
+            "1": "words accurately and to support their reading expression and intonation that facilitate comprehension",
+            "2": "of texts with accuracy and fluency and convey meaning"
+          }
+        },
+        {
+          "label": "Looks like…",
+          "byGrade": {
+            "K": "naming letters accurately and ∙ automatically ∙ identifying the sound for a grapheme with increasing accuracy and automaticity beginning to develop accurate word ∙ reading at the single-word level based on knowledge of grapheme-phoneme correspondences reading decodable text aloud with ∙ accuracy and beginning to develop automaticity",
+            "1": "identifying the sound for a grapheme ∙ accurately and automatically ∙ developing accurate and effortless word identification at the single-word level, based on learned graphemephoneme correspondences and learned irregular words recognizing high-frequency words ∙ effortlessly reading decodable text aloud with ∙ increasing automaticity and accuracy and with appropriate pacing to support comprehension",
+            "2": "reading a variety of texts with ∙ automaticity and accuracy and with appropriate pacing for the grade to support comprehension of grade-level texts ∙ recognizing irregular and highfrequency words using decoding strategies to work ∙ through new words and demonstrating automaticity when reading all other words recoding (rereading) words that were ∙ newly decoded to increase word reading fluency ∙ using knowledge of punctuation to pause appropriately at longer phrase boundaries and to read with intonation and expression",
+            "3": "reading a variety of texts with ∙ automaticity and accuracy and with appropriate pacing for the grade to support comprehension of grade-level texts ∙ using decoding strategies to work through new words and demonstrating automaticity when reading all other words ∙ recoding (rereading) words that were newly decoded to increase word reading fluency using knowledge of sentence structure ∙ to parse sentences and to pause appropriately when punctuation is not provided",
+            "4": "reading a variety of texts with ∙ automaticity and accuracy, with appropriate pacing for the grade, and using expression and intonation to support comprehension and in accordance with the purpose of reading using decoding strategies to work ∙ through new words and demonstrating automaticity when reading all other words recoding (rereading) words that were ∙ newly decoded to increase word reading fluency ∙ using knowledge of sentence structure to parse sentences and to pause appropriately when punctuation is not provided 6 2 0 2 , o r i a n t O r o f r e t n r i P s g ' n K i"
+          }
+        }
+      ]
+    }
+  ]
+}
