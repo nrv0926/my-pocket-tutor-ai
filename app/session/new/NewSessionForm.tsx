@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import LoadingState from "@/components/LoadingState";
+import ExpectationPicker from "@/components/ExpectationPicker";
 import { createLearningSession } from "@/lib/actions/sessions";
-import type { Subject } from "@/types/child";
+import type { Grade, Subject } from "@/types/child";
+import type { GradeId, SubjectId } from "@/types/curriculum";
 import type { SessionInputType } from "@/types/session";
 
 /** Server actions throw this internal signal when they call redirect(). */
@@ -38,9 +40,14 @@ export default function NewSessionForm({ childProfiles }: { childProfiles: Child
   const [childId, setChildId] = useState(childProfiles[0]?.id ?? "");
   const [mode, setMode] = useState<SessionInputType>("paste");
   const [subject, setSubject] = useState<Subject>("language");
+  const [expectation, setExpectation] = useState("");
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const selectedGrade = childProfiles.find((c) => c.id === childId)?.grade as
+    | GradeId
+    | undefined;
 
   return (
     <form
@@ -56,6 +63,7 @@ export default function NewSessionForm({ childProfiles }: { childProfiles: Child
             childId,
             inputType: mode,
             subject,
+            expectationCode: expectation || null,
             text: text.trim(),
           });
           // createLearningSession redirects to /results/[id] internally.
@@ -96,6 +104,15 @@ export default function NewSessionForm({ childProfiles }: { childProfiles: Child
           </select>
         </label>
       </div>
+
+      {selectedGrade && (
+        <ExpectationPicker
+          subject={subject as SubjectId}
+          grade={selectedGrade}
+          value={expectation}
+          onChange={setExpectation}
+        />
+      )}
 
       <div className="grid gap-3 sm:grid-cols-2">
         {MODES.map((m) => (

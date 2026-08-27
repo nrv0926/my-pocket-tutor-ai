@@ -6,6 +6,7 @@ import {
   SUPPORTED_SUBJECTS,
   expectationOptions,
   loadedExpectationCount,
+  findExpectation,
   overallFor,
   resolveSubject,
   strandsFor,
@@ -154,5 +155,40 @@ describe("sessions saved under the old subject names still resolve", () => {
 
   it("an unknown stored value does not resolve", () => {
     expect(resolveSubject("underwater-basket-weaving")).toBeNull();
+  });
+});
+
+/**
+ * The expectation code arrives from a <select> in a browser, so it is looked
+ * up rather than trusted. A code that does not exist must not reach a prompt.
+ */
+describe("findExpectation", () => {
+  it("resolves a real code to its published wording", () => {
+    const found = findExpectation("language", "3", "B2.1");
+    expect(found).not.toBeNull();
+    expect(found!.code).toBe("B2.1");
+    expect(found!.strandCode).toBe("B");
+    expect(found!.text.length).toBeGreaterThan(20);
+  });
+
+  it("returns null for a code that does not exist at that grade", () => {
+    expect(findExpectation("language", "3", "B99.9")).toBeNull();
+  });
+
+  it("does not leak a code across subjects", () => {
+    // B2.1 exists in both, but they are different expectations.
+    const lang = findExpectation("language", "3", "B2.1");
+    const math = findExpectation("mathematics", "3", "B2.1");
+    expect(lang!.text).not.toBe(math!.text);
+  });
+
+  it("returns null for a subject with no transcription", () => {
+    expect(findExpectation("science-technology", "3", "B1.1")).toBeNull();
+  });
+
+  it("rejects a fabricated code rather than inventing wording", () => {
+    for (const bogus of ["Z1.1", "B1.999", "'; drop table --", ""]) {
+      expect(findExpectation("language", "3", bogus)).toBeNull();
+    }
   });
 });

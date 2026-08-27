@@ -6,11 +6,56 @@ import ProgressTracker from "@/components/ProgressTracker";
 import ChildProfileForm from "@/components/ChildProfileForm";
 import LoadingState from "@/components/LoadingState";
 import UploadBox from "@/components/UploadBox";
+import { useState } from "react";
+import ExpectationPicker from "@/components/ExpectationPicker";
+import type { GradeId, SubjectId } from "@/types/curriculum";
 import { SAMPLE_ANALYSIS } from "@/app/try/samples/parent";
+
+function ExpectationPickerDemo() {
+  const [subject, setSubject] = useState<SubjectId>("language");
+  const [grade, setGrade] = useState<GradeId>("3");
+  const [code, setCode] = useState("");
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2">
+        {(["language", "mathematics", "science-technology"] as SubjectId[]).map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => setSubject(s)}
+            className={`rounded-full border-[3px] border-pop-night px-3 py-1 text-xs font-semibold ${
+              subject === s ? "bg-pop-night text-pop-cream" : "bg-white text-pop-night"
+            }`}
+          >
+            {s}
+          </button>
+        ))}
+        {(["1", "3", "6"] as GradeId[]).map((g) => (
+          <button
+            key={g}
+            type="button"
+            onClick={() => setGrade(g)}
+            className={`rounded-full border-[3px] border-pop-night px-3 py-1 text-xs font-semibold ${
+              grade === g ? "bg-pop-yellow" : "bg-white"
+            }`}
+          >
+            Gr {g}
+          </button>
+        ))}
+      </div>
+      <ExpectationPicker subject={subject} grade={grade} value={code} onChange={setCode} />
+      <p className="text-xs text-pop-night/60">selected: {code || "(none)"}</p>
+    </div>
+  );
+}
 
 export default function PreviewGallery() {
   return (
     <div className="mx-auto max-w-4xl space-y-16 px-4 py-12 sm:px-6">
+      <Block label="ExpectationPicker — Language, Grade 3 (real Ontario data)">
+        <ExpectationPickerDemo />
+      </Block>
+
       <Block label="LoadingState">
         <LoadingState />
       </Block>

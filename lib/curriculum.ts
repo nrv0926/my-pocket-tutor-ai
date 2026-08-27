@@ -152,3 +152,38 @@ export function subjectsWithExpectations(): SubjectId[] {
     )
   ).map((s) => s.id);
 }
+
+export interface ResolvedExpectation {
+  code: string;
+  text: string;
+  strandCode: string;
+  strandName: string;
+}
+
+/**
+ * Look up a specific expectation by code.
+ *
+ * The caller passes a code that came from a browser, so it is resolved
+ * against the transcribed data rather than trusted: an unknown code returns
+ * null and the plan is built without one. That keeps a fabricated code from
+ * ever reaching a prompt (CLAUDE.md §6).
+ */
+export function findExpectation(
+  subject: SubjectId,
+  grade: GradeId,
+  code: string
+): ResolvedExpectation | null {
+  for (const strand of strandsFor(subject, grade)) {
+    for (const spec of strand.specific?.[grade as SourceGrade] ?? []) {
+      if (spec.code === code) {
+        return {
+          code: spec.code,
+          text: spec.text,
+          strandCode: strand.code,
+          strandName: strand.name,
+        };
+      }
+    }
+  }
+  return null;
+}

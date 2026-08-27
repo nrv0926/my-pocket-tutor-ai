@@ -269,3 +269,27 @@ export {
   buildWeeklyPlanPrompt,
   WEEKLY_PLAN_PROMPT_VERSION,
 } from "@/prompts/weeklyPlanPrompt";
+
+/**
+ * Anchor the plan to one published Ontario expectation.
+ *
+ * The wording is passed in already resolved from the transcribed curriculum
+ * (lib/curriculum.ts) — the model is never asked to recall a code, because a
+ * plausible-but-wrong B1.3 is exactly what a teacher will catch and exactly
+ * what CLAUDE.md §6 forbids.
+ */
+export function expectationContext(
+  expectation: { code: string; text: string; strandCode: string; strandName: string } | null
+): string {
+  if (!expectation) return "";
+  return [
+    "TARGET CURRICULUM EXPECTATION (Ontario, chosen by the adult):",
+    `- Strand ${expectation.strandCode}: ${expectation.strandName}`,
+    `- ${expectation.code}: ${expectation.text}`,
+    "Aim the session at THIS expectation. Say the code once in WHAT TO TEACH",
+    "NEXT so the adult can see the link. Quote the code and wording exactly as",
+    "given above — do not reword it, and never cite any other code.",
+    "If the child is not ready for it, work the prerequisite skill instead and",
+    "say plainly which one and why.",
+  ].join("\n");
+}

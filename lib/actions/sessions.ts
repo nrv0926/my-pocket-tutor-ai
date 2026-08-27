@@ -14,6 +14,8 @@ import { QuotaExceededError, consumeAIQuota } from "@/lib/quota";
 import { getRole } from "@/lib/role";
 import { mapToSkillIds } from "@/lib/skillGapEngine";
 import { getServerSupabase } from "@/lib/supabaseServer";
+import { findExpectation } from "@/lib/curriculum";
+import type { GradeId } from "@/types/curriculum";
 import type { Grade, LearningNeed, Subject } from "@/types/child";
 import { STORED_SUBJECTS, normalizeSubject, type StoredSubject } from "@/types/child";
 import type {
@@ -40,6 +42,7 @@ const InputSchema = z.object({
   childId: z.string().uuid(),
   inputType: z.enum(["paste", "upload", "description", "plan"]),
   subject: z.enum(STORED_SUBJECTS),
+  expectationCode: z.string().max(12).nullable().optional(),
   text: z.string().min(5).max(8000),
 });
 
@@ -48,6 +51,8 @@ export async function createLearningSession(input: {
   inputType: SessionInputType;
   /** Accepts the legacy names too; normalised before anything downstream. */
   subject: StoredSubject;
+  /** Optional Ontario expectation code the adult chose to target, e.g. "B2.1". */
+  expectationCode?: string | null;
   text: string;
 }) {
   const parsed = InputSchema.parse(input);
@@ -100,6 +105,13 @@ export async function createLearningSession(input: {
   // Rows written before the taxonomy fix stored Reading/Writing as subjects.
   const subject = normalizeSubject(parsed.subject);
 
+  // Resolve the chosen code to its published wording. Looked up rather than
+  // passed through, so the prompt can never carry a code the curriculum does
+  // not actually contain (CLAUDE.md §6).
+  const expectation = parsed.expectationCode
+    ? findExpectation(subject, child.grade as GradeId, parsed.expectationCode)
+    : null;
+
   const prompt =
     parsed.inputType === "paste"
       ? buildReportCardPrompt({
@@ -113,6 +125,7 @@ export async function createLearningSession(input: {
           subject: subject,
           parentInput: parsed.text,
           role,
+          expectation,
           recentFeedback,
         });
 
