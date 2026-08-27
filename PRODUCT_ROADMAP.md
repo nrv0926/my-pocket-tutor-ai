@@ -125,6 +125,28 @@ happened to each since. Sorted by what they'd change, not the order said.
 5. **Science and Technology.** A real Ontario subject, still absent. Deferred
    deliberately, not forgotten.
 
+6. **A whole lesson plan for the class, and one for the child who is
+   struggling.** Her strongest framing of the "teacher units" note, and the
+   two halves have very different costs.
+
+   The *differentiated* half is generation, not accounts, and needs no schema
+   change: one lesson, with an adapted track for the student who is behind
+   and an extension for those who are ahead. It fits the nine sections
+   (CLAUDE.md §5) if it lives inside HOW TO TEACH IT, the way teaching
+   materials already do.
+
+   The *class* half hits a real constraint. `learning_sessions.child_id` is
+   NOT NULL, and the RLS policy proves ownership by joining through the
+   child row — so a plan with no child has no way to prove who owns it. A
+   true class entity therefore means a migration and a new RLS policy, and
+   CLAUDE.md §3 calls RLS non-negotiable, so that is deliberate work rather
+   than something to slip in. The cheap alternative is to let a teacher make
+   a profile that represents the group rather than a person; it needs no
+   schema change, at the cost of conflating a class with a child.
+
+   Worth noting this shares its blocker with the no-input worksheet above:
+   both want a generation path that does not start from one child's profile.
+
 ### Deferred to phases already planned
 
 Full teacher units for a class or an individual, and a parent portal wired to
