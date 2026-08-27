@@ -78,81 +78,79 @@ parent of a single K–6 child in Ontario.
 
 ## Teacher feedback — 2026-08-25
 
-Raw notes from a classroom teacher who walked the prototype. Sorted by what
-they'd change, not by the order they were said. Nothing here is built yet.
+Raw notes from a classroom teacher who walked the prototype, and what has
+happened to each since. Sorted by what they'd change, not the order said.
 
-### Confirms the plan we already have
+### Shipped
 
-Four asks land on phases already written below, which is a good signal:
-full teacher units for a class or an individual, and a parent portal wired
-to the teacher portal → **Phase 4**. Reading pronunciation with a mic, the
-child reading aloud into it → **Phase 7**, which already scopes supervised
-read-aloud. Subject linked to specific Ontario expectations → **Phase 2**.
+- **"How to teach does not produce the material."** The sharpest note of the
+  session, and the first thing fixed. Section 4 now carries the cards, word
+  lists, sentence strips and dictation words the lesson calls for, print-ready.
+- **"Create subject and link it to the Ontario curriculum, specific
+  expectations per subject as a dropdown."** 1,189 expectations transcribed
+  from the Ministry PDFs — Language 2023 (478), Mathematics 2020 (369), FSL
+  2013 across all three programs (342) — with a strand-grouped picker on the
+  new-session page. This was almost certainly the "dropdown" written three
+  times in the notes.
+- **French, and French immersion.** All three FSL programs, immersion
+  included. The subject taxonomy was wrong before this and is now Ontario's:
+  Reading and Writing are strands of Language, not subjects.
+- **"Wrong time."** A real bug. Three server components formatted timestamps
+  in the server's zone — UTC on Vercel — so an evening session in Ontario
+  read as the next morning.
+- **Grade range.** She said "K–6 first" and then asked for high school. K–8
+  settles it without either: it is the whole of Ontario elementary, and the
+  expectation data already covered Grades 7 and 8.
 
-She also said "K–6 first" unprompted, then asked for high-school science,
-math and French. Those two are in tension; the first one is the one that
-matches CLAUDE.md §6, and it should win until K–6 is genuinely good.
+### Still open, and inside the five verbs
 
-### New, and inside the five verbs
+1. **Worksheet with no diagnostic input.** Grade + subject + topic, and a
+   worksheet comes out. The flow still demands a concern to analyse, which is
+   the wrong shape for a teacher who knows what she wants and needs it before
+   period three. Blocked on what "object" meant in *grade, subject, idea,
+   object*.
+2. **Continuous sessions, sequenced by level.** Said twice, which usually
+   means it matters. Session N+1 should start where session N landed.
+   `recentFeedbackContext()` already feeds the last few results to the
+   prompt, so the plumbing half-exists; the sequencing does not. The
+   Foundations Continuum now gives us a published K–4 progression to sequence
+   against rather than inventing one.
+3. **Bulk generation across levels.** One topic, several difficulty levels at
+   once, so a class of mixed readers gets one lesson and several worksheets.
+   Related to Phase 4 but not gated on it: this is generation, not accounts.
+4. **Celebrate a win.** Needs a decision before any code. An easy
+   consolidation session an adult chooses to run is inside the product; a
+   streak or badge a child logs in to collect is a permanent non-goal. One
+   design decision separates them.
+5. **Science and Technology.** A real Ontario subject, still absent. Deferred
+   deliberately, not forgotten.
 
-1. **"How to teach does not produce the material."** The sharpest note of
-   the session. Section 4 tells you to write six vowel-team cards; it does
-   not write them. The plan hands a teacher a prep list at the exact moment
-   she has no prep time. Generating the artefacts the lesson calls for —
-   the cards, the word lists, the sentence strips — is the single change
-   that would most improve *Teach*, and it is squarely inside Phase 1's
-   remit rather than a new phase.
+### Deferred to phases already planned
 
-2. **Worksheet with no diagnostic input.** Grade + subject + topic, and a
-   worksheet comes out. Today the flow demands a concern to analyse, which
-   is the wrong shape for a teacher who already knows what she wants and
-   needs it before period three.
-
-3. **Continuous sessions, sequenced by level.** Said twice, which usually
-   means it matters. Session N+1 should start from where session N landed.
-   `recentFeedbackContext()` feeds the last few results to the prompt, so
-   the plumbing half-exists — the sequencing does not.
-
-4. **Bulk generation across levels.** One topic, several difficulty levels,
-   generated together, so a class of mixed readers gets one lesson and
-   several worksheets. Related to Phase 4 but distinct from it: this is a
-   generation feature, not an accounts feature, and it does not require
-   student profiles to exist.
-
-5. **French, and French immersion.** Ontario-specific and large. CLAUDE.md
-   §6 lists Language, Reading, Writing, Math — French is not a subject yet,
-   and immersion is not merely "the same worksheet in French": the phonics
-   sequence itself differs. Science is likewise absent from §6.
-
-6. **Celebrate a win.** Worth taking, but carefully. A deliberately easy
-   consolidation session an adult chooses to run is inside the product. A
-   streak, a badge, or anything the child logs in to collect is a permanent
-   non-goal, and the distance between those two is one design decision.
+Full teacher units for a class or an individual, and a parent portal wired to
+the teacher portal → **Phase 4**. Reading pronunciation with a mic, the child
+reading aloud into it → **Phase 7**, which already scopes supervised
+read-aloud.
 
 ### Not product
 
-School board vendor lists are a procurement route, not a feature — but they
-say something about how this gets bought, and that belongs in a go-to-market
-note rather than here. Prodigy and IXL are the comparison she reached for
-unprompted; both are child-facing practice engines, which is the opposite
-end of the market from an adult planning tool. That the comparison came up
-at all is worth understanding before positioning against it.
+School board vendor lists are a procurement route, and belong in a
+go-to-market note. Prodigy and IXL are the comparison she reached for
+unprompted; both are child-facing practice engines, the opposite end of the
+market from an adult planning tool. That the comparison came up at all is
+worth understanding before positioning against it.
 
-### Fixed
+### Still needs her
 
-- **"Wrong time."** Real bug, now fixed. Three server components formatted
-  timestamps with `toLocaleString()`, which renders in the server's zone —
-  UTC on Vercel — so every session read four or five hours late in Ontario
-  and an evening session appeared to happen the next morning.
-  `components/LocalTime.tsx` now formats in the viewer's zone.
+Four notes remain too compressed to act on:
 
-### Needs her, before anyone builds
-
-Five notes are too compressed to act on: "prototype loop error" (an error
-she hit, and we should reproduce it before guessing), "target group",
-"contact", "object" in *grade, subject, idea, object*, and "dropdown",
-written three times without saying which dropdown — most likely the
-curriculum-expectation picker, but that is inference, not a requirement.
+- **"prototype loop error"** — an error she hit during the walkthrough. Worth
+  reproducing rather than guessing; the redirect paths were checked and
+  nothing obviously loops.
+- **"object"** in *grade, subject, idea, object* — this is the spec for the
+  no-input worksheet above, so it blocks that item specifically.
+- **"target group"** and **"contact"** — most likely positioning and a
+  contact route, but that is inference.
 
 ---
 
