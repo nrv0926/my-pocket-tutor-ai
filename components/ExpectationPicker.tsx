@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import {
   getExpectations,
   getPrograms,
+  searchExpectations,
+  type ContinuumHint,
   type ExpectationGroup,
   type ProgramOption,
 } from "@/lib/actions/curriculum";
@@ -35,6 +37,9 @@ export default function ExpectationPicker({
   const [programs, setPrograms] = useState<ProgramOption[]>([]);
   const [program, setProgram] = useState<Program["id"] | undefined>(undefined);
   const [query, setQuery] = useState("");
+  const [via, setVia] = useState<ContinuumHint[]>([]);
+  const [filtered, setFiltered] = useState<ExpectationGroup[] | null>(null);
+  const [searching, setSearching] = useState(false);
 
   // FSL is the only subject that asks which program you teach.
   useEffect(() => {
@@ -74,24 +79,37 @@ export default function ExpectationPicker({
     if (!has) onChange("", program);
   }, [groups, value, onChange, program]);
 
-  // Typing beats scrolling a list of sixty. Matches code or wording, so
-  // "B2.1", "syllable" and "vowel" all find the same kind of thing.
-  const filtered = useMemo(() => {
-    if (!groups) return null;
-    const q = query.trim().toLowerCase();
-    if (!q) return groups;
-    return groups
-      .map((g) => ({
-        ...g,
-        options: g.options.filter(
-          (o) => o.code.toLowerCase().includes(q) || o.text.toLowerCase().includes(q)
-        ),
-      }))
-      .filter((g) => g.options.length > 0);
-  }, [groups, query]);
+  // Typing beats scrolling a list of sixty. The search runs on the server so
+  // it can also reach the Foundations Continuum, where a teacher's own
+  // vocabulary actually lives.
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) {
+      setVia([]);
+      setFiltered(null);
+      return;
+    }
+    setSearching(true);
+    const t = setTimeout(() => {
+      let live = true;
+      searchExpectations(subject, grade, program, q)
+        .then((r) => {
+          if (!live) return;
+          setFiltered(r.groups);
+          setVia(r.via);
+        })
+        .catch(() => live && setFiltered([]))
+        .finally(() => live && setSearching(false));
+      return () => {
+        live = false;
+      };
+    }, 220);
+    return () => clearTimeout(t);
+  }, [query, subject, grade, program]);
 
   const total = groups?.reduce((n, g) => n + g.options.length, 0) ?? 0;
-  const shown = filtered?.reduce((n, g) => n + g.options.length, 0) ?? 0;
+  const view = filtered ?? groups;
+  const shown = view?.reduce((n, g) => n + g.options.length, 0) ?? 0;
 
   return (
     <label className="block">
@@ -143,7 +161,7 @@ export default function ExpectationPicker({
           className="w-full rounded-xl border-[3px] border-pop-night bg-pop-cream px-3 py-2.5 outline-none focus:border-pop-night focus:bg-white focus:ring-4 focus:ring-pop-pink/30"
         >
           <option value="">No specific expectation</option>
-          {(filtered ?? []).map((g) => (
+          {(view ?? []).map((g) => (
             <optgroup key={g.strandCode} label={`${g.strandCode}. ${g.strandName}`}>
               {g.options.map((o) => (
                 <option key={o.code} value={o.code}>
@@ -156,13 +174,27 @@ export default function ExpectationPicker({
         </>
       )}
 
+      {via.length > 0 && (
+        <p className="mt-2 rounded-xl border-[3px] border-pop-night bg-pop-cyan/30 px-3 py-2 text-xs text-pop-night">
+          <span className="font-display uppercase tracking-widest text-pop-magenta">
+            Matched through the foundations continuum
+          </span>
+          <br />
+          Ontario does not use that word in its expectations, but it does in the
+          continuum behind them —{" "}
+          {via.map((v) => `${v.section} (${v.codes.join(", ")})`).join("; ")}.
+        </p>
+      )}
+
       {total > 0 && (
         <p className="mt-1 text-xs text-pop-night/60">
-          {query.trim() && shown === 0
-            ? `Nothing matches “${query.trim()}”. Ontario words its expectations broadly — a classroom term like “syllable” may not appear even where the skill does. Clear the box to see all ${total}.`
-            : query.trim() && shown !== total
-              ? `${shown} of ${total} match “${query.trim()}”.`
-              : `${total} expectations for Grade ${grade}, straight from the Ontario curriculum.`}
+          {searching
+            ? "Searching…"
+            : query.trim() && shown === 0
+              ? `Nothing matches “${query.trim()}” at Grade ${grade}. Clear the box to see all ${total}.`
+              : query.trim()
+                ? `${shown} of ${total} match “${query.trim()}”.`
+                : `${total} expectations for Grade ${grade}, straight from the Ontario curriculum.`}
         </p>
       )}
     </label>

@@ -1,6 +1,9 @@
 import Link from "next/link";
+import RoleSwitcher from "@/components/RoleSwitcher";
+import { getRole } from "@/lib/role";
 
 export default function SettingsPage() {
+  const role = getRole();
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <header className="mb-6">
@@ -9,6 +12,17 @@ export default function SettingsPage() {
         </p>
         <h1 className="mt-1 font-display text-3xl text-pop-night">Your account.</h1>
       </header>
+
+      <section className="mb-6 rounded-2xl border-[3px] border-pop-night bg-white p-5 shadow-pop-sm">
+        <h2 className="font-display text-lg text-pop-night">What are you planning for?</h2>
+        <p className="mt-2 text-sm text-pop-night/80">
+          This changes the questions we ask and how every plan is written. Switch
+          whenever — plans you already have are not touched.
+        </p>
+        <div className="mt-4">
+          <RoleSwitcher current={role} next="/settings" />
+        </div>
+      </section>
 
       <section className="mb-6 rounded-2xl border-[3px] border-pop-night bg-white p-5 shadow-pop-sm">
         <h2 className="font-display text-lg text-pop-night">Privacy</h2>

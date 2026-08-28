@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import NewSessionForm from "./NewSessionForm";
+import RoleSwitcher from "@/components/RoleSwitcher";
 import { getServerSupabase } from "@/lib/supabaseServer";
 import { getRole } from "@/lib/role";
 import { roleCopy } from "@/lib/roleCopy";
@@ -40,6 +41,12 @@ export default async function NewSessionPage({
         </p>
         <h1 className="mt-1 font-display text-3xl text-pop-night">{copy.sessionTitle}</h1>
         <p className="mt-2 text-pop-night/80">{copy.sessionSubhead}</p>
+        <div className="mt-4">
+          <p className="mb-1.5 font-display text-[11px] uppercase tracking-widest text-pop-night/50">
+            Planning as
+          </p>
+          <RoleSwitcher current={role} next="/session/new" compact />
+        </div>
       </header>
 
       <NewSessionForm

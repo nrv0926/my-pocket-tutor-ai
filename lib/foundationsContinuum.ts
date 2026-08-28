@@ -92,3 +92,79 @@ export function kindergartenCodes(): string[] {
   }
   return [...codes].sort();
 }
+
+/**
+ * Parse a section's code mapping into the expectations it serves per grade.
+ *
+ * The strings look like
+ *   "Kindergarten: A1.3, A2.5; Grade 1: B2.4, B2.5, B2.6; Grades 2-3: B2.1"
+ * which is Ontario telling us, in the document itself, which expectations
+ * each foundational skill sits behind. That mapping is what makes it possible
+ * to search a teacher's vocabulary and land on a selectable expectation.
+ */
+const GRADE_SPEC = /^(Kindergarten|Grades?\s+(\d)(?:\s*[\u2013\u2014-]\s*(\d))?)$/i;
+
+export function codesForGrade(section: ContinuumSection, grade: string): string[] {
+  const out: string[] = [];
+  for (const segment of section.codes.split(";")) {
+    const at = segment.indexOf(":");
+    if (at < 0) continue;
+    const spec = segment.slice(0, at).trim();
+    const codes = segment
+      .slice(at + 1)
+      .split(",")
+      .map((c) => c.trim())
+      .filter((c) => /^[A-Z]\d+\.\d+$/.test(c));
+    if (codes.length === 0) continue;
+
+    const m = GRADE_SPEC.exec(spec);
+    if (!m) continue;
+
+    if (/^Kindergarten$/i.test(m[1])) {
+      if (grade === "K") out.push(...codes);
+      continue;
+    }
+    const lo = Number(m[2]);
+    const hi = m[3] ? Number(m[3]) : lo;
+    const g = Number(grade);
+    if (!Number.isNaN(g) && g >= lo && g <= hi) out.push(...codes);
+  }
+  return [...new Set(out)];
+}
+
+export interface ContinuumMatch {
+  section: string;
+  label: string;
+  text: string;
+  /** Expectation codes this skill sits behind, at the grade asked for. */
+  codes: string[];
+}
+
+/**
+ * Find foundational skills matching a query, with the expectations they serve.
+ *
+ * Ontario words its expectations broadly — "syllable" appears nowhere in the
+ * Language curriculum, and "decoding" nowhere either — while both are all over
+ * this continuum. Searching only the expectations means a teacher's own
+ * vocabulary returns nothing.
+ */
+export function searchContinuum(grade: string, query: string): ContinuumMatch[] {
+  const q = query.trim().toLowerCase();
+  if (q.length < 2 || !continuumCovers(grade)) return [];
+
+  const out: ContinuumMatch[] = [];
+  for (const section of CONTINUUM_SECTIONS) {
+    const codes = codesForGrade(section, grade);
+    if (codes.length === 0) continue;
+    const sectionHit = section.name.toLowerCase().includes(q);
+    for (const row of section.rows) {
+      const text = row.byGrade[grade as ContinuumGrade];
+      if (!text) continue;
+      if (!sectionHit && !text.toLowerCase().includes(q) && !row.label.toLowerCase().includes(q)) {
+        continue;
+      }
+      out.push({ section: section.name, label: row.label, text, codes });
+    }
+  }
+  return out;
+}
