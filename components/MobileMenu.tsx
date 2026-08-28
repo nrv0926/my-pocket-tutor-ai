@@ -104,6 +104,7 @@ export default function MobileMenu({ isAuthed, userEmail }: MobileMenuProps) {
                     <MobileLink href="/try" onClick={close}>See a sample plan</MobileLink>
                     <MobileLink href="/#who" onClick={close}>Who it&apos;s for</MobileLink>
                     <MobileLink href="/#how" onClick={close}>How it works</MobileLink>
+                    <MobileLink href="/curriculum" onClick={close}>Browse the curriculum</MobileLink>
                     <MobileLink href="/pricing" onClick={close}>Pricing</MobileLink>
                     <MobileLink href="/login" onClick={close}>Sign in</MobileLink>
                   </>

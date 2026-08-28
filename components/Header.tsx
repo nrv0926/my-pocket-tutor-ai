@@ -28,6 +28,7 @@ export default async function Header() {
           <nav className="hidden items-center gap-6 font-display text-xs uppercase tracking-wide text-pop-night md:flex">
             <Link href="/#who" className="hover:text-pop-magenta">Who it&apos;s for</Link>
             <Link href="/#how" className="hover:text-pop-magenta">How it works</Link>
+            <Link href="/curriculum" className="hover:text-pop-magenta">Curriculum</Link>
             <Link href="/pricing" className="hover:text-pop-magenta">Pricing</Link>
           </nav>
         )}

@@ -263,3 +263,64 @@ export function findExpectation(
   }
   return null;
 }
+
+export interface Objective {
+  strandCode: string;
+  strandName: string;
+  /** The overall expectation — what a teacher calls the objective. */
+  code: string;
+  text: string;
+  /** The specific expectations underneath it. */
+  specifics: SpecificExpectation[];
+}
+
+/**
+ * The curriculum grouped the way it is published: strand, then objective,
+ * then the specifics beneath it.
+ *
+ * A specific belongs to the overall whose code it extends — B1.3 sits under
+ * B1 — which is Ontario's own numbering rather than a mapping we invent. A
+ * specific with no matching overall is still returned, under a stub, so a
+ * gap in the transcription shows up rather than silently dropping rows.
+ */
+export function objectivesFor(
+  id: SubjectId,
+  grade: GradeId,
+  program?: Program["id"]
+): Objective[] {
+  const out: Objective[] = [];
+  for (const strand of strandsFor(id, grade, program)) {
+    const specifics = strand.specific?.[grade as SourceGrade] ?? [];
+    const byOverall = new Map<string, SpecificExpectation[]>();
+    for (const spec of specifics) {
+      const parent = spec.code.split(".")[0];
+      byOverall.set(parent, [...(byOverall.get(parent) ?? []), spec]);
+    }
+
+    const seen = new Set<string>();
+    for (const overall of strand.overall) {
+      seen.add(overall.code);
+      const kids = byOverall.get(overall.code) ?? [];
+      if (kids.length === 0) continue;
+      out.push({
+        strandCode: strand.code,
+        strandName: strand.name,
+        code: overall.code,
+        text: overall.text,
+        specifics: kids,
+      });
+    }
+
+    for (const [code, kids] of byOverall) {
+      if (seen.has(code)) continue;
+      out.push({
+        strandCode: strand.code,
+        strandName: strand.name,
+        code,
+        text: "",
+        specifics: kids,
+      });
+    }
+  }
+  return out;
+}

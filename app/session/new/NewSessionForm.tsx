@@ -5,6 +5,7 @@ import LoadingState from "@/components/LoadingState";
 import ExpectationPicker from "@/components/ExpectationPicker";
 import AchievementLevelPicker from "@/components/AchievementLevelPicker";
 import { createLearningSession } from "@/lib/actions/sessions";
+import { SUBJECTS } from "@/types/child";
 import type { AchievementLevel, Grade, Subject } from "@/types/child";
 import type { GradeId, Program, SubjectId } from "@/types/curriculum";
 import type { SessionInputType } from "@/types/session";
@@ -40,16 +41,27 @@ const MODES: { id: SessionInputType; title: string; desc: string; placeholder: s
 export default function NewSessionForm({
   childProfiles,
   showLevel = false,
+  initialSubject,
+  initialExpectation,
+  initialProgram,
 }: {
   childProfiles: ChildOption[];
   /** Teachers and homeschoolers place a learner on the chart; parents do not. */
   showLevel?: boolean;
+  /** Preselection carried over from /curriculum, so "Plan this" arrives ready. */
+  initialSubject?: string;
+  initialExpectation?: string;
+  initialProgram?: string;
 }) {
   const [childId, setChildId] = useState(childProfiles[0]?.id ?? "");
   const [mode, setMode] = useState<SessionInputType>("paste");
-  const [subject, setSubject] = useState<Subject>("language");
-  const [expectation, setExpectation] = useState("");
-  const [expectationProgram, setExpectationProgram] = useState<Program["id"] | null>(null);
+  const [subject, setSubject] = useState<Subject>(
+    SUBJECTS.includes(initialSubject as Subject) ? (initialSubject as Subject) : "language"
+  );
+  const [expectation, setExpectation] = useState(initialExpectation ?? "");
+  const [expectationProgram, setExpectationProgram] = useState<Program["id"] | null>(
+    (initialProgram as Program["id"]) ?? null
+  );
   const [level, setLevel] = useState<AchievementLevel | null>(null);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);

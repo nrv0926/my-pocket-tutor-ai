@@ -7,7 +7,11 @@ import { roleCopy } from "@/lib/roleCopy";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewSessionPage() {
+export default async function NewSessionPage({
+  searchParams,
+}: {
+  searchParams: { subject?: string; expectation?: string; program?: string };
+}) {
   const role = getRole();
   const copy = roleCopy(role);
   const supabase = getServerSupabase();
@@ -39,6 +43,9 @@ export default async function NewSessionPage() {
       </header>
 
       <NewSessionForm
+        initialSubject={searchParams.subject}
+        initialExpectation={searchParams.expectation}
+        initialProgram={searchParams.program}
         showLevel={role === "teacher" || role === "homeschooler"}
         childProfiles={children.map((c) => ({
           id: c.id,
