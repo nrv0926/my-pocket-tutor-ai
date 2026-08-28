@@ -3,8 +3,9 @@
 import { useState } from "react";
 import LoadingState from "@/components/LoadingState";
 import ExpectationPicker from "@/components/ExpectationPicker";
+import AchievementLevelPicker from "@/components/AchievementLevelPicker";
 import { createLearningSession } from "@/lib/actions/sessions";
-import type { Grade, Subject } from "@/types/child";
+import type { AchievementLevel, Grade, Subject } from "@/types/child";
 import type { GradeId, Program, SubjectId } from "@/types/curriculum";
 import type { SessionInputType } from "@/types/session";
 
@@ -36,12 +37,20 @@ const MODES: { id: SessionInputType; title: string; desc: string; placeholder: s
   },
 ];
 
-export default function NewSessionForm({ childProfiles }: { childProfiles: ChildOption[] }) {
+export default function NewSessionForm({
+  childProfiles,
+  showLevel = false,
+}: {
+  childProfiles: ChildOption[];
+  /** Teachers and homeschoolers place a learner on the chart; parents do not. */
+  showLevel?: boolean;
+}) {
   const [childId, setChildId] = useState(childProfiles[0]?.id ?? "");
   const [mode, setMode] = useState<SessionInputType>("paste");
   const [subject, setSubject] = useState<Subject>("language");
   const [expectation, setExpectation] = useState("");
   const [expectationProgram, setExpectationProgram] = useState<Program["id"] | null>(null);
+  const [level, setLevel] = useState<AchievementLevel | null>(null);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +75,7 @@ export default function NewSessionForm({ childProfiles }: { childProfiles: Child
             subject,
             expectationCode: expectation || null,
             expectationProgram: expectation ? expectationProgram : null,
+            achievementLevel: level,
             text: text.trim(),
           });
           // createLearningSession redirects to /results/[id] internally.
@@ -106,6 +116,8 @@ export default function NewSessionForm({ childProfiles }: { childProfiles: Child
           </select>
         </label>
       </div>
+
+      {showLevel && <AchievementLevelPicker value={level} onChange={setLevel} />}
 
       {selectedGrade && (
         <ExpectationPicker

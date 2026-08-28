@@ -95,3 +95,33 @@ export interface ChildInput {
   weaknesses: string | null;
   parentGoal: string | null;
 }
+
+/**
+ * Ontario's achievement chart — the scale on every provincial report card.
+ *
+ * Level 3 is the provincial standard, not a middling grade, and a teacher
+ * reads these without explanation. Kept as strings so they round-trip through
+ * a form and a JSON column without turning into numbers.
+ */
+export type AchievementLevel = "1" | "2" | "3" | "4";
+
+export const ACHIEVEMENT_LEVELS: AchievementLevel[] = ["1", "2", "3", "4"];
+
+export const ACHIEVEMENT_LABEL: Record<AchievementLevel, string> = {
+  "1": "Below the provincial standard",
+  "2": "Approaching the provincial standard",
+  "3": "At the provincial standard",
+  "4": "Above the provincial standard",
+};
+
+/** Short form for a chip or a dropdown row. */
+export const ACHIEVEMENT_SHORT: Record<AchievementLevel, string> = {
+  "1": "Below standard",
+  "2": "Approaching",
+  "3": "At standard",
+  "4": "Above standard",
+};
+
+export function isAchievementLevel(v: unknown): v is AchievementLevel {
+  return v === "1" || v === "2" || v === "3" || v === "4";
+}

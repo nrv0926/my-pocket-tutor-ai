@@ -8,8 +8,15 @@ import LoadingState from "@/components/LoadingState";
 import UploadBox from "@/components/UploadBox";
 import { useState } from "react";
 import ExpectationPicker from "@/components/ExpectationPicker";
+import AchievementLevelPicker from "@/components/AchievementLevelPicker";
 import type { GradeId, SubjectId } from "@/types/curriculum";
+import type { AchievementLevel } from "@/types/child";
 import { SAMPLE_ANALYSIS } from "@/app/try/samples/parent";
+
+function AchievementDemo() {
+  const [lvl, setLvl] = useState<AchievementLevel | null>(null);
+  return <AchievementLevelPicker value={lvl} onChange={setLvl} />;
+}
 
 function ExpectationPickerDemo() {
   const [subject, setSubject] = useState<SubjectId>("language");
@@ -52,6 +59,10 @@ function ExpectationPickerDemo() {
 export default function PreviewGallery() {
   return (
     <div className="mx-auto max-w-4xl space-y-16 px-4 py-12 sm:px-6">
+      <Block label="AchievementLevelPicker — Ontario 1-4">
+        <AchievementDemo />
+      </Block>
+
       <Block label="ExpectationPicker — Language, Grade 3 (real Ontario data)">
         <ExpectationPickerDemo />
       </Block>

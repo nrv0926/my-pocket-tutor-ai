@@ -23,7 +23,12 @@ import {
 import type { PreviousSession } from "@/lib/prompts";
 import type { GradeId } from "@/types/curriculum";
 import type { Grade, LearningNeed, Subject } from "@/types/child";
-import { STORED_SUBJECTS, normalizeSubject, type StoredSubject } from "@/types/child";
+import {
+  STORED_SUBJECTS,
+  normalizeSubject,
+  type AchievementLevel,
+  type StoredSubject,
+} from "@/types/child";
 import type {
   AnalysisResult,
   Difficulty,
@@ -50,6 +55,7 @@ const InputSchema = z.object({
   subject: z.enum(STORED_SUBJECTS),
   expectationCode: z.string().max(12).nullable().optional(),
   expectationProgram: z.enum(["core", "extended", "immersion"]).nullable().optional(),
+  achievementLevel: z.enum(["1", "2", "3", "4"]).nullable().optional(),
   text: z.string().min(5).max(8000),
 });
 
@@ -62,6 +68,8 @@ export async function createLearningSession(input: {
   expectationCode?: string | null;
   /** FSL only — which program that code belongs to. */
   expectationProgram?: "core" | "extended" | "immersion" | null;
+  /** Ontario achievement level the learner is working at, if stated. */
+  achievementLevel?: AchievementLevel | null;
   text: string;
 }) {
   const parsed = InputSchema.parse(input);
@@ -173,6 +181,7 @@ export async function createLearningSession(input: {
           parentInput: parsed.text,
           role,
           expectation,
+          achievementLevel: parsed.achievementLevel ?? null,
           previous,
           progression,
           recentFeedback,

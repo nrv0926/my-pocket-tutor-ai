@@ -11,7 +11,7 @@
  * functions from "@/lib/prompts" and passes the result to aiService.generate().
  */
 
-import type { Child, Role } from "@/types/child";
+import type { AchievementLevel, Child, Role } from "@/types/child";
 import type { ParentFeedback } from "@/types/progress";
 import type { Difficulty } from "@/types/session";
 
@@ -387,4 +387,69 @@ export function progressionContext(
     "Use this to choose the next step. Step DOWN a rung when the child is",
     "struggling; never up past one that is not secure.",
   ].join("\n");
+}
+
+/**
+ * Where the learner actually is, on the scale her report cards already use.
+ *
+ * This is calibration, not a target. CLAUDE.md §4 only ever steps DOWN
+ * automatically, so Level 1 and 2 pull the whole plan back to solid ground
+ * while Level 4 extends sideways rather than skipping a stage.
+ */
+export function achievementContext(
+  level: AchievementLevel | null,
+  /** For a class, how many students sit at each level. */
+  spread: Partial<Record<AchievementLevel, number>> | null = null
+): string {
+  if (!level && !spread) return "";
+
+  const lines: string[] = ["ACHIEVEMENT LEVEL (Ontario, stated by the adult)"];
+
+  if (spread) {
+    const total = Object.values(spread).reduce((n, v) => n + (v ?? 0), 0);
+    lines.push(`This is a group of ${total}, spread across the chart:`);
+    for (const l of ["1", "2", "3", "4"] as AchievementLevel[]) {
+      const n = spread[l];
+      if (n) lines.push(`- Level ${l}: ${n} student${n === 1 ? "" : "s"}`);
+    }
+    lines.push(
+      "",
+      "Size the three differentiation tracks to those counts. If most of the",
+      "room is at Level 1 or 2, the WHOLE GROUP track pitches there and the",
+      "extension is small — do not write a lesson for a class that is not in",
+      "front of her."
+    );
+  } else if (level) {
+    lines.push(`This learner is working at Level ${level}.`);
+  }
+
+  const anchor = level ?? ((): AchievementLevel => {
+    const entries = Object.entries(spread ?? {}) as [AchievementLevel, number][];
+    entries.sort((a, b) => (b[1] ?? 0) - (a[1] ?? 0));
+    return entries[0]?.[0] ?? "3";
+  })();
+
+  const guidance: Record<AchievementLevel, string[]> = {
+    "1": [
+      "Level 1 is below the provincial standard. Step down until you reach",
+      "something they can already do, build from there, and keep the worksheet",
+      "short. Do not pitch at grade level and hope.",
+    ],
+    "2": [
+      "Level 2 is approaching the standard. The gap is usually one stage, not",
+      "several — find that stage and make it secure rather than reteaching",
+      "everything below it.",
+    ],
+    "3": [
+      "Level 3 IS the provincial standard, not a middling result. Hold the",
+      "current level, vary the practice, and consolidate.",
+    ],
+    "4": [
+      "Level 4 is above the standard. Extend sideways — richer texts, harder",
+      "applications, explaining their thinking — rather than skipping ahead to",
+      "the next grade's stage.",
+    ],
+  };
+
+  return [...lines, "", ...guidance[anchor]].join("\n");
 }

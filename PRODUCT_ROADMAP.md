@@ -183,6 +183,23 @@ first two need no migration and make the third worth having.
 Open: which class model; level per session or stored per student per subject;
 whether `/curriculum` is public; and whether she wants R below Level 1.
 
+### Found while building search — worth knowing
+
+Ontario words its expectations broadly, and the vocabulary a teacher would
+search for is not in them. Across all of Language: "syllable" appears 0 times,
+"decoding" 0, "vowel" once. The same words are all over the Foundations
+Continuum — syllable 10, phoneme 46, grapheme 33, vowel 21.
+
+So searching expectation text alone will disappoint on exactly the terms a
+teacher reaches for. The fix is to search the continuum too and map a hit back
+to the expectations that section serves — the continuum already records those
+(`Kindergarten: A2.3; Grade 1: B2.1`). That is a design decision rather than a
+tweak, because a continuum row is not itself selectable, so it needs to resolve
+to something that is. Filed rather than guessed at.
+
+For now the empty state says so plainly instead of implying the skill is
+missing from the curriculum.
+
 ### Deferred to phases already planned
 
 Full teacher units for a class or an individual, and a parent portal wired to

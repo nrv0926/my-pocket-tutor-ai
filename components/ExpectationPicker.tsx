@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   getExpectations,
   getPrograms,
@@ -34,6 +34,7 @@ export default function ExpectationPicker({
   const [groups, setGroups] = useState<ExpectationGroup[] | null>(null);
   const [programs, setPrograms] = useState<ProgramOption[]>([]);
   const [program, setProgram] = useState<Program["id"] | undefined>(undefined);
+  const [query, setQuery] = useState("");
 
   // FSL is the only subject that asks which program you teach.
   useEffect(() => {
@@ -63,6 +64,7 @@ export default function ExpectationPicker({
     return () => {
       live = false;
     };
+    setQuery("");
   }, [subject, grade, program]);
 
   // Clear a selection that the new subject or grade doesn't contain.
@@ -72,7 +74,24 @@ export default function ExpectationPicker({
     if (!has) onChange("", program);
   }, [groups, value, onChange, program]);
 
+  // Typing beats scrolling a list of sixty. Matches code or wording, so
+  // "B2.1", "syllable" and "vowel" all find the same kind of thing.
+  const filtered = useMemo(() => {
+    if (!groups) return null;
+    const q = query.trim().toLowerCase();
+    if (!q) return groups;
+    return groups
+      .map((g) => ({
+        ...g,
+        options: g.options.filter(
+          (o) => o.code.toLowerCase().includes(q) || o.text.toLowerCase().includes(q)
+        ),
+      }))
+      .filter((g) => g.options.length > 0);
+  }, [groups, query]);
+
   const total = groups?.reduce((n, g) => n + g.options.length, 0) ?? 0;
+  const shown = filtered?.reduce((n, g) => n + g.options.length, 0) ?? 0;
 
   return (
     <label className="block">
@@ -107,13 +126,24 @@ export default function ExpectationPicker({
           {emptyReason(subject, grade)} The plan still works without one.
         </p>
       ) : (
+        <>
+        {total > 12 && (
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by code or wording — try “spelling”"
+            aria-label="Filter expectations"
+            className="mb-2 w-full rounded-xl border-[3px] border-pop-night bg-white px-3 py-2 text-sm outline-none focus:ring-4 focus:ring-pop-pink/30"
+          />
+        )}
         <select
           value={value}
           onChange={(e) => onChange(e.target.value, program)}
           className="w-full rounded-xl border-[3px] border-pop-night bg-pop-cream px-3 py-2.5 outline-none focus:border-pop-night focus:bg-white focus:ring-4 focus:ring-pop-pink/30"
         >
           <option value="">No specific expectation</option>
-          {groups.map((g) => (
+          {(filtered ?? []).map((g) => (
             <optgroup key={g.strandCode} label={`${g.strandCode}. ${g.strandName}`}>
               {g.options.map((o) => (
                 <option key={o.code} value={o.code}>
@@ -123,11 +153,16 @@ export default function ExpectationPicker({
             </optgroup>
           ))}
         </select>
+        </>
       )}
 
       {total > 0 && (
         <p className="mt-1 text-xs text-pop-night/60">
-          {total} expectations for Grade {grade}, straight from the Ontario curriculum.
+          {query.trim() && shown === 0
+            ? `Nothing matches “${query.trim()}”. Ontario words its expectations broadly — a classroom term like “syllable” may not appear even where the skill does. Clear the box to see all ${total}.`
+            : query.trim() && shown !== total
+              ? `${shown} of ${total} match “${query.trim()}”.`
+              : `${total} expectations for Grade ${grade}, straight from the Ontario curriculum.`}
         </p>
       )}
     </label>
