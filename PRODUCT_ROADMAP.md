@@ -147,6 +147,42 @@ happened to each since. Sorted by what they'd change, not the order said.
    Worth noting this shares its blocker with the no-input worksheet above:
    both want a generation path that does not start from one child's profile.
 
+### Designed, awaiting a decision — browse / class / level
+
+Her follow-up resolved "object": it means **objective**. She wants to browse the
+curriculum by grade, subject and objective and pick one, rather than typing it;
+to plan for a whole class or one student; and to say which achievement level
+(1-4) the student or class is working at.
+
+**Browsing.** Ontario's own hierarchy solves the reach problem. Language Grade 3
+is 4 strands -> 12 overall expectations -> 60 specifics, so a drill-down never
+puts more than about a dozen things on screen, where the current picker shows a
+flat list of 60. An overall expectation is what a teacher calls an objective; a
+specific is what she assesses against, and she should be able to plan from
+either. A text search across all 1,189 is cheaper than the browse UI and
+probably what she reaches for first.
+
+**Class or student.** `learning_sessions.child_id` is NOT NULL and the RLS
+policy proves ownership by joining through the child row, so a plan with no
+child cannot prove who owns it. Two ways out: a real `classes` table with a
+second policy path, or a `kind` column on `children` so a class is just another
+row and the policy is untouched. The second is recommended — CLAUDE.md §3 calls
+RLS non-negotiable, and it buys the same feature without rewriting a working
+policy. Its honest cost is a table named `children` that also holds classes.
+
+**Achievement levels.** Ontario's 1-4 scale is on every report card, so it needs
+no explaining, and it maps onto the three differentiation tracks already
+shipping: Levels 1-2 are the support track, Level 3 the whole group, Level 4 the
+extension. Level belongs per subject rather than per child — a student can be
+Level 4 in Mathematics and Level 2 in Language — so it should be captured per
+session, defaulting to the last one used.
+
+Build order: search, then level, then the browser, then the class model. The
+first two need no migration and make the third worth having.
+
+Open: which class model; level per session or stored per student per subject;
+whether `/curriculum` is public; and whether she wants R below Level 1.
+
 ### Deferred to phases already planned
 
 Full teacher units for a class or an individual, and a parent portal wired to
