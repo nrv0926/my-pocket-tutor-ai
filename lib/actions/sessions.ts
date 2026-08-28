@@ -56,6 +56,10 @@ const InputSchema = z.object({
   expectationCode: z.string().max(12).nullable().optional(),
   expectationProgram: z.enum(["core", "extended", "immersion"]).nullable().optional(),
   achievementLevel: z.enum(["1", "2", "3", "4"]).nullable().optional(),
+  achievementSpread: z
+    .record(z.enum(["1", "2", "3", "4"]), z.number().int().min(0).max(60))
+    .nullable()
+    .optional(),
   text: z.string().min(5).max(8000),
 });
 
@@ -70,6 +74,8 @@ export async function createLearningSession(input: {
   expectationProgram?: "core" | "extended" | "immersion" | null;
   /** Ontario achievement level the learner is working at, if stated. */
   achievementLevel?: AchievementLevel | null;
+  /** For a class: how many students sit at each level. */
+  achievementSpread?: Partial<Record<AchievementLevel, number>> | null;
   text: string;
 }) {
   const parsed = InputSchema.parse(input);
@@ -182,6 +188,7 @@ export async function createLearningSession(input: {
           role,
           expectation,
           achievementLevel: parsed.achievementLevel ?? null,
+          achievementSpread: parsed.achievementSpread ?? null,
           previous,
           progression,
           recentFeedback,

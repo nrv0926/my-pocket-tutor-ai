@@ -67,9 +67,24 @@ export function isRole(value: unknown): value is Role {
   return value === "parent" || value === "homeschooler" || value === "teacher";
 }
 
+/**
+ * A profile is either one learner or a whole class.
+ *
+ * Both live in the same table so row-level security keeps proving ownership
+ * through user_id — see the comment in supabase/schema.sql.
+ */
+export type LearnerKind = "student" | "class";
+
+export const LEARNER_KINDS: LearnerKind[] = ["student", "class"];
+
+export function isLearnerKind(v: unknown): v is LearnerKind {
+  return v === "student" || v === "class";
+}
+
 export interface Child {
   id: string;
   userId: string;
+  kind: LearnerKind;
   nickname: string;
   age: number | null;
   grade: Grade;
@@ -84,6 +99,7 @@ export interface Child {
 }
 
 export interface ChildInput {
+  kind: LearnerKind;
   nickname: string;
   age: number | null;
   grade: Grade;

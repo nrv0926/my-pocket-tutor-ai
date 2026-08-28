@@ -26,6 +26,12 @@ create table if not exists public.children (
   nickname        text not null check (char_length(nickname) between 1 and 40),
   age             smallint check (age between 4 and 14),
   grade           text not null,                 -- 'K' through '8'
+  -- A row is either one learner or a whole class. Keeping both in this table
+  -- means row-level security still proves ownership through user_id, with no
+  -- second policy path to get wrong (CLAUDE.md §3). The table name is now a
+  -- little wrong; rename it when there is another reason to touch the schema.
+  kind            text not null default 'student'
+                  check (kind in ('student', 'class')),
   location        text not null default 'ON-CA', -- e.g. 'ON-CA' (Ontario, Canada)
   curriculum      text not null default 'ontario',
   learning_needs  text[] not null default '{}',  -- e.g. {'adhd','dyslexia','anxiety'}
@@ -40,6 +46,17 @@ create index if not exists children_user_id_idx on public.children(user_id);
 -- ---------------------------------------------------------------------
 -- uploads  (declared before learning_sessions because sessions reference it)
 -- ---------------------------------------------------------------------
+-- Added 2026-08. Safe to re-run; existing rows become 'student'.
+alter table public.children
+  add column if not exists kind text not null default 'student';
+do $$
+begin
+  alter table public.children
+    add constraint children_kind_check check (kind in ('student', 'class'));
+exception
+  when duplicate_object then null;
+end $$;
+
 create table if not exists public.uploads (
   id                          uuid primary key default uuid_generate_v4(),
   child_id                    uuid not null references public.children(id) on delete cascade,

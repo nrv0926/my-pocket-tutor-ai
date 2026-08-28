@@ -3,7 +3,8 @@
 import { useState } from "react";
 import type { ChildInput, Grade, LearningNeed, Role } from "@/types/child";
 import { GRADES } from "@/types/child";
-import { roleCopy } from "@/lib/roleCopy";
+import type { LearnerKind } from "@/types/child";
+import { learnerCopy } from "@/lib/roleCopy";
 
 
 const NEEDS: { id: LearningNeed; label: string }[] = [
@@ -17,13 +18,17 @@ const NEEDS: { id: LearningNeed; label: string }[] = [
 export default function ChildProfileForm({
   onSubmit,
   role = null,
+  allowClass = false,
 }: {
   onSubmit?: (data: ChildInput) => Promise<void> | void;
   role?: Role | null;
+  /** Teachers can plan for a class; everyone else profiles one learner. */
+  allowClass?: boolean;
 }) {
   const [needs, setNeeds] = useState<LearningNeed[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const copy = roleCopy(role);
+  const [kind, setKind] = useState<LearnerKind>("student");
+  const copy = learnerCopy(role, kind);
 
   return (
     <form
@@ -42,6 +47,7 @@ export default function ChildProfileForm({
           mainConcern: nullable(f.get("mainConcern")),
           strengths: nullable(f.get("strengths")),
           weaknesses: nullable(f.get("weaknesses")),
+          kind,
           parentGoal: nullable(f.get("parentGoal")),
         };
         try {
@@ -51,6 +57,24 @@ export default function ChildProfileForm({
         }
       }}
     >
+      {allowClass && (
+        <div className="flex gap-2 rounded-xl border-[3px] border-pop-night bg-pop-cream p-2">
+          {(["student", "class"] as LearnerKind[]).map((k) => (
+            <button
+              key={k}
+              type="button"
+              aria-pressed={kind === k}
+              onClick={() => setKind(k)}
+              className={`flex-1 rounded-lg border-[3px] border-pop-night px-3 py-2 font-display text-xs uppercase tracking-wide ${
+                kind === k ? "bg-pop-night text-pop-cream" : "bg-white text-pop-night hover:bg-pop-yellow"
+              }`}
+            >
+              {k === "student" ? "One student" : "A whole class"}
+            </button>
+          ))}
+        </div>
+      )}
+
       <Field label={copy.nicknameLabel}>
         <input
           name="nickname"
@@ -62,16 +86,18 @@ export default function ChildProfileForm({
       </Field>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Field label="Age">
-          <input
-            name="age"
-            type="number"
-            min={4}
-            max={14}
-            placeholder="7"
-            className={inputCls}
-          />
-        </Field>
+        {kind === "student" && (
+          <Field label="Age">
+            <input
+              name="age"
+              type="number"
+              min={4}
+              max={14}
+              placeholder="7"
+              className={inputCls}
+            />
+          </Field>
+        )}
         <Field label="Grade">
           <select name="grade" required defaultValue="" className={inputCls}>
             <option value="" disabled>

@@ -100,6 +100,11 @@ each, and `child-uploads` is created private.
 > CLI. Running the SQL by hand leaves it saying that forever. It is not
 > evidence your tables are missing.
 
+**Already have a database from before August 2026?** Re-run `schema.sql`. It
+adds the `kind` column that lets a profile be a whole class rather than one
+student, and existing rows become `student`. Verified against a database
+created without the column.
+
 ## 6. Point Supabase at the deployed URL
 
 **Authentication → URL Configuration:**

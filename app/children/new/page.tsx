@@ -25,7 +25,7 @@ export default function NewChildPage() {
           </p>
         )}
       </header>
-      <NewChildClient role={role} />
+      <NewChildClient role={role} allowClass={role === "teacher"} />
     </div>
   );
 }

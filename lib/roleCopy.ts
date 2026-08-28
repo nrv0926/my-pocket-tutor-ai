@@ -1,4 +1,4 @@
-import type { Role } from "@/types/child";
+import type { LearnerKind, Role } from "@/types/child";
 
 /**
  * Every user-facing string that changes with the reader's role.
@@ -108,4 +108,39 @@ export const DEFAULT_ROLE_COPY: RoleCopy = ROLE_COPY.parent;
 
 export function roleCopy(role: Role | null): RoleCopy {
   return role ? ROLE_COPY[role] : DEFAULT_ROLE_COPY;
+}
+
+/**
+ * Wording for a profile that is a whole class rather than one learner.
+ *
+ * Overlaid on the role copy above, because a teacher planning for her room
+ * is answering different questions from one planning for a single student —
+ * "where it breaks down" becomes "what the spread looks like".
+ */
+export const CLASS_COPY: Partial<RoleCopy> = {
+  learner: "class",
+  headline: "Setting up a class",
+  subhead: "We'll write one lesson with a track for each level in the room.",
+  pageTitle: "Tell us about your class.",
+  nicknameLabel: "Class or group name (never a student's name)",
+  nicknamePlaceholder: "e.g. Grade 3 Group B, Period 2 Core French",
+  concernLabel: "What are you seeing across the group? (one sentence)",
+  concernPlaceholder: "e.g. Most can decode CVC, a handful are stuck on anything longer.",
+  strengthsLabel: "What most of the room can already do",
+  strengthsPlaceholder: "e.g. CVC and digraphs are secure for about two thirds.",
+  weaknessesLabel: "Where the group splits",
+  weaknessesPlaceholder: "e.g. Six students cannot break a two-syllable word apart.",
+  goalLabel: "What do you need the group to be able to do?",
+  goalPlaceholder: "e.g. Everyone decoding two-syllable words before report cards.",
+  submitLabel: "Create class profile",
+  submittingLabel: "Creating class...",
+  sessionTitle: "What does the class need?",
+  sessionSubhead:
+    "Pick a class, tell us what you're seeing, and we'll write one lesson with a track for each level.",
+};
+
+/** Role copy, with the class overlay applied when the profile is a class. */
+export function learnerCopy(role: Role | null, kind: LearnerKind = "student"): RoleCopy {
+  const base = roleCopy(role);
+  return kind === "class" ? { ...base, ...CLASS_COPY } : base;
 }

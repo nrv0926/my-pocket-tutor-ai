@@ -6,7 +6,13 @@ import ChildProfileForm from "@/components/ChildProfileForm";
 import { createChild } from "@/lib/actions/children";
 import type { Role } from "@/types/child";
 
-export default function NewChildClient({ role }: { role: Role | null }) {
+export default function NewChildClient({
+  role,
+  allowClass = false,
+}: {
+  role: Role | null;
+  allowClass?: boolean;
+}) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
@@ -20,6 +26,7 @@ export default function NewChildClient({ role }: { role: Role | null }) {
 
       <ChildProfileForm
         role={role}
+        allowClass={allowClass}
         onSubmit={async (data) => {
           setError(null);
           try {

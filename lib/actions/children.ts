@@ -8,6 +8,7 @@ import type { ChildInput } from "@/types/child";
 const ChildInputSchema = z.object({
   nickname: z.string().min(1).max(40),
   age: z.number().int().min(4).max(14).nullable(),
+  kind: z.enum(["student", "class"]).default("student"),
   grade: z.enum(["K", "1", "2", "3", "4", "5", "6", "7", "8"]),
   location: z.string().min(2).default("ON-CA"),
   curriculum: z.enum(["ontario", "common-core", "other"]).default("ontario"),
@@ -36,6 +37,7 @@ export async function createChild(input: ChildInput): Promise<{ id: string }> {
       user_id: user.id,
       nickname: parsed.nickname,
       age: parsed.age,
+      kind: parsed.kind,
       grade: parsed.grade,
       location: parsed.location,
       curriculum: parsed.curriculum,

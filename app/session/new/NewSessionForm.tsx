@@ -4,6 +4,7 @@ import { useState } from "react";
 import LoadingState from "@/components/LoadingState";
 import ExpectationPicker from "@/components/ExpectationPicker";
 import AchievementLevelPicker from "@/components/AchievementLevelPicker";
+import LevelSpreadPicker, { type LevelSpread } from "@/components/LevelSpreadPicker";
 import { createLearningSession } from "@/lib/actions/sessions";
 import { SUBJECTS } from "@/types/child";
 import type { AchievementLevel, Grade, Subject } from "@/types/child";
@@ -21,7 +22,7 @@ function isRedirectSignal(err: unknown): boolean {
   );
 }
 
-type ChildOption = { id: string; nickname: string; grade: string };
+type ChildOption = { id: string; nickname: string; grade: string; kind?: "student" | "class" };
 
 const MODES: { id: SessionInputType; title: string; desc: string; placeholder: string }[] = [
   {
@@ -63,11 +64,14 @@ export default function NewSessionForm({
     (initialProgram as Program["id"]) ?? null
   );
   const [level, setLevel] = useState<AchievementLevel | null>(null);
+  const [spread, setSpread] = useState<LevelSpread>({});
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const selectedGrade = childProfiles.find((c) => c.id === childId)?.grade as
+  const selected = childProfiles.find((c) => c.id === childId);
+  const isClass = selected?.kind === "class";
+  const selectedGrade = selected?.grade as
     | GradeId
     | undefined;
 
@@ -87,7 +91,8 @@ export default function NewSessionForm({
             subject,
             expectationCode: expectation || null,
             expectationProgram: expectation ? expectationProgram : null,
-            achievementLevel: level,
+            achievementLevel: isClass ? null : level,
+            achievementSpread: isClass && Object.keys(spread).length ? spread : null,
             text: text.trim(),
           });
           // createLearningSession redirects to /results/[id] internally.
@@ -129,7 +134,12 @@ export default function NewSessionForm({
         </label>
       </div>
 
-      {showLevel && <AchievementLevelPicker value={level} onChange={setLevel} />}
+      {showLevel &&
+        (isClass ? (
+          <LevelSpreadPicker value={spread} onChange={setSpread} />
+        ) : (
+          <AchievementLevelPicker value={level} onChange={setLevel} />
+        ))}
 
       {selectedGrade && (
         <ExpectationPicker

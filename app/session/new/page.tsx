@@ -17,7 +17,7 @@ export default async function NewSessionPage({
   const supabase = getServerSupabase();
   const { data: children, error } = await supabase
     .from("children")
-    .select("id, nickname, grade")
+    .select("id, nickname, grade, kind")
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -51,6 +51,7 @@ export default async function NewSessionPage({
           id: c.id,
           nickname: c.nickname,
           grade: c.grade,
+          kind: (c.kind ?? "student") as "student" | "class",
         }))}
       />
 
