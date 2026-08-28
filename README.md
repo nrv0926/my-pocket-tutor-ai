@@ -6,6 +6,9 @@
 
 ---
 
+> Testing a build by hand? [TEST_JOURNEYS.md](TEST_JOURNEYS.md) has ten
+> walk-throughs with expected results.
+
 ## What it does
 
 AI Pocket Tutor lets a **parent or teacher** create a private profile for a
