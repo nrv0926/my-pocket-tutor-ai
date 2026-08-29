@@ -34,6 +34,8 @@ export interface RoleCopy {
   /** New-session page. */
   sessionTitle: string;
   sessionSubhead: string;
+  /** The "describe it" door on /start, in this reader's own terms. */
+  startDescribe: string;
 }
 
 export const ROLE_COPY: Record<Role, RoleCopy> = {
@@ -57,6 +59,8 @@ export const ROLE_COPY: Record<Role, RoleCopy> = {
     sessionTitle: "What would you like help with?",
     sessionSubhead:
       "Pick your child, tell us what came home, and we'll turn it into tonight's session.",
+    startDescribe:
+      "Homework tears, a note from school, something you noticed at bedtime.",
   },
   teacher: {
     learner: "student",
@@ -79,6 +83,8 @@ export const ROLE_COPY: Record<Role, RoleCopy> = {
     sessionTitle: "What do you need a plan for?",
     sessionSubhead:
       "Pick a student, tell us what you're seeing, and we'll send back a mini-lesson and an exit ticket.",
+    startDescribe:
+      "What you're seeing in the room, or where a group keeps stalling.",
   },
   homeschooler: {
     learner: "learner",
@@ -100,6 +106,8 @@ export const ROLE_COPY: Record<Role, RoleCopy> = {
     sessionTitle: "What are we planning today?",
     sessionSubhead:
       "Pick your learner, tell us where you are in the sequence, and we'll write the full mini-lesson.",
+    startDescribe:
+      "Where you've got stuck in the sequence, or what isn't sticking.",
   },
 };
 

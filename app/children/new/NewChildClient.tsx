@@ -31,7 +31,9 @@ export default function NewChildClient({
           setError(null);
           try {
             const { id } = await createChild(data);
-            router.push(`/progress/${id}`);
+            // A brand-new profile has no progress to show. Send them to
+            // the doors instead of an empty chart.
+            router.push(`/start?child=${id}`);
             router.refresh();
           } catch (err) {
             setError(err instanceof Error ? err.message : "Could not save profile.");

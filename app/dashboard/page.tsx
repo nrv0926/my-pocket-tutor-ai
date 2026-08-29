@@ -76,10 +76,10 @@ export default async function DashboardPage() {
           <p className="mt-1 text-sm text-pop-night/60">{user.email}</p>
         </div>
         <Link
-          href="/session/new"
+          href="/start"
           className="rounded-full bg-pop-pink px-5 py-2.5 text-sm font-semibold text-pop-night shadow hover:bg-pop-yellow"
         >
-          New learning session
+          Start something
         </Link>
       </header>
 

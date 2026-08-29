@@ -2,6 +2,7 @@ import LocalTime from "@/components/LocalTime";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AnalysisResultCard from "@/components/AnalysisResultCard";
+import PlanBridge from "@/components/PlanBridge";
 import WorksheetClient from "@/app/worksheet/[id]/WorksheetClient";
 import { getServerSupabase } from "@/lib/supabaseServer";
 import type { AnalysisResult, Worksheet } from "@/types/session";
@@ -27,6 +28,20 @@ export default async function ResultsPage({ params }: { params: { id: string } }
     .single();
 
   if (error || !data) notFound();
+
+  // Whether a month already exists decides whether we offer to build one or
+  // to open it. Both queries are RLS-scoped, so a session that is not theirs
+  // never got this far.
+  const [childRes, planRes] = await Promise.all([
+    supabase.from("children").select("nickname").eq("id", data.child_id).single(),
+    supabase
+      .from("learning_plans")
+      .select("id")
+      .eq("child_id", data.child_id)
+      .limit(1),
+  ]);
+  const nickname = childRes.data?.nickname ?? "them";
+  const hasPlan = (planRes.data ?? []).length > 0;
 
   const result = data.analysis_result as AnalysisResult;
   const worksheet = (data.worksheet as Worksheet | null) ?? result.practiceWorksheet;
@@ -79,7 +94,12 @@ export default async function ResultsPage({ params }: { params: { id: string } }
         <AnalysisResultCard result={result} />
       </section>
 
-      {/* 2 + 3. Worksheet + feedback (client) */}
+      {/* 2. The month this session belongs to */}
+      <section className="mb-10">
+        <PlanBridge childId={data.child_id} nickname={nickname} hasPlan={hasPlan} />
+      </section>
+
+      {/* 3 + 4. Worksheet + feedback (client) */}
       <section id="worksheet" className="scroll-mt-24">
         <h2 className="mb-3 font-display text-2xl text-pop-night">Worksheet</h2>
         <WorksheetClient

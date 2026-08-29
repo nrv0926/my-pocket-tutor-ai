@@ -17,7 +17,9 @@ const PROTECTED_PREFIXES = [
   "/worksheet",
   "/progress",
   "/settings",
-];
+  "/plan",
+  "/start",
+];  // tests/protectedRoutes.test.ts fails if a db-reading page is missing here
 
 /** Send anyone without a session to /login, keeping where they were headed. */
 function toLogin(request: NextRequest, path: string) {
