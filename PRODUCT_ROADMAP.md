@@ -104,12 +104,12 @@ happened to each since. Sorted by what they'd change, not the order said.
 
 ### Still open, and inside the five verbs
 
-1. **Worksheet with no diagnostic input.** Grade + subject + topic, and a
-   worksheet comes out. The flow still demands a concern to analyse, which is
-   the wrong shape for a teacher who knows what she wants and needs it before
-   period three. No longer blocked: "object" meant objective, and grade →
-   topic → item is now the picker. What is left is letting the text box be
-   empty when she has already said what she wants to teach.
+1. ~~**Worksheet with no diagnostic input.**~~ **Done.** Grade → topic →
+   item, and a plan comes out with nothing written in the box. "object"
+   meant objective. The remaining shape question is whether she also wants
+   this without a saved profile at all — every session still hangs off a
+   child or class row, because that is what row-level security proves
+   ownership through.
 2. **Continuous sessions, sequenced by level.** Said twice, which usually
    means it matters. Session N+1 should start where session N landed.
    `recentFeedbackContext()` already feeds the last few results to the

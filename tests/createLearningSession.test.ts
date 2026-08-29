@@ -169,6 +169,63 @@ describe("createLearningSession", () => {
     expect(serialized).not.toContain("blends");
   });
 
+  /**
+   * "plan" is the mode for a teacher who already knows what to teach. She
+   * picked the expectation from the curriculum; there is no concern to
+   * describe, so the box stays empty and the row stores no raw input.
+   */
+  describe("planning with no described concern", () => {
+    const runPlan = (over: Partial<Parameters<typeof createLearningSession>[0]> = {}) =>
+      createLearningSession({
+        childId: CHILD_ID,
+        inputType: "plan",
+        subject: "language" as StoredSubject,
+        expectationCode: "B2.1",
+        text: "",
+        ...over,
+      }).catch((e: Error) => e);
+
+    it("saves a session with an empty text box", async () => {
+      const err = (await runPlan()) as Error;
+      expect(err.message).toContain("NEXT_REDIRECT");
+      const row = calls.find((c) => c.table === "learning_sessions")!.payload as Record<
+        string,
+        unknown
+      >;
+      expect(row.input_type).toBe("plan");
+      // text is nullable; "" would be a lie about what she typed.
+      expect(row.raw_input).toBeNull();
+      expect(row.analysis_result).toBeTruthy();
+    });
+
+    it("refuses when she has named neither a concern nor an expectation", async () => {
+      const err = (await runPlan({ expectationCode: null })) as Error;
+      expect(err.message).not.toContain("NEXT_REDIRECT");
+      expect(calls.some((c) => c.table === "learning_sessions")).toBe(false);
+    });
+
+    it("still keeps an optional note she does write", async () => {
+      await runPlan({ text: "Third period, twenty minutes, no printer today." });
+      const row = calls.find((c) => c.table === "learning_sessions")!.payload as Record<
+        string,
+        unknown
+      >;
+      expect(row.raw_input).toContain("no printer");
+    });
+
+    it("treats a two-character note as a slip, not a note", async () => {
+      const err = (await runPlan({ text: "ok" })) as Error;
+      expect(err.message).not.toContain("NEXT_REDIRECT");
+      expect(calls.some((c) => c.table === "learning_sessions")).toBe(false);
+    });
+
+    it("does not let the other modes skip the box", async () => {
+      const err = (await runPlan({ inputType: "description", text: "" })) as Error;
+      expect(err.message).not.toContain("NEXT_REDIRECT");
+      expect(calls.some((c) => c.table === "learning_sessions")).toBe(false);
+    });
+  });
+
   it("rejects input that fails validation before touching the model", async () => {
     const err = (await createLearningSession({
       childId: "not-a-uuid",

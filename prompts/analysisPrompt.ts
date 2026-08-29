@@ -15,7 +15,7 @@ import {
 } from "@/lib/prompts";
 import type { AchievementLevel, Child, Role, Subject } from "@/types/child";
 
-export const ANALYSIS_PROMPT_VERSION = "analysis@2026-08-29.6";
+export const ANALYSIS_PROMPT_VERSION = "analysis@2026-08-29.7";
 
 /**
  * Main analysis: parent input → 9-section structured plan + worksheet.
@@ -82,13 +82,35 @@ export function buildAnalysisPrompt(args: {
     ? progressionContext(progression.current, progression.next)
     : "";
 
-  const taskAddendum = `
-TASK
+  // No described concern: she picked the expectation instead. The task is
+  // to teach it, not to diagnose — and section 1 must report rather than
+  // imagine, because there is a real child on the other end of it.
+  const taught = parentInput.trim().length === 0;
+
+  const task = taught
+    ? `TASK
+The adult has not described a problem. They have chosen what to teach.
+Design ONE session for the target expectation named below.
+
+WHAT I NOTICE must report ONLY what you were actually given: what the
+profile says is already secure, where it breaks down, the stated goal, the
+achievement level, and the last session if there was one. If the profile
+says little, say so plainly — "You haven't told us much about them yet, so
+this plan starts from the curriculum" — and move on. NEVER invent an
+observation, a struggle, a behaviour, or a classroom moment you were not
+told about. A made-up noticing about a real child is worse than a short one.
+
+Everything else is unchanged: the specific underlying skills, the top 3 to
+teach next, and a single short worksheet.`
+    : `TASK
 Analyze what is going on with this child and design ONE session they can do
 today. Identify the SPECIFIC underlying skills, choose the top 3 to teach
 next (in priority order), and write a single short worksheet. Difficulty
 must match the child's current level — start easier than the adult's
-baseline assumption if there are signs of struggle.
+baseline assumption if there are signs of struggle.`;
+
+  const taskAddendum = `
+${task}
 ${roleBlock ? `\n${roleBlock}\n` : ""}${expectationBlock ? `\n${expectationBlock}\n` : ""}${planGradeBlock ? `\n${planGradeBlock}\n` : ""}${achievementBlock ? `\n${achievementBlock}\n` : ""}${levelsBlock ? `\n${levelsBlock}\n` : ""}${continuityBlock ? `\n${continuityBlock}\n` : ""}${progressionBlock ? `\n${progressionBlock}\n` : ""}
 OUTPUT FORMAT
 ${NINE_SECTION_OUTPUT_SCHEMA}
@@ -101,11 +123,11 @@ CHILD PROFILE
 ${childContext(child)}
 
 SUBJECT: ${subject}
-${feedbackBlock ? `\n${feedbackBlock}\n` : ""}
-PARENT / TEACHER INPUT
-"""
-${parentInput}
-"""
+${feedbackBlock ? `\n${feedbackBlock}\n` : ""}${
+    taught
+      ? "The adult described no concern. Teach the expectation above."
+      : `PARENT / TEACHER INPUT\n"""\n${parentInput}\n"""`
+  }
 
 Return the JSON object now. No prose outside JSON, no markdown fences.
 `.trim();

@@ -10,6 +10,8 @@ import { useState } from "react";
 import ExpectationPicker from "@/components/ExpectationPicker";
 import AchievementLevelPicker from "@/components/AchievementLevelPicker";
 import LevelSpreadPicker, { type LevelSpread } from "@/components/LevelSpreadPicker";
+import SessionModePicker, { sessionMode } from "@/components/SessionModePicker";
+import type { SessionInputType } from "@/types/session";
 import type { GradeId, SubjectId } from "@/types/curriculum";
 import type { AchievementLevel } from "@/types/child";
 import { SAMPLE_ANALYSIS } from "@/app/try/samples/parent";
@@ -66,6 +68,19 @@ const SPLIT_ANALYSIS: AnalysisResult = {
     },
   ],
 };
+
+function ModeDemo() {
+  const [mode, setMode] = useState<SessionInputType>("plan");
+  return (
+    <div className="space-y-3">
+      <SessionModePicker value={mode} onChange={setMode} />
+      <p className="text-xs text-pop-night/60">
+        box label: <b>{sessionMode(mode).label}</b> · required:{" "}
+        <b>{mode === "plan" ? "no" : "yes"}</b>
+      </p>
+    </div>
+  );
+}
 
 function SpreadDemo() {
   const [spread, setSpread] = useState<LevelSpread>({ "1": 6, "3": 12, "4": 4 });
@@ -125,6 +140,10 @@ function ExpectationPickerDemo() {
 export default function PreviewGallery() {
   return (
     <div className="mx-auto max-w-4xl space-y-16 px-4 py-12 sm:px-6">
+      <Block label="SessionModePicker — the third mode needs no text">
+        <ModeDemo />
+      </Block>
+
       <Block label="LevelSpreadPicker — how a class splits">
         <SpreadDemo />
       </Block>

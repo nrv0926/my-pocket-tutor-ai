@@ -62,8 +62,27 @@ const InputSchema = z.object({
     .nullable()
     .optional(),
   worksheetLevels: z.array(z.enum(["1", "2", "3", "4"])).max(4).optional(),
-  text: z.string().min(5).max(8000),
-});
+  text: z.string().max(8000),
+})
+  /**
+   * "plan" is the mode for an adult who already knows what to teach: she
+   * picked the expectation, so there is no concern to describe and the box
+   * stays empty. Every other mode is diagnostic and has nothing to work
+   * from without it.
+   */
+  .refine((v) => v.inputType !== "plan" || !!v.expectationCode, {
+    message: "Choose what to teach, or tell us what's going on.",
+    path: ["expectationCode"],
+  })
+  .refine((v) => v.inputType === "plan" || v.text.trim().length >= 5, {
+    message: "Tell us a little more so we can help.",
+    path: ["text"],
+  })
+  // Optional does not mean "anything". Two characters is a slip, not a note.
+  .refine((v) => v.text.trim().length === 0 || v.text.trim().length >= 5, {
+    message: "Tell us a little more so we can help.",
+    path: ["text"],
+  });
 
 export async function createLearningSession(input: {
   childId: string;
@@ -203,7 +222,7 @@ export async function createLearningSession(input: {
       : buildAnalysisPrompt({
           child: childForPrompt,
           subject: subject,
-          parentInput: parsed.text,
+          parentInput: parsed.text.trim(),
           role,
           expectation,
           planGrade: planGrade === child.grade ? null : planGrade,
@@ -277,7 +296,7 @@ export async function createLearningSession(input: {
       child_id: parsed.childId,
       input_type: parsed.inputType,
       subject,
-      raw_input: parsed.text,
+      raw_input: parsed.text.trim() || null,
       analysis_result: result,
       top_skill_gaps: skillIds.length > 0 ? skillIds : result.whatToTeachNext,
       worksheet: result.practiceWorksheet,

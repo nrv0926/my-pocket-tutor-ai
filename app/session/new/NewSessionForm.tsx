@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import LoadingState from "@/components/LoadingState";
+import SessionModePicker, { sessionMode } from "@/components/SessionModePicker";
 import ExpectationPicker from "@/components/ExpectationPicker";
 import AchievementLevelPicker from "@/components/AchievementLevelPicker";
 import LevelSpreadPicker, { type LevelSpread } from "@/components/LevelSpreadPicker";
@@ -24,20 +25,6 @@ function isRedirectSignal(err: unknown): boolean {
 
 type ChildOption = { id: string; nickname: string; grade: string; kind?: "student" | "class" };
 
-const MODES: { id: SessionInputType; title: string; desc: string; placeholder: string }[] = [
-  {
-    id: "paste",
-    title: "Paste report card comments",
-    desc: "A sentence or two from the term report works.",
-    placeholder: "e.g. Reads grade-level texts but is hesitant with multisyllabic words...",
-  },
-  {
-    id: "description",
-    title: "Describe a homework struggle",
-    desc: "Tell us what's going on in plain English.",
-    placeholder: "e.g. He freezes when subtraction has borrowing.",
-  },
-];
 
 export default function NewSessionForm({
   childProfiles,
@@ -55,7 +42,12 @@ export default function NewSessionForm({
   initialProgram?: string;
 }) {
   const [childId, setChildId] = useState(childProfiles[0]?.id ?? "");
-  const [mode, setMode] = useState<SessionInputType>("paste");
+  // Arriving from /curriculum's "Plan this" means she has already said what
+  // to teach, so start where that leaves her rather than asking for a
+  // concern she came here specifically not to have to write.
+  const [mode, setMode] = useState<SessionInputType>(
+    initialExpectation ? "plan" : "paste"
+  );
   const [subject, setSubject] = useState<Subject>(
     SUBJECTS.includes(initialSubject as Subject) ? (initialSubject as Subject) : "language"
   );
@@ -97,7 +89,15 @@ export default function NewSessionForm({
       onSubmit={async (event) => {
         event.preventDefault();
         if (!childId) return setError("Choose a child first.");
-        if (text.trim().length < 5) return setError("Tell us a little more so we can help.");
+        if (mode === "plan" && !expectation) {
+          return setError("Choose what to teach above, or tell us what's going on.");
+        }
+        // The box is optional only in "plan" mode, and only when empty:
+        // two characters is a slip, not a note.
+        const note = text.trim();
+        if (mode === "plan" ? note.length > 0 && note.length < 5 : note.length < 5) {
+          return setError("Tell us a little more so we can help.");
+        }
         setSubmitting(true);
         setError(null);
         try {
@@ -190,37 +190,27 @@ export default function NewSessionForm({
         />
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {MODES.map((m) => (
-          <button
-            key={m.id}
-            type="button"
-            onClick={() => setMode(m.id)}
-            className={[
-              "rounded-2xl border p-5 text-left shadow-pop-sm transition",
-              mode === m.id
-                ? "border-pop-night bg-pop-cyan"
-                : "border-pop-night bg-white hover:border-pop-night",
-            ].join(" ")}
-          >
-            <p className="font-display text-lg text-pop-night">{m.title}</p>
-            <p className="mt-1 text-sm text-pop-night/80">{m.desc}</p>
-          </button>
-        ))}
-      </div>
+      <SessionModePicker value={mode} onChange={setMode} />
+
+      {mode === "plan" && !expectation && (
+        <p className="rounded-xl border-[3px] border-dashed border-pop-night/40 bg-pop-cream px-3 py-2.5 text-sm text-pop-night/75">
+          Pick what they&apos;ll work on above — grade, topic, then the item.
+          That is what this plan gets built from.
+        </p>
+      )}
 
       <label className="block">
         <span className="mb-1 block text-sm font-medium text-pop-night/80">
-          {MODES.find((m) => m.id === mode)?.title}
+          {sessionMode(mode).label}
         </span>
         <textarea
-          rows={6}
-          required
+          rows={mode === "plan" ? 3 : 6}
+          required={mode !== "plan"}
           minLength={5}
           maxLength={8000}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder={MODES.find((m) => m.id === mode)?.placeholder}
+          placeholder={sessionMode(mode).placeholder}
           className="w-full rounded-xl border-[3px] border-pop-night bg-pop-cream px-3 py-2.5 outline-none focus:border-pop-night focus:bg-white focus:ring-4 focus:ring-forest-500/15"
         />
         <p className="mt-1 text-xs text-pop-night/60">

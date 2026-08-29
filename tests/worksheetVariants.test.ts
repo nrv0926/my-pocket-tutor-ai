@@ -102,7 +102,7 @@ describe("the analysis prompt", () => {
   });
 
   it("bumps its version when the contract changes", () => {
-    expect(build([]).version).toBe("analysis@2026-08-29.6");
+    expect(build([]).version).toBe("analysis@2026-08-29.7");
   });
 });
 
@@ -159,5 +159,70 @@ describe("variant integrity", () => {
     const legacy = { whatINotice: "x" } as unknown as AnalysisResult;
     expect(Schema.safeParse(legacy).success).toBe(true);
     expect(legacy.worksheetVariants).toBeUndefined();
+  });
+});
+
+/**
+ * Planning with nothing described.
+ *
+ * She picked the expectation, so there is nothing to diagnose. The danger is
+ * section 1: WHAT I NOTICE has to report what it was given and nothing more,
+ * because there is a real child on the other end and a fabricated noticing
+ * about them is worse than a short one.
+ */
+describe("a plan built from the curriculum, not from a concern", () => {
+  const teach = (input: string) =>
+    buildAnalysisPrompt({
+      child,
+      subject: "language",
+      parentInput: input,
+      expectation: {
+        code: "B2.1",
+        text: "read and spell words with vowel teams",
+        strandCode: "B",
+        strandName: "Foundations of Language",
+      },
+    });
+
+  it("switches the task from diagnosing to teaching", () => {
+    const { system } = teach("");
+    expect(system).toContain("The adult has not described a problem");
+    expect(system).not.toMatch(/^TASK\nAnalyze what is going on/m);
+  });
+
+  it("keeps diagnosing when she did describe something", () => {
+    const { system } = teach("He guesses at any word longer than one syllable.");
+    expect(system).toMatch(/Analyze what is going on/);
+    expect(system).not.toContain("The adult has not described a problem");
+  });
+
+  it("forbids inventing an observation about a real child", () => {
+    const { system } = teach("");
+    expect(system).toMatch(/NEVER invent an\s*\n?observation/);
+    expect(system).toMatch(/report ONLY what you were actually given/);
+  });
+
+  it("gives it something honest to say when the profile is thin", () => {
+    expect(teach("").system).toMatch(/haven't told us much about them yet/);
+  });
+
+  it("never leaves an empty quote block in the user message", () => {
+    const { user } = teach("");
+    expect(user).not.toContain('"""\n\n"""');
+    expect(user).not.toContain("PARENT / TEACHER INPUT");
+    expect(user).toContain("described no concern");
+  });
+
+  it("still quotes her note when she writes one", () => {
+    const { user } = teach("No printer today.");
+    expect(user).toContain("PARENT / TEACHER INPUT");
+    expect(user).toContain("No printer today.");
+  });
+
+  it("still asks for all nine sections either way", () => {
+    for (const input of ["", "He guesses at long words."]) {
+      expect(teach(input).system).toContain("feedbackQuestion");
+      expect(teach(input).system).toContain("whatINotice");
+    }
   });
 });

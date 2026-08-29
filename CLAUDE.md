@@ -137,6 +137,13 @@ and a tab strip prints whichever tab happened to be open.
   same table so row-level security keeps proving ownership through `user_id` —
   do not add a second policy path. The table name is knowingly a little wrong;
   rename it when there is another reason to touch the schema.
+- **A plan does not require a described problem.** When the adult has picked
+  an expectation, the text box is optional (`inputType: "plan"`). The prompt
+  switches from diagnosing to teaching, and WHAT I NOTICE must then report
+  **only** what it was actually given — the profile, the level, the last
+  session. Never let it invent an observation, a struggle or a classroom
+  moment: there is a real child on the other end, and a fabricated noticing
+  is worse than a short one. Every other mode still needs the box.
 - **A plan can target a grade other than the profile's.** The reading group
   that is two years behind is the whole reason a teacher reaches down, so the
   picker lets her, and the plan says which grade it is pitched at. Resolve

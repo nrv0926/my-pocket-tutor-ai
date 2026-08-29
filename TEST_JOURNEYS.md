@@ -1,10 +1,10 @@
 # Test journeys
 
-Sixteen walks through the app, written so a failure is unambiguous. Each step says
+Seventeen walks through the app, written so a failure is unambiguous. Each step says
 what to do and what should happen; each journey ends with the specific thing
 that counts as a bug.
 
-The automated suite (`npm test`, 194 tests) covers shapes and rules. These
+The automated suite (`npm test`, 206 tests) covers shapes and rules. These
 cover the things only a person notices — whether the copy speaks to the right
 reader, whether a plan is usable in a classroom, whether it prints.
 
@@ -15,7 +15,7 @@ This file is the one that gets updated when the app changes.
 
 ## Before you start
 
-**Journeys 1, 2, 8, 10, 11 and 16 need nothing configured.** They are the demo path and
+**Journeys 1, 2, 8, 10, 11 and 16 need nothing configured.** (17 needs Supabase.) They are the demo path and
 should work on any deployment. Run these first — if something is broken there,
 it is broken for everyone.
 
@@ -293,6 +293,27 @@ setup.*
 at, or a Level 1 worksheet that is a different activity rather than a smaller
 step of the same one.
 
+## 17. A plan with nothing written in the box
+*Needs Supabase. This is the teacher who knows what she wants and has four
+minutes before period three.*
+
+1. On `/session/new`, look at the three mode cards. → The third reads **I
+   know what to teach — pick it above. Nothing to write.**
+2. Choose it without picking an expectation. → A note tells you to pick what
+   they'll work on above. Submitting says the same thing rather than failing
+   silently.
+3. Pick Grade 3 → Language → B2 → an item, leave the box empty, submit. → A
+   full nine-section plan.
+4. Read section 1. → It reports only what it was given — what the profile
+   says is secure, where it breaks down, the goal, the level. If the profile
+   is thin it says so plainly.
+5. Come in from `/curriculum` via **Plan this**. → You land already in the
+   third mode, because you already said what to teach.
+
+**Bug:** section 1 describing a struggle, a behaviour or a classroom moment
+nobody told us about. There is a real child on the other end of that
+sentence, and an invented noticing is worse than a short one.
+
 ---
 
 ## Regression watch
@@ -315,10 +336,10 @@ Bugs already fixed once, and the journey that would catch each coming back.
 
 ## Not covered, because it is not built
 
-The "celebrate a win" consolidation session, the Science and Technology
-curriculum, and a worksheet from a blank text box — the flow still asks for a
-concern to analyse even when she has already said what she wants to teach.
-See PRODUCT_ROADMAP.md.
+The "celebrate a win" consolidation session and the Science and Technology
+curriculum. Planning from a blank box now works (journey 17); what is still
+missing is doing it with no saved profile at all, which row-level security
+makes a real change rather than a small one. See PRODUCT_ROADMAP.md.
 
 **R is decided: no.** The scale is Ontario's 1–4 and nothing else.
 
