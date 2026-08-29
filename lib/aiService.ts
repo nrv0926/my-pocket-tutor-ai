@@ -49,6 +49,24 @@ export interface AIRequest {
   enableThinking?: boolean;
   /** Override the default 16k output cap. */
   maxTokens?: number;
+  /**
+   * A file for the model to read itself.
+   *
+   * Claude reads PDFs and images natively, which is why there is no OCR step
+   * anywhere in this app. A report card is usually a phone photo taken at an
+   * angle or a scan, and an OCR pass over that loses the table structure —
+   * which column a comment sits in is most of the meaning. Handing over the
+   * document keeps it.
+   */
+  attachment?: Attachment;
+}
+
+export interface Attachment {
+  kind: "image" | "pdf";
+  /** e.g. "image/jpeg" or "application/pdf". */
+  mediaType: string;
+  /** Base64, no newlines, no data: prefix. */
+  data: string;
 }
 
 export interface AIUsage {
@@ -75,6 +93,31 @@ export async function generate<T>(req: AIRequest): Promise<AIResponse<T>> {
   return callClaude<T>(req, model);
 }
 
+/**
+ * The user turn, with the file first when there is one.
+ *
+ * Order matters: the API wants a document or image block before the text
+ * that refers to it.
+ */
+function userContent(req: AIRequest): string | Anthropic.ContentBlockParam[] {
+  const a = req.attachment;
+  if (!a) return req.user;
+
+  const source = { type: "base64" as const, data: a.data };
+  const file: Anthropic.ContentBlockParam =
+    a.kind === "pdf"
+      ? { type: "document", source: { ...source, media_type: "application/pdf" } }
+      : {
+          type: "image",
+          source: {
+            ...source,
+            media_type: a.mediaType as "image/png" | "image/jpeg" | "image/webp" | "image/gif",
+          },
+        };
+
+  return [file, { type: "text", text: req.user }];
+}
+
 async function callClaude<T>(req: AIRequest, model: string): Promise<AIResponse<T>> {
   try {
     const response = await client().messages.create({
@@ -91,7 +134,7 @@ async function callClaude<T>(req: AIRequest, model: string): Promise<AIResponse<
           cache_control: { type: "ephemeral" },
         },
       ],
-      messages: [{ role: "user", content: req.user }],
+      messages: [{ role: "user", content: userContent(req) }],
       ...(req.enableThinking
         ? {
             thinking: {

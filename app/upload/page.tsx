@@ -1,12 +1,20 @@
-"use client";
+import { redirect } from "next/navigation";
+import UploadClient from "./UploadClient";
+import { getRole } from "@/lib/role";
+import { getServerSupabase } from "@/lib/supabaseServer";
 
-import { useState } from "react";
-import UploadBox from "@/components/UploadBox";
-import LoadingState from "@/components/LoadingState";
+export const dynamic = "force-dynamic";
 
-export default function UploadPage() {
-  const [file, setFile] = useState<File | null>(null);
-  const [busy, setBusy] = useState(false);
+export default async function UploadPage() {
+  if (!getRole()) redirect("/welcome?next=%2Fupload");
+
+  const supabase = getServerSupabase();
+  const { data: children } = await supabase
+    .from("children")
+    .select("id, nickname, grade")
+    .order("created_at", { ascending: true });
+
+  if (!children || children.length === 0) redirect("/children/new");
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
@@ -14,32 +22,23 @@ export default function UploadPage() {
         <p className="text-xs font-semibold uppercase tracking-widest text-pop-magenta">
           Secure upload
         </p>
-        <h1 className="mt-1 font-display text-3xl text-pop-night">Share a worksheet or document.</h1>
+        <h1 className="mt-1 font-display text-3xl text-pop-night">
+          Share a report card or worksheet.
+        </h1>
         <p className="mt-2 text-pop-night/80">
-          Files go to a private storage bucket. We delete them after analysis
-          unless you choose to keep them.
+          A photo of the page is fine — we read it as it is, columns and all.
+          The file goes to a private bucket and is deleted the moment the plan
+          is written.
         </p>
       </header>
 
-      <UploadBox onFileReady={setFile} />
-
-      <div className="mt-6 flex items-center gap-3">
-        <button
-          disabled={!file || busy}
-          onClick={async () => {
-            setBusy(true);
-            // TODO: server action: createSignedUploadUrl, PUT file, insert
-            // uploads row, kick off analysis, redirect to /results/[id].
-            await new Promise((r) => setTimeout(r, 800));
-            setBusy(false);
-            alert("Upload pipeline wires up in Phase 1.5.");
-          }}
-          className="rounded-full bg-pop-pink px-5 py-3 text-sm font-semibold text-pop-night hover:bg-pop-yellow disabled:opacity-50"
-        >
-          {busy ? "Analyzing..." : "Analyze this"}
-        </button>
-        {busy && <LoadingState label="Sending to AI..." />}
-      </div>
+      <UploadClient
+        learners={children.map((c) => ({
+          id: c.id,
+          nickname: c.nickname,
+          grade: c.grade,
+        }))}
+      />
     </div>
   );
 }
