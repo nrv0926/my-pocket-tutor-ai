@@ -269,3 +269,23 @@ share the `.next` build cache and will start serving each other 404s.
 
 Env changes only take effect on restart — Next.js reads `.env.local` at
 boot.
+
+## Already have a project? Run the migration
+
+`schema.sql` and `policies.sql` describe a fresh database. If yours already
+has data in it, paste **`supabase/migrations/0001_plans_and_uploads.sql`**
+into the Supabase SQL editor instead and run it once. It is idempotent —
+running it twice changes nothing the second time.
+
+It creates:
+
+- `learning_plans` and its row-level security policy, which `/plan/[childId]`
+  needs;
+- a **private** `uploads` bucket with the same 10 MB limit and file types the
+  app enforces, plus owner-scoped read/write/update/**delete** policies,
+  which `/upload` needs. The delete policy is not optional: the app removes
+  each file after analysis, and without it that promise silently fails.
+
+**How to tell whether you need it:** open `/settings`. If anything is
+missing, a panel there names it and says which file fixes it. If the panel is
+not there, nothing is missing.

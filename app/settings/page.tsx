@@ -1,9 +1,17 @@
+import SetupStatus from "@/components/SetupStatus";
+import { runSetupChecks } from "@/lib/setupCheck";
 import Link from "next/link";
 import RoleSwitcher from "@/components/RoleSwitcher";
 import { getRole } from "@/lib/role";
 
-export default function SettingsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function SettingsPage() {
   const role = getRole();
+  // Asked here rather than on the dashboard: this is where someone goes
+  // when something is not working, and a permanent banner elsewhere would
+  // be noise once it is fixed.
+  const checks = await runSetupChecks();
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <header className="mb-6">
@@ -12,6 +20,10 @@ export default function SettingsPage() {
         </p>
         <h1 className="mt-1 font-display text-3xl text-pop-night">Your account.</h1>
       </header>
+
+      <div className="mb-6">
+        <SetupStatus checks={checks} />
+      </div>
 
       <section className="mb-6 rounded-2xl border-[3px] border-pop-night bg-white p-5 shadow-pop-sm">
         <h2 className="font-display text-lg text-pop-night">What are you planning for?</h2>
