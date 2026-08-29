@@ -1,10 +1,10 @@
 # Test journeys
 
-Fourteen walks through the app, written so a failure is unambiguous. Each step says
+Sixteen walks through the app, written so a failure is unambiguous. Each step says
 what to do and what should happen; each journey ends with the specific thing
 that counts as a bug.
 
-The automated suite (`npm test`, 164 tests) covers shapes and rules. These
+The automated suite (`npm test`, 194 tests) covers shapes and rules. These
 cover the things only a person notices — whether the copy speaks to the right
 reader, whether a plan is usable in a classroom, whether it prints.
 
@@ -15,7 +15,7 @@ This file is the one that gets updated when the app changes.
 
 ## Before you start
 
-**Journeys 1, 2, 8, 10 and 11 need nothing configured.** They are the demo path and
+**Journeys 1, 2, 8, 10, 11 and 16 need nothing configured.** They are the demo path and
 should work on any deployment. Run these first — if something is broken there,
 it is broken for everyone.
 
@@ -255,6 +255,44 @@ Level 4 is the goal and Level 3 a shortfall.
 **Bug:** being stuck with whichever role you first arrived through, or a
 switcher that sends you anywhere other than back where you were.
 
+## 15. Getting to an objective without knowing its wording
+*Needs Supabase (the picker lives on the session form).*
+
+1. On `/session/new` with a Grade 3 student. → A **What are you teaching?**
+   box with a Grade dropdown and a Topic dropdown, not one list of sixty.
+2. Open Topic. → Twelve, each named as Ontario names it — "B2 — Language
+   Foundations for Reading and Writing".
+3. Choose B2. → The objective's full wording appears, and the item list drops
+   to four. The caption reads "4 to choose from in this topic".
+4. Change Grade to 1. → The topic resets to All, the item list reloads for
+   Grade 1, and a note says you are planning at Grade 1 for a Grade 3
+   profile.
+5. Generate the plan. → It targets the Grade 1 expectation you picked, and
+   says which grade it is pitched at.
+
+**Bug:** the plan quoting a Grade 3 expectation after you chose a Grade 1
+one. The code is the same string at both grades and means different things —
+that is the bug this journey exists to catch.
+
+## 16. One lesson, a worksheet per level
+*Needs Supabase for the real flow; `/qa-preview` shows the rendering with no
+setup.*
+
+1. As a teacher, select a class profile and give it a spread across two or
+   more levels. → A checkbox offers a worksheet for each level in the room,
+   already ticked, and counts them.
+2. Set every student to one level. → The checkbox disappears. One level in
+   the room needs one worksheet.
+3. Generate with a spread of Level 1 and Level 3. → Section 5 holds three
+   worksheets: Whole group, Level 1, Level 3. Section 6 holds a key for each.
+4. Count the numbered sections. → Still exactly nine. The variants sit inside
+   5 and 6, not beside them.
+5. Open print preview. → All three worksheets and all three keys print.
+
+**Bug:** a tenth section, a level in the output that nobody in the room sits
+at, or a Level 1 worksheet that is a different activity rather than a smaller
+step of the same one.
+
 ---
 
 ## Regression watch
@@ -272,14 +310,17 @@ Bugs already fixed once, and the journey that would catch each coming back.
 | Subject taxonomy | Reading and Writing listed as subjects, not Language strands | 5 |
 | Search vocabulary | "syllable" returned nothing; the word is not in Ontario's wording | 12 |
 | Open redirect | Switching role redirected to a raw form value | 14 |
+| Grade-blind lookup | A stepped-down code resolved against the profile's grade | 15 |
+| Curriculum in the bundle | One client import took first load from 99 KB to 175 KB | — |
 
 ## Not covered, because it is not built
 
-Bulk generation across levels, the "celebrate a win" consolidation session, and
-the Science and Technology curriculum. Class planning now exists (journey 14);
-what is still missing is generating several difficulty levels at once from one
-topic — see PRODUCT_ROADMAP.md.
+The "celebrate a win" consolidation session, the Science and Technology
+curriculum, and a worksheet from a blank text box — the flow still asks for a
+concern to analyse even when she has already said what she wants to teach.
+See PRODUCT_ROADMAP.md.
 
-One note is still open: whether she wants **R**, the level below 1 that some
-Ontario report cards use. And the "prototype loop error" she hit during the
-walkthrough has never been reproduced.
+**R is decided: no.** The scale is Ontario's 1–4 and nothing else.
+
+The "prototype loop error" she hit during the walkthrough has never been
+reproduced.

@@ -107,17 +107,20 @@ happened to each since. Sorted by what they'd change, not the order said.
 1. **Worksheet with no diagnostic input.** Grade + subject + topic, and a
    worksheet comes out. The flow still demands a concern to analyse, which is
    the wrong shape for a teacher who knows what she wants and needs it before
-   period three. Blocked on what "object" meant in *grade, subject, idea,
-   object*.
+   period three. No longer blocked: "object" meant objective, and grade →
+   topic → item is now the picker. What is left is letting the text box be
+   empty when she has already said what she wants to teach.
 2. **Continuous sessions, sequenced by level.** Said twice, which usually
    means it matters. Session N+1 should start where session N landed.
    `recentFeedbackContext()` already feeds the last few results to the
    prompt, so the plumbing half-exists; the sequencing does not. The
    Foundations Continuum now gives us a published K–4 progression to sequence
    against rather than inventing one.
-3. **Bulk generation across levels.** One topic, several difficulty levels at
-   once, so a class of mixed readers gets one lesson and several worksheets.
-   Related to Phase 4 but not gated on it: this is generation, not accounts.
+3. ~~**Bulk generation across levels.**~~ **Done.** A class whose level
+   spread names two or more levels gets one lesson and a worksheet per level,
+   inside sections 5 and 6 rather than beside them. What is still not built
+   is the same idea for a single student across several sessions — that is
+   item 2, sequencing, not this.
 4. **Celebrate a win.** Needs a decision before any code. An easy
    consolidation session an adult chooses to run is inside the product; a
    streak or badge a child logs in to collect is a permanent non-goal. One

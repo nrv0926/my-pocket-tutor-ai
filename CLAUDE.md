@@ -82,7 +82,9 @@ The renderer in `components/AnalysisResultCard.tsx` depends on this shape.
 If you change the structure, change both — and bump the prompt version.
 
 **Nine means nine.** Anything new goes *inside* an existing section, never
-beside them. Two things already do, both inside HOW TO TEACH IT:
+beside them. Three things already do.
+
+Inside HOW TO TEACH IT:
 
 - `teachingMaterials` — the cards, word lists and sentence strips the lesson
   calls for. Produce them; never tell an adult to go and make something.
@@ -90,6 +92,17 @@ beside them. Two things already do, both inside HOW TO TEACH IT:
   ready for more). The support track is a **smaller step of the same skill**,
   never a different lesson and never busywork. Omit the field for a parent
   teaching one child: there is nobody to differentiate between.
+
+Inside PRACTICE WORKSHEET and ANSWER KEY:
+
+- `worksheetVariants` — one lesson, a worksheet per achievement level in the
+  room. Each variant carries its own key, so the two sections cannot drift
+  apart. Same skill and same shape as the whole-group worksheet every time.
+  Only for levels the room actually contains, and only when a class spread
+  names two or more; one learner at one level needs one worksheet.
+
+Render these **stacked, not tabbed**. She prints the plan and walks to class,
+and a tab strip prints whichever tab happened to be open.
 
 ## 6. Curriculum alignment
 
@@ -117,18 +130,35 @@ beside them. Two things already do, both inside HOW TO TEACH IT:
   write copy or a prompt that treats 4 as the goal and 3 as a shortfall.
   Level is per subject, not per child: a student can be Level 4 in Mathematics
   and Level 2 in Language. Captured per session; optional; never shown to
-  parents. A class gives a spread of counts instead, which sizes the three
+  parents. **The scale is 1–4 and nothing else** — no R, no half levels, no
+  "3+". Asked and settled. A class gives a spread of counts instead, which sizes the three
   differentiation tracks to the room.
 - **A profile is a student or a class** (`children.kind`). Both live in the
   same table so row-level security keeps proving ownership through `user_id` —
   do not add a second policy path. The table name is knowingly a little wrong;
   rename it when there is another reason to touch the schema.
+- **A plan can target a grade other than the profile's.** The reading group
+  that is two years behind is the whole reason a teacher reaches down, so the
+  picker lets her, and the plan says which grade it is pitched at. Resolve
+  the expectation against the **grade being planned**, never the profile's:
+  B1.1 at Grade 1 is a different expectation from B1.1 at Grade 3, so the
+  wrong lookup silently hands the model the wrong wording.
+- **Topic names are transcribed too.** Ontario labels each Language overall
+  expectation with a short name before a colon; Mathematics has none, so the
+  published wording stands. Never write a topic name — an invented label is
+  the same sin as an invented code, just quieter. Watch for grade bands:
+  Financial Literacy really is written "Grades 1 and 2: …", and that is not
+  a topic.
 - **Search the continuum, not just the expectations.** Ontario words its
   expectations broadly: "syllable" appears nowhere in the Language curriculum
   and neither does "decoding". Both are in
   `data/ontario/language-foundations-continuum.json`, which records which
   expectations each foundational skill sits behind. Any search a teacher
   touches must span both, or her own vocabulary returns nothing.
+- **Never import `lib/curriculum.ts` from a `"use client"` file.** It pulls
+  ~250 KB of transcribed JSON in at module scope; one three-line helper once
+  took first load from 99 KB to 175 KB. Reach it through a server action.
+  `tests/clientBundle.test.ts` fails the build if you forget.
 - Skill maps live in `/data`. Look there before inventing a skill name.
 - If the curriculum data does not cover a skill yet, add it to the JSON file
   rather than hard-coding it in a prompt.
