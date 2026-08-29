@@ -1,7 +1,9 @@
 import LocalTime from "@/components/LocalTime";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import ContinueCard from "@/components/ContinueCard";
 import ProgressTracker from "@/components/ProgressTracker";
+import { getRole } from "@/lib/role";
 import { getServerSupabase } from "@/lib/supabaseServer";
 import { summarize } from "@/lib/progressEngine";
 import { continuityFor } from "@/lib/continuity";
@@ -10,6 +12,10 @@ import type { ProgressRecord } from "@/types/progress";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
+  // The role decides the wording and which controls exist at all, so it is
+  // asked before the first plan rather than defaulted into silently.
+  if (!getRole()) redirect("/welcome?next=%2Fdashboard");
+
   const supabase = getServerSupabase();
   const {
     data: { user },

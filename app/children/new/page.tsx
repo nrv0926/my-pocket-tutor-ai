@@ -1,9 +1,13 @@
+import { redirect } from "next/navigation";
 import { getRole } from "@/lib/role";
 import { roleCopy } from "@/lib/roleCopy";
 import NewChildClient from "./NewChildClient";
 
 export default function NewChildPage() {
   const role = getRole();
+  // Asking after they have filled the form would be too late: the questions
+  // themselves differ by role.
+  if (!role) redirect("/welcome?next=%2Fchildren%2Fnew");
   const copy = roleCopy(role);
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
