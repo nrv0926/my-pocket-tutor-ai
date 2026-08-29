@@ -309,6 +309,37 @@ export function expectationContext(
   ].join("\n");
 }
 
+/**
+ * Say out loud that the plan is aimed at a grade other than the profile's.
+ *
+ * A teacher steps down deliberately — the reading group that is two years
+ * behind is the reason she wants a Grade 1 expectation for a Grade 3 class.
+ * The plan has to name that, because the alternative is a document that
+ * looks like a filing error to whoever reads it next, including her in
+ * September. Stepping down is house policy (CLAUDE.md §4); stepping up is
+ * hers to choose, and the work still has to land where the child actually
+ * is, so the instruction is the same either way.
+ */
+export function planGradeContext(
+  planGrade: string | null,
+  profileGrade: string
+): string {
+  if (!planGrade || planGrade === profileGrade) return "";
+  const name = (g: string) => (g === "K" ? "Kindergarten" : `Grade ${g}`);
+  const down = planGrade === "K" || (profileGrade !== "K" && Number(planGrade) < Number(profileGrade));
+  return [
+    `TARGET GRADE: ${name(planGrade)} (the profile is ${name(profileGrade)}).`,
+    `The adult chose this deliberately — ${
+      down
+        ? "they are teaching the step the learner can actually take."
+        : "they are reaching past the register grade."
+    }`,
+    `Pitch the work at ${name(planGrade)} and say once, plainly and without`,
+    "apology, that it is pitched there and why. Never describe the learner as",
+    "behind, below, or delayed — describe the work, not the child.",
+  ].join("\n");
+}
+
 /** The previous session for this child, as far as the prompt needs it. */
 export interface PreviousSession {
   createdAt: string;

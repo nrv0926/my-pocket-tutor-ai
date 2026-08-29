@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LoadingState from "@/components/LoadingState";
 import ExpectationPicker from "@/components/ExpectationPicker";
 import AchievementLevelPicker from "@/components/AchievementLevelPicker";
@@ -63,6 +63,7 @@ export default function NewSessionForm({
   const [expectationProgram, setExpectationProgram] = useState<Program["id"] | null>(
     (initialProgram as Program["id"]) ?? null
   );
+  const [planGrade, setPlanGrade] = useState<GradeId | null>(null);
   const [level, setLevel] = useState<AchievementLevel | null>(null);
   const [spread, setSpread] = useState<LevelSpread>({});
   const [text, setText] = useState("");
@@ -71,9 +72,16 @@ export default function NewSessionForm({
 
   const selected = childProfiles.find((c) => c.id === childId);
   const isClass = selected?.kind === "class";
-  const selectedGrade = selected?.grade as
-    | GradeId
-    | undefined;
+  const selectedGrade = selected?.grade as GradeId | undefined;
+
+  // Planning follows the profile until she says otherwise, and follows it
+  // again the moment she picks a different profile — a Grade 1 target left
+  // over from the last student would be silently wrong for the next one.
+  useEffect(() => {
+    setPlanGrade(null);
+  }, [childId]);
+
+  const grade = planGrade ?? selectedGrade;
 
   return (
     <form
@@ -91,6 +99,7 @@ export default function NewSessionForm({
             subject,
             expectationCode: expectation || null,
             expectationProgram: expectation ? expectationProgram : null,
+            planGrade: grade && grade !== selectedGrade ? grade : null,
             achievementLevel: isClass ? null : level,
             achievementSpread: isClass && Object.keys(spread).length ? spread : null,
             text: text.trim(),
@@ -141,10 +150,12 @@ export default function NewSessionForm({
           <AchievementLevelPicker value={level} onChange={setLevel} />
         ))}
 
-      {selectedGrade && (
+      {grade && (
         <ExpectationPicker
           subject={subject as SubjectId}
-          grade={selectedGrade}
+          grade={grade}
+          onGradeChange={setPlanGrade}
+          childGrade={selectedGrade}
           value={expectation}
           onChange={(code, program) => {
             setExpectation(code);

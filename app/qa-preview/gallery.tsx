@@ -56,7 +56,14 @@ function ExpectationPickerDemo() {
           </button>
         ))}
       </div>
-      <ExpectationPicker subject={subject} grade={grade} value={code} onChange={setCode} />
+      <ExpectationPicker
+        subject={subject}
+        grade={grade}
+        onGradeChange={setGrade}
+        childGrade="3"
+        value={code}
+        onChange={setCode}
+      />
       <p className="text-xs text-pop-night/60">selected: {code || "(none)"}</p>
     </div>
   );

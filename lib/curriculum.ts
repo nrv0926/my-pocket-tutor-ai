@@ -324,3 +324,25 @@ export function objectivesFor(
   }
   return out;
 }
+
+/**
+ * The short name Ontario gives an objective, when it gives one.
+ *
+ * Language labels every overall expectation with a topic before a colon —
+ * "Oral and Non-Verbal Communication: apply listening..." — which is exactly
+ * the phrase a teacher would use for it. Mathematics does not, so there is
+ * nothing to extract and the caller falls back to the wording itself. We
+ * never write a topic name ourselves: an invented label is the same sin as an
+ * invented code (CLAUDE.md §6), just quieter.
+ *
+ * Financial Literacy is the exception that forces the guard. Ontario really
+ * does write "Grades 1 and 2: demonstrate..." there, so the text before the
+ * colon is a grade band, not a topic, and must not become one.
+ */
+export function objectiveTopic(text: string): string | null {
+  const colon = text.indexOf(":");
+  if (colon < 2 || colon > 70) return null;
+  const head = text.slice(0, colon).trim();
+  if (!head || /^grades?\b/i.test(head)) return null;
+  return head;
+}

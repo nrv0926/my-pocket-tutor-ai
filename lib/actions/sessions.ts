@@ -55,6 +55,7 @@ const InputSchema = z.object({
   subject: z.enum(STORED_SUBJECTS),
   expectationCode: z.string().max(12).nullable().optional(),
   expectationProgram: z.enum(["core", "extended", "immersion"]).nullable().optional(),
+  planGrade: z.enum(["K", "1", "2", "3", "4", "5", "6", "7", "8"]).nullable().optional(),
   achievementLevel: z.enum(["1", "2", "3", "4"]).nullable().optional(),
   achievementSpread: z
     .record(z.enum(["1", "2", "3", "4"]), z.number().int().min(0).max(60))
@@ -72,6 +73,12 @@ export async function createLearningSession(input: {
   expectationCode?: string | null;
   /** FSL only — which program that code belongs to. */
   expectationProgram?: "core" | "extended" | "immersion" | null;
+  /**
+   * Plan at a different grade than the profile sits in — the group that is
+   * behind is the whole reason a teacher reaches for a lower grade. Null
+   * means "use the profile's grade", which is the ordinary case.
+   */
+  planGrade?: GradeId | null;
   /** Ontario achievement level the learner is working at, if stated. */
   achievementLevel?: AchievementLevel | null;
   /** For a class: how many students sit at each level. */
@@ -161,13 +168,19 @@ export async function createLearningSession(input: {
   // Rows written before the taxonomy fix stored Reading/Writing as subjects.
   const subject = normalizeSubject(parsed.subject);
 
+  // The grade the plan is aimed at, which is not always the grade on the
+  // profile. Looking the code up under the profile's grade instead would
+  // silently drop every deliberately stepped-down expectation, because
+  // B1.1 at Grade 1 is a different expectation from B1.1 at Grade 3.
+  const planGrade = (parsed.planGrade ?? child.grade) as GradeId;
+
   // Resolve the chosen code to its published wording. Looked up rather than
   // passed through, so the prompt can never carry a code the curriculum does
   // not actually contain (CLAUDE.md §6).
   const expectation = parsed.expectationCode
     ? findExpectation(
         subject,
-        child.grade as GradeId,
+        planGrade,
         parsed.expectationCode,
         parsed.expectationProgram ?? undefined
       )
@@ -187,6 +200,7 @@ export async function createLearningSession(input: {
           parentInput: parsed.text,
           role,
           expectation,
+          planGrade: planGrade === child.grade ? null : planGrade,
           achievementLevel: parsed.achievementLevel ?? null,
           achievementSpread: parsed.achievementSpread ?? null,
           previous,

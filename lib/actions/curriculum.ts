@@ -1,6 +1,12 @@
 "use server";
 
-import { expectationOptions, programsFor, type ExpectationOption } from "@/lib/curriculum";
+import {
+  expectationOptions,
+  objectiveTopic,
+  objectivesFor,
+  programsFor,
+  type ExpectationOption,
+} from "@/lib/curriculum";
 import { searchContinuum } from "@/lib/foundationsContinuum";
 import type { GradeId, Program, SubjectId } from "@/types/curriculum";
 
@@ -117,4 +123,49 @@ export async function searchExpectations(
   }
 
   return { groups: [...groups.values()], via, matched: direct.size, total: all.length };
+}
+
+export interface TopicItem {
+  code: string;
+  text: string;
+}
+
+export interface Topic {
+  strandCode: string;
+  strandName: string;
+  /** The overall expectation's code — "B2". */
+  code: string;
+  /** Ontario's own short name for it, where Ontario gives one. */
+  label: string;
+  /** The full published wording, shown once the topic is chosen. */
+  text: string;
+  items: TopicItem[];
+}
+
+/**
+ * The curriculum as a teacher picks through it: topic first, then the item
+ * she will actually teach.
+ *
+ * One dropdown of sixty specific expectations is technically complete and
+ * practically unusable — she has to already know the wording to find
+ * anything. Splitting it at Ontario's own objective boundary turns that into
+ * a dozen topics and then a handful of items, which is a choice she can make
+ * without reading the whole list.
+ *
+ * Server-side for the same reason as everything else here: the transcribed
+ * curriculum is ~215 KB that has no business in a browser.
+ */
+export async function getTopics(
+  subject: SubjectId,
+  grade: GradeId,
+  program?: Program["id"]
+): Promise<Topic[]> {
+  return objectivesFor(subject, grade, program).map((o) => ({
+    strandCode: o.strandCode,
+    strandName: o.strandName,
+    code: o.code,
+    label: objectiveTopic(o.text) ?? o.text,
+    text: o.text,
+    items: o.specifics.map((s) => ({ code: s.code, text: s.text })),
+  }));
 }
