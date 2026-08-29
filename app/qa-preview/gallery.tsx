@@ -13,6 +13,59 @@ import LevelSpreadPicker, { type LevelSpread } from "@/components/LevelSpreadPic
 import type { GradeId, SubjectId } from "@/types/curriculum";
 import type { AchievementLevel } from "@/types/child";
 import { SAMPLE_ANALYSIS } from "@/app/try/samples/parent";
+import type { AnalysisResult } from "@/types/session";
+
+/**
+ * One lesson, several worksheets — the shape a class of mixed readers gets.
+ * Stacked rather than tabbed, because she prints this and walks to class.
+ */
+const SPLIT_ANALYSIS: AnalysisResult = {
+  ...SAMPLE_ANALYSIS,
+  worksheetVariants: [
+    {
+      level: "1",
+      worksheet: {
+        title: "Level 1 — two syllables, closed only",
+        difficulty: "easy",
+        questions: [
+          { id: "L1q1", prompt: "Split and read: nap-kin", answer: "napkin", difficulty: "easy" },
+          { id: "L1q2", prompt: "Split and read: mag-net", answer: "magnet", difficulty: "easy" },
+          { id: "L1q3", prompt: "Split and read: sun-set", answer: "sunset", difficulty: "easy" },
+          { id: "L1q4", prompt: "Split and read: rab-bit", answer: "rabbit", difficulty: "easy" },
+          { id: "L1q5", prompt: "Split and read: pic-nic", answer: "picnic", difficulty: "medium" },
+        ],
+      },
+      answerKey: [
+        { questionId: "L1q1", answer: "napkin" },
+        { questionId: "L1q2", answer: "magnet" },
+        { questionId: "L1q3", answer: "sunset" },
+        { questionId: "L1q4", answer: "rabbit" },
+        { questionId: "L1q5", answer: "picnic" },
+      ],
+    },
+    {
+      level: "3",
+      worksheet: {
+        title: "Level 3 — three syllables, mixed types",
+        difficulty: "medium",
+        questions: [
+          { id: "L3q1", prompt: "Split and read: fan-tas-tic", answer: "fantastic", difficulty: "medium" },
+          { id: "L3q2", prompt: "Split and read: im-por-tant", answer: "important", difficulty: "medium" },
+          { id: "L3q3", prompt: "Split and read: to-ma-to", answer: "tomato", difficulty: "medium" },
+          { id: "L3q4", prompt: "Split and read: cel-e-brate", answer: "celebrate", difficulty: "hard" },
+          { id: "L3q5", prompt: "Split and read: ex-pen-sive", answer: "expensive", difficulty: "hard" },
+        ],
+      },
+      answerKey: [
+        { questionId: "L3q1", answer: "fantastic" },
+        { questionId: "L3q2", answer: "important" },
+        { questionId: "L3q3", answer: "tomato" },
+        { questionId: "L3q4", answer: "celebrate" },
+        { questionId: "L3q5", answer: "expensive" },
+      ],
+    },
+  ],
+};
 
 function SpreadDemo() {
   const [spread, setSpread] = useState<LevelSpread>({ "1": 6, "3": 12, "4": 4 });
@@ -116,6 +169,10 @@ export default function PreviewGallery() {
 
       <Block label="ChildProfileForm">
         <ChildProfileForm />
+      </Block>
+
+      <Block label="AnalysisResultCard — one lesson, a worksheet per level">
+        <AnalysisResultCard result={SPLIT_ANALYSIS} />
       </Block>
 
       <Block label="AnalysisResultCard">

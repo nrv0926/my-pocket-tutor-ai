@@ -1,4 +1,4 @@
-import type { Subject } from "./child";
+import type { AchievementLevel, Subject } from "./child";
 
 export type Difficulty = "easy" | "medium" | "hard";
 
@@ -63,6 +63,26 @@ export interface Differentiation {
   watchFor?: string;
 }
 
+/**
+ * The same practice, pitched where each part of the room actually is.
+ *
+ * One lesson, several worksheets. A class of mixed readers gets taught
+ * together and then practises apart, which is what the three differentiation
+ * tracks already say out loud — this is that promise carried through to the
+ * paper she hands out, instead of one worksheet aimed at the middle and two
+ * thirds of the class quietly mismatched to it.
+ *
+ * Lives inside PRACTICE WORKSHEET and ANSWER KEY rather than becoming a
+ * tenth section: nine means nine (CLAUDE.md §5). Each variant carries its
+ * own key so the two sections cannot drift out of step.
+ */
+export interface WorksheetVariant {
+  /** Ontario achievement level this set is pitched at. */
+  level: AchievementLevel;
+  worksheet: Worksheet;
+  answerKey: { questionId: string; answer: string }[];
+}
+
 /** The structured nine-section AI output. Order is fixed — see CLAUDE.md §5. */
 export interface AnalysisResult {
   whatINotice: string;
@@ -86,6 +106,14 @@ export interface AnalysisResult {
   differentiation?: Differentiation;
   practiceWorksheet: Worksheet;
   answerKey: { questionId: string; answer: string }[];
+  /**
+   * Extra worksheets, one per achievement level in the room.
+   *
+   * Optional twice over: every session saved before this field existed still
+   * parses, and one learner at one level needs exactly one worksheet — the
+   * one above.
+   */
+  worksheetVariants?: WorksheetVariant[];
   parentTips: string[];      // 2–3
   nextStepPlan: string;
   feedbackQuestion: string;  // always: "Was this too easy, just right, or too hard?"

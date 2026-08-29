@@ -61,6 +61,7 @@ const InputSchema = z.object({
     .record(z.enum(["1", "2", "3", "4"]), z.number().int().min(0).max(60))
     .nullable()
     .optional(),
+  worksheetLevels: z.array(z.enum(["1", "2", "3", "4"])).max(4).optional(),
   text: z.string().min(5).max(8000),
 });
 
@@ -83,6 +84,11 @@ export async function createLearningSession(input: {
   achievementLevel?: AchievementLevel | null;
   /** For a class: how many students sit at each level. */
   achievementSpread?: Partial<Record<AchievementLevel, number>> | null;
+  /**
+   * Give each of these levels its own worksheet. One lesson, several
+   * worksheets — the class is taught together and practises apart.
+   */
+  worksheetLevels?: AchievementLevel[];
   text: string;
 }) {
   const parsed = InputSchema.parse(input);
@@ -203,6 +209,11 @@ export async function createLearningSession(input: {
           planGrade: planGrade === child.grade ? null : planGrade,
           achievementLevel: parsed.achievementLevel ?? null,
           achievementSpread: parsed.achievementSpread ?? null,
+          // Only levels the room actually contains. Asking for a worksheet
+          // at a level nobody sits at spends tokens on paper for no one.
+          worksheetLevels: (parsed.worksheetLevels ?? []).filter(
+            (l) => !parsed.achievementSpread || (parsed.achievementSpread[l] ?? 0) > 0
+          ),
           previous,
           progression,
           recentFeedback,

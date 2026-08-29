@@ -66,6 +66,7 @@ export default function NewSessionForm({
   const [planGrade, setPlanGrade] = useState<GradeId | null>(null);
   const [level, setLevel] = useState<AchievementLevel | null>(null);
   const [spread, setSpread] = useState<LevelSpread>({});
+  const [perLevel, setPerLevel] = useState(true);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,6 +83,13 @@ export default function NewSessionForm({
   }, [childId]);
 
   const grade = planGrade ?? selectedGrade;
+
+  // Levels the room actually contains, in Ontario's order. Two or more of
+  // them is what makes a separate worksheet each worth generating.
+  const levelsInRoom = (["1", "2", "3", "4"] as AchievementLevel[]).filter(
+    (l) => (spread[l] ?? 0) > 0
+  );
+  const canSplit = isClass && levelsInRoom.length > 1;
 
   return (
     <form
@@ -102,6 +110,7 @@ export default function NewSessionForm({
             planGrade: grade && grade !== selectedGrade ? grade : null,
             achievementLevel: isClass ? null : level,
             achievementSpread: isClass && Object.keys(spread).length ? spread : null,
+            worksheetLevels: canSplit && perLevel ? levelsInRoom : [],
             text: text.trim(),
           });
           // createLearningSession redirects to /results/[id] internally.
@@ -145,7 +154,24 @@ export default function NewSessionForm({
 
       {showLevel &&
         (isClass ? (
-          <LevelSpreadPicker value={spread} onChange={setSpread} />
+          <>
+            <LevelSpreadPicker value={spread} onChange={setSpread} />
+            {canSplit && (
+              <label className="flex items-start gap-3 rounded-2xl border-[3px] border-pop-night bg-pop-cyan/25 p-4">
+                <input
+                  type="checkbox"
+                  checked={perLevel}
+                  onChange={(e) => setPerLevel(e.target.checked)}
+                  className="mt-0.5 h-5 w-5 shrink-0 accent-pop-magenta"
+                />
+                <span className="text-sm text-pop-night">
+                  <b>A worksheet for each level in the room.</b> One lesson,{" "}
+                  {levelsInRoom.length} worksheets — same skill, sized to each
+                  group. Takes a little longer to write.
+                </span>
+              </label>
+            )}
+          </>
         ) : (
           <AchievementLevelPicker value={level} onChange={setLevel} />
         ))}

@@ -104,6 +104,15 @@ SMALLER STEP of the same skill, never a different lesson and never busywork.
 Omit the field entirely for a parent teaching one child, who has nobody to
 differentiate between.
 
+ONE LESSON, SEVERAL WORKSHEETS.
+Include "worksheetVariants" only when the levels to write for are named
+below, and then write one variant per level named — no more, no fewer. Every
+variant practises THE SAME SKILL as the main worksheet; a lower level gets a
+smaller step of it, never a different topic and never colouring. Keep the
+question count and the shape the same so the room looks like one class doing
+one thing. Question ids must be unique across every variant, because the
+answer keys are read together.
+
 PRODUCE THE MATERIALS, DO NOT DESCRIBE THEM.
 If a step says to write six cards, put the six words in teachingMaterials.
 If it says to read five sentences, write the five sentences. The reader has
@@ -143,6 +152,20 @@ The JSON object MUST match this TypeScript type EXACTLY:
     }>                                           // length between 5 and 8
   },
   "answerKey": Array<{ "questionId": string, "answer": string }>,
+  "worksheetVariants": Array<{                  // ONLY when levels are named below
+    "level": "1" | "2" | "3" | "4",
+    "worksheet": {                              // same shape as practiceWorksheet
+      "title": string,
+      "difficulty": "easy" | "medium" | "hard",
+      "questions": Array<{
+        "id": string,                           // unique ACROSS variants: "L2q1", ...
+        "prompt": string,
+        "answer": string,
+        "difficulty": "easy" | "medium" | "hard"
+      }>                                         // length between 5 and 8
+    },
+    "answerKey": Array<{ "questionId": string, "answer": string }>
+  }>,
   "parentTips": string[],                       // 2–3 practical tips
   "nextStepPlan": string,                       // 1 short paragraph
   "feedbackQuestion": "Was this too easy, just right, or too hard?"
@@ -338,6 +361,52 @@ export function planGradeContext(
     "apology, that it is pitched there and why. Never describe the learner as",
     "behind, below, or delayed — describe the work, not the child.",
   ].join("\n");
+}
+
+/**
+ * Which levels get their own worksheet.
+ *
+ * A class that splits three ways is taught once and practises three ways,
+ * which is what the differentiation tracks already promise; this carries the
+ * promise onto the paper. The counts go in so the model can size each set to
+ * a real group rather than an abstraction, and so it never treats Level 3 as
+ * a shortfall — Level 3 IS the provincial standard (CLAUDE.md §6).
+ */
+export function worksheetLevelsContext(
+  levels: AchievementLevel[],
+  spread?: Partial<Record<AchievementLevel, number>> | null
+): string {
+  if (levels.length === 0) return "";
+  const described = levels
+    .map((l) => {
+      const n = spread?.[l];
+      return n ? `Level ${l} (${n} student${n === 1 ? "" : "s"})` : `Level ${l}`;
+    })
+    .join(", ");
+  const lines = [
+    `WRITE A WORKSHEET FOR EACH OF THESE LEVELS: ${described}.`,
+    "Put them in worksheetVariants, one entry per level, in the order given.",
+    "The main practiceWorksheet stays what the whole group does together.",
+    "Every variant must be recognisably the same lesson.",
+  ];
+  // Only guidance about levels that are actually in the room. Explaining
+  // Level 4 to a class that has none is noise the model has to read past.
+  if (levels.includes("3")) {
+    lines.push(
+      "Level 3 is the provincial standard, not a shortfall: write it as the",
+      "expected work, not as a set that falls short of Level 4."
+    );
+  }
+  if (levels.includes("4")) {
+    lines.push("Level 4 goes deeper, not merely longer. Do not just add questions.");
+  }
+  if (levels.includes("1")) {
+    lines.push(
+      "Level 1 is a smaller step of the same skill, with more scaffolding —",
+      "never a different topic, never colouring, never busywork."
+    );
+  }
+  return lines.join("\n");
 }
 
 /** The previous session for this child, as far as the prompt needs it. */

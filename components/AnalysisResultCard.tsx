@@ -1,6 +1,6 @@
 import DifferentiationTracks from "@/components/DifferentiationTracks";
 import TeachingMaterials from "@/components/TeachingMaterials";
-import type { AnalysisResult } from "@/types/session";
+import type { AnalysisResult, Worksheet } from "@/types/session";
 
 /**
  * Renders the fixed nine-section AI output. The shape is binding — see
@@ -8,6 +8,10 @@ import type { AnalysisResult } from "@/types/session";
  * and bump its version too.
  */
 export default function AnalysisResultCard({ result }: { result: AnalysisResult }) {
+  // Stacked, not tabbed. She prints this and walks to class, and a tab strip
+  // prints whichever one happened to be open (journey 10).
+  const variants = result.worksheetVariants ?? [];
+
   return (
     <article className="space-y-8">
       <Section index={1} title="What I notice">
@@ -47,30 +51,27 @@ export default function AnalysisResultCard({ result }: { result: AnalysisResult 
       </Section>
 
       <Section index={5} title="Practice worksheet">
-        <p className="mb-3 text-sm text-pop-night/60">
-          {result.practiceWorksheet.questions.length} questions ·
-          difficulty: <strong className="capitalize">{result.practiceWorksheet.difficulty}</strong>
-        </p>
-        <ol className="ml-5 list-decimal space-y-2 text-pop-night">
-          {result.practiceWorksheet.questions.map((q) => (
-            <li key={q.id}>
-              <span>{q.prompt}</span>{" "}
-              <span className="ml-2 rounded bg-pop-night/15 px-1.5 py-0.5 align-middle text-[10px] uppercase tracking-widest text-pop-night/60">
-                {q.difficulty}
-              </span>
-            </li>
-          ))}
-        </ol>
+        <QuestionList
+          worksheet={result.practiceWorksheet}
+          heading={variants.length > 0 ? "Whole group" : null}
+        />
+        {variants.map((v) => (
+          <QuestionList
+            key={v.level}
+            worksheet={v.worksheet}
+            heading={`Level ${v.level}`}
+          />
+        ))}
       </Section>
 
       <Section index={6} title="Answer key">
-        <ul className="ml-5 list-disc space-y-1 text-pop-night/80">
-          {result.answerKey.map((a) => (
-            <li key={a.questionId}>
-              <span className="font-mono text-xs text-pop-night/60">{a.questionId}</span> · {a.answer}
-            </li>
-          ))}
-        </ul>
+        <AnswerList
+          answers={result.answerKey}
+          heading={variants.length > 0 ? "Whole group" : null}
+        />
+        {variants.map((v) => (
+          <AnswerList key={v.level} answers={v.answerKey} heading={`Level ${v.level}`} />
+        ))}
       </Section>
 
       <Section index={7} title="Parent / teacher tips">
@@ -111,5 +112,68 @@ function Section({
       </header>
       {children}
     </section>
+  );
+}
+
+/**
+ * One worksheet. The heading only appears when there is more than one to
+ * tell apart — a single set is just "the worksheet", and labelling it would
+ * imply a level nobody chose.
+ */
+function QuestionList({
+  worksheet,
+  heading,
+}: {
+  worksheet: Worksheet;
+  heading: string | null;
+}) {
+  return (
+    <div className={heading ? "mt-5 break-inside-avoid first:mt-0" : ""}>
+      {heading && (
+        <p className="font-display text-sm uppercase tracking-widest text-pop-magenta">
+          {heading}
+        </p>
+      )}
+      <p className="mb-3 text-sm text-pop-night/60">
+        {worksheet.questions.length} questions · difficulty:{" "}
+        <strong className="capitalize">{worksheet.difficulty}</strong>
+      </p>
+      <ol className="ml-5 list-decimal space-y-2 text-pop-night">
+        {worksheet.questions.map((q) => (
+          <li key={q.id}>
+            <span>{q.prompt}</span>{" "}
+            <span className="ml-2 rounded bg-pop-night/15 px-1.5 py-0.5 align-middle text-[10px] uppercase tracking-widest text-pop-night/60">
+              {q.difficulty}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+function AnswerList({
+  answers,
+  heading,
+}: {
+  answers: { questionId: string; answer: string }[];
+  heading: string | null;
+}) {
+  return (
+    <div className={heading ? "mt-4 break-inside-avoid first:mt-0" : ""}>
+      {heading && (
+        <p className="mb-1 font-display text-sm uppercase tracking-widest text-pop-magenta">
+          {heading}
+        </p>
+      )}
+      <ul className="ml-5 list-disc space-y-1 text-pop-night/80">
+        {answers.map((a) => (
+          <li key={a.questionId}>
+            <span className="font-mono text-xs text-pop-night/60">{a.questionId}</span> ·{" "}
+            {a.answer}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

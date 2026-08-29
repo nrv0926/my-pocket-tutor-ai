@@ -137,3 +137,26 @@ Ontario publishes Kindergarten as its own program document rather than as a
 grade inside each subject. `GradeId` includes `"K"`, but no strand currently
 claims it. Handle it explicitly when it is added — do not fold it into
 Grade 1.
+
+## Known transcription defects
+
+Two expectations are truncated. Both are left as they are, and recorded
+here, because the fix requires the source PDF: writing the missing tail from
+memory is exactly the invention this file exists to prevent, and a
+plausible-looking wrong expectation is worse than a visibly short one.
+
+- **`language.json` — B3.1, Grade 4.** Ends mid-sentence at "…see Appendix B
+  in the". A cross-reference whose tail was lost in extraction.
+- **`mathematics.json` — F1 overall.** Ontario writes Financial Literacy's
+  overall expectation as several grade bands in one entry. The extraction
+  ran two of them together and cut the second: "Grades 1 and 2: … Canadian
+  currency Grade 3: demonstrate an understanding of".
+
+One artifact was repaired without the PDF, because the intended characters
+were not in doubt: `F1` read "G rades 1 and 2" — a space inserted mid-word by
+the extractor. Character-level repairs of that kind are safe. Anything that
+would add or complete a *word* is not.
+
+The `objectiveTopic()` guard in `lib/curriculum.ts` exists because of F1:
+the text before its colon is a grade band, not a topic name, and must never
+be shown as one.
