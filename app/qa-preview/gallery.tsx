@@ -12,6 +12,8 @@ import AchievementLevelPicker from "@/components/AchievementLevelPicker";
 import LevelSpreadPicker, { type LevelSpread } from "@/components/LevelSpreadPicker";
 import SessionModePicker, { sessionMode } from "@/components/SessionModePicker";
 import ContinueCard from "@/components/ContinueCard";
+import WeeklyPlanCard from "@/components/WeeklyPlanCard";
+import type { WeeklyPlan } from "@/types/plan";
 import type { Continuity } from "@/lib/continuity";
 import type { SessionInputType } from "@/types/session";
 import type { GradeId, SubjectId } from "@/types/curriculum";
@@ -68,6 +70,43 @@ const SPLIT_ANALYSIS: AnalysisResult = {
         { questionId: "L3q5", answer: "expensive" },
       ],
     },
+  ],
+};
+
+const DEMO_PLAN: WeeklyPlan = {
+  weeks: [
+    { week: 1, focus: "Closed syllables, two at a time",
+      sessions: [
+        { day: "Mon", minutes: 10, skill: "Split at the consonant pair", activity: "Draw a line between the two middle consonants in eight words, then read each half.", parentTip: "If she reads the whole word first, cover the second half." },
+        { day: "Tue", minutes: 10, skill: "Read each half alone", activity: "Read the halves off cards with no word in front of her.", parentTip: "Speed matters less than getting every vowel short." },
+        { day: "Wed", minutes: 15, skill: "Blend the halves back", activity: "Put the two cards together and read the whole word without re-sounding it.", parentTip: "One pass only. Re-sounding is the habit we are replacing." },
+        { day: "Thu", minutes: 10, skill: "Read in a sentence", activity: "Three sentences, each with two of this week's words.", parentTip: "Let her finish the sentence before you correct anything." },
+        { day: "Fri", minutes: 10, skill: "Review and one win", activity: "Re-read Monday's eight words, then pick the one she found hardest and read it three times.", parentTip: "Say which one improved. Name it out loud." },
+      ] },
+    { week: 2, focus: "Three syllables, still closed",
+      sessions: [
+        { day: "Mon", minutes: 10, skill: "Find the syllables", activity: "Clap out six three-syllable words before reading any of them.", parentTip: "Clapping first stops the guess." },
+        { day: "Tue", minutes: 15, skill: "Split and read", activity: "Same six words, split with a pencil, read part by part.", parentTip: "If a part stalls, go back to two syllables for that word." },
+        { day: "Wed", minutes: 10, skill: "Blend all three", activity: "Read each word straight through, once.", parentTip: "No re-sounding. Cover and retry instead." },
+        { day: "Thu", minutes: 10, skill: "Mixed practice", activity: "Two- and three-syllable words shuffled together.", parentTip: "The shuffle is the point — she has to decide, not follow a pattern." },
+        { day: "Fri", minutes: 10, skill: "Review and one win", activity: "Re-read Monday's six, then choose a favourite to read to someone else.", parentTip: "Reading it to a person is the reward. Nothing else needed." },
+      ] },
+    { week: 3, focus: "Open syllables enter",
+      sessions: [
+        { day: "Mon", minutes: 10, skill: "Hear the long vowel", activity: "Sort eight syllables into short and long by sound only.", parentTip: "Ears before eyes this week." },
+        { day: "Tue", minutes: 10, skill: "Read open syllables", activity: "Read ba, me, hi, go, tu off cards.", parentTip: "If she says the short sound, tap the card and wait." },
+        { day: "Wed", minutes: 15, skill: "Open plus closed", activity: "Read words that mix the two: robot, tulip, music.", parentTip: "Say which half is open before she reads." },
+        { day: "Thu", minutes: 10, skill: "Read in a sentence", activity: "Four sentences using this week's words.", parentTip: "Slow is fine. Guessing is not." },
+        { day: "Fri", minutes: 10, skill: "Review and one win", activity: "Mix week two and week three words, read them all once.", parentTip: "Count how many she got first try, and tell her the number." },
+      ] },
+    { week: 4, focus: "Put it together",
+      sessions: [
+        { day: "Mon", minutes: 10, skill: "Mixed syllable types", activity: "Ten words drawing on all three weeks.", parentTip: "Let her split them herself now." },
+        { day: "Tue", minutes: 15, skill: "Read a short passage", activity: "One paragraph built from words she has already met.", parentTip: "Do not stop her mid-sentence to correct." },
+        { day: "Wed", minutes: 10, skill: "Reread for smoothness", activity: "Same paragraph, second time.", parentTip: "The second read is where fluency shows up." },
+        { day: "Thu", minutes: 10, skill: "New passage, same words", activity: "A different paragraph, same word families.", parentTip: "Familiar words, unfamiliar order — that is the test." },
+        { day: "Fri", minutes: 10, skill: "Review and one win", activity: "Read the first paragraph from week four once more, then stop.", parentTip: "Compare it to Monday of week one out loud. That is a month." },
+      ] },
   ],
 };
 
@@ -169,6 +208,10 @@ function ExpectationPickerDemo() {
 export default function PreviewGallery() {
   return (
     <div className="mx-auto max-w-4xl space-y-16 px-4 py-12 sm:px-6">
+      <Block label="WeeklyPlanCard — four weeks, five sessions each">
+        <WeeklyPlanCard plan={DEMO_PLAN} />
+      </Block>
+
       <Block label="ContinueCard — the thread, picked back up">
         <div className="grid gap-3 sm:grid-cols-2">
           <ContinueCard nickname="Iliana" grade="3" kind="student" continuity={THREAD} />

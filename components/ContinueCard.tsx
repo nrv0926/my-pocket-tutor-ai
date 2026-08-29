@@ -101,6 +101,12 @@ export default function ContinueCard({
               Last plan
             </Link>
             <Link
+              href={`/plan/${continuity.childId}`}
+              className="text-sm text-pop-magenta underline underline-offset-2"
+            >
+              4-week plan
+            </Link>
+            <Link
               href={`/progress/${continuity.childId}`}
               className="text-sm text-pop-magenta underline underline-offset-2"
             >

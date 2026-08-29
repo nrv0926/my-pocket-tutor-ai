@@ -91,6 +91,22 @@ create table if not exists public.learning_sessions (
 create index if not exists sessions_child_id_idx on public.learning_sessions(child_id);
 
 -- ---------------------------------------------------------------------
+-- learning_plans
+--   A four-week plan built from a child's recent skill gaps. Separate from
+--   learning_sessions because it is a different shape and a different
+--   cadence: a session is one sitting, this is the shape of a month.
+-- ---------------------------------------------------------------------
+create table if not exists public.learning_plans (
+  id                uuid primary key default uuid_generate_v4(),
+  child_id          uuid not null references public.children(id) on delete cascade,
+  source_gaps       text[] not null default '{}',   -- what it was built from
+  plan              jsonb not null,                 -- { weeks: [...] }, 4 weeks of 5
+  created_at        timestamptz not null default now()
+);
+create index if not exists plans_child_created_idx
+  on public.learning_plans(child_id, created_at desc);
+
+-- ---------------------------------------------------------------------
 -- progress_records
 -- ---------------------------------------------------------------------
 create table if not exists public.progress_records (

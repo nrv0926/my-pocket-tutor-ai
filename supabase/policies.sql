@@ -7,6 +7,7 @@
 alter table public.users               enable row level security;
 alter table public.children            enable row level security;
 alter table public.learning_sessions   enable row level security;
+alter table public.learning_plans      enable row level security;
 alter table public.progress_records    enable row level security;
 alter table public.uploads             enable row level security;
 alter table public.subscriptions       enable row level security;
@@ -49,6 +50,24 @@ create policy "sessions owner all"
   with check (
     exists (select 1 from public.children c
             where c.id = learning_sessions.child_id
+              and c.user_id = auth.uid())
+  );
+
+-- --------- learning_plans ---------
+-- Same ownership path as sessions: proved through the parent child row, so
+-- there is still exactly one way to own anything (CLAUDE.md §6).
+drop policy if exists "plans owner all" on public.learning_plans;
+
+create policy "plans owner all"
+  on public.learning_plans for all
+  using (
+    exists (select 1 from public.children c
+            where c.id = learning_plans.child_id
+              and c.user_id = auth.uid())
+  )
+  with check (
+    exists (select 1 from public.children c
+            where c.id = learning_plans.child_id
               and c.user_id = auth.uid())
   );
 
