@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function NewSessionPage({
   searchParams,
 }: {
-  searchParams: { subject?: string; expectation?: string; program?: string };
+  searchParams: { child?: string; subject?: string; expectation?: string; program?: string };
 }) {
   const role = getRole();
   const copy = roleCopy(role);
@@ -50,6 +50,7 @@ export default async function NewSessionPage({
       </header>
 
       <NewSessionForm
+        initialChildId={searchParams.child}
         initialSubject={searchParams.subject}
         initialExpectation={searchParams.expectation}
         initialProgram={searchParams.program}

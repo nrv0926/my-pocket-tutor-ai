@@ -29,6 +29,7 @@ type ChildOption = { id: string; nickname: string; grade: string; kind?: "studen
 export default function NewSessionForm({
   childProfiles,
   showLevel = false,
+  initialChildId,
   initialSubject,
   initialExpectation,
   initialProgram,
@@ -36,12 +37,18 @@ export default function NewSessionForm({
   childProfiles: ChildOption[];
   /** Teachers and homeschoolers place a learner on the chart; parents do not. */
   showLevel?: boolean;
+  /** Preselection carried over from a Continue card on the dashboard. */
+  initialChildId?: string;
   /** Preselection carried over from /curriculum, so "Plan this" arrives ready. */
   initialSubject?: string;
   initialExpectation?: string;
   initialProgram?: string;
 }) {
-  const [childId, setChildId] = useState(childProfiles[0]?.id ?? "");
+  const [childId, setChildId] = useState(
+    childProfiles.some((c) => c.id === initialChildId)
+      ? (initialChildId as string)
+      : (childProfiles[0]?.id ?? "")
+  );
   // Arriving from /curriculum's "Plan this" means she has already said what
   // to teach, so start where that leaves her rather than asking for a
   // concern she came here specifically not to have to write.

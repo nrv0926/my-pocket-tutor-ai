@@ -1,8 +1,10 @@
 import LocalTime from "@/components/LocalTime";
 import Link from "next/link";
+import ContinueCard from "@/components/ContinueCard";
 import ProgressTracker from "@/components/ProgressTracker";
 import { getServerSupabase } from "@/lib/supabaseServer";
 import { summarize } from "@/lib/progressEngine";
+import { continuityFor } from "@/lib/continuity";
 import type { ProgressRecord } from "@/types/progress";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +22,7 @@ export default async function DashboardPage() {
   const [childrenRes, sessionsRes, progressRes] = await Promise.all([
     supabase
       .from("children")
-      .select("id, nickname, grade, location")
+      .select("id, nickname, grade, location, kind")
       .order("created_at", { ascending: true }),
     supabase
       .from("learning_sessions")
@@ -50,6 +52,13 @@ export default async function DashboardPage() {
   }));
   const summary = summarize(progressRows);
 
+  // The thread to pick back up, per learner. Shaped from rows already loaded
+  // above rather than a fresh query — the data was always here, it just had
+  // nowhere to be said.
+  const threads = new Map(
+    children.map((c) => [c.id, continuityFor(c.id, sessions, progressRows)])
+  );
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <header className="mb-8 flex items-end justify-between gap-4">
@@ -70,7 +79,7 @@ export default async function DashboardPage() {
 
       <div className="grid gap-6 md:grid-cols-3">
         <section className="md:col-span-2">
-          <h2 className="mb-3 font-display text-xl text-pop-night">Children</h2>
+          <h2 className="mb-3 font-display text-xl text-pop-night">Your learners</h2>
           {children.length === 0 ? (
             <EmptyState
               title="No children yet"
@@ -80,22 +89,13 @@ export default async function DashboardPage() {
           ) : (
             <ul className="grid gap-3 sm:grid-cols-2">
               {children.map((c) => (
-                <li
-                  key={c.id}
-                  className="flex items-center justify-between rounded-2xl border-[3px] border-pop-night bg-white p-5 shadow-pop-sm"
-                >
-                  <div>
-                    <p className="font-display text-lg text-pop-night">{c.nickname}</p>
-                    <p className="text-sm text-pop-night/60">
-                      Grade {c.grade} · {c.location}
-                    </p>
-                  </div>
-                  <Link
-                    href={`/progress/${c.id}`}
-                    className="text-sm text-pop-magenta hover:underline"
-                  >
-                    View progress →
-                  </Link>
+                <li key={c.id} className="flex">
+                  <ContinueCard
+                    nickname={c.nickname}
+                    grade={c.grade}
+                    kind={(c.kind ?? "student") as "student" | "class"}
+                    continuity={threads.get(c.id)!}
+                  />
                 </li>
               ))}
               <li className="flex items-center justify-center rounded-2xl border border-dashed border-pop-night bg-pop-cream p-5 text-sm text-pop-night/80 hover:border-pop-night">

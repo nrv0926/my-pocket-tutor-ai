@@ -11,6 +11,8 @@ import ExpectationPicker from "@/components/ExpectationPicker";
 import AchievementLevelPicker from "@/components/AchievementLevelPicker";
 import LevelSpreadPicker, { type LevelSpread } from "@/components/LevelSpreadPicker";
 import SessionModePicker, { sessionMode } from "@/components/SessionModePicker";
+import ContinueCard from "@/components/ContinueCard";
+import type { Continuity } from "@/lib/continuity";
 import type { SessionInputType } from "@/types/session";
 import type { GradeId, SubjectId } from "@/types/curriculum";
 import type { AchievementLevel } from "@/types/child";
@@ -67,6 +69,33 @@ const SPLIT_ANALYSIS: AnalysisResult = {
       ],
     },
   ],
+};
+
+const THREAD: Continuity = {
+  childId: "demo-1",
+  sessionCount: 4,
+  last: {
+    id: "s-last",
+    subject: "language",
+    createdAt: "2026-08-26T18:30:00Z",
+    taught: [
+      "Split two-syllable words at the consonant pair",
+      "Read closed syllables in isolation before in context",
+      "Blend the halves back without re-sounding",
+    ],
+    nextStepPlan:
+      "Next time, move from two-syllable words to three, keeping every syllable closed before introducing vowel teams.",
+  },
+  feedback: "too_hard",
+  note: "She understands it visually but struggles when there are no pictures.",
+};
+
+const THREAD_NO_FEEDBACK: Continuity = {
+  ...THREAD, childId: "demo-2", sessionCount: 1, feedback: null, note: null,
+};
+
+const THREAD_FRESH: Continuity = {
+  childId: "demo-3", sessionCount: 0, last: null, feedback: null, note: null,
 };
 
 function ModeDemo() {
@@ -140,6 +169,14 @@ function ExpectationPickerDemo() {
 export default function PreviewGallery() {
   return (
     <div className="mx-auto max-w-4xl space-y-16 px-4 py-12 sm:px-6">
+      <Block label="ContinueCard — the thread, picked back up">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <ContinueCard nickname="Iliana" grade="3" kind="student" continuity={THREAD} />
+          <ContinueCard nickname="Penelope" grade="5" kind="student" continuity={THREAD_NO_FEEDBACK} />
+          <ContinueCard nickname="Grade 4 Math" grade="4" kind="class" continuity={THREAD_FRESH} />
+        </div>
+      </Block>
+
       <Block label="SessionModePicker — the third mode needs no text">
         <ModeDemo />
       </Block>
