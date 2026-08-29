@@ -81,6 +81,16 @@ order, with these headings:
 The renderer in `components/AnalysisResultCard.tsx` depends on this shape.
 If you change the structure, change both — and bump the prompt version.
 
+**Nine means nine.** Anything new goes *inside* an existing section, never
+beside them. Two things already do, both inside HOW TO TEACH IT:
+
+- `teachingMaterials` — the cards, word lists and sentence strips the lesson
+  calls for. Produce them; never tell an adult to go and make something.
+- `differentiation` — one lesson, three tracks (whole group, needs support,
+  ready for more). The support track is a **smaller step of the same skill**,
+  never a different lesson and never busywork. Omit the field for a parent
+  teaching one child: there is nobody to differentiate between.
+
 ## 6. Curriculum alignment
 
 - **Default location**: Ontario, Canada.
@@ -102,6 +112,23 @@ If you change the structure, change both — and bump the prompt version.
   expectation code or its text from memory. An invented `B1.3` is worse than
   a missing one, because a teacher will trust it. See
   `data/ontario/README.md`.
+- **Achievement levels are Ontario's 1–4 chart**, the scale on every report
+  card. **Level 3 IS the provincial standard**, not a middling result — never
+  write copy or a prompt that treats 4 as the goal and 3 as a shortfall.
+  Level is per subject, not per child: a student can be Level 4 in Mathematics
+  and Level 2 in Language. Captured per session; optional; never shown to
+  parents. A class gives a spread of counts instead, which sizes the three
+  differentiation tracks to the room.
+- **A profile is a student or a class** (`children.kind`). Both live in the
+  same table so row-level security keeps proving ownership through `user_id` —
+  do not add a second policy path. The table name is knowingly a little wrong;
+  rename it when there is another reason to touch the schema.
+- **Search the continuum, not just the expectations.** Ontario words its
+  expectations broadly: "syllable" appears nowhere in the Language curriculum
+  and neither does "decoding". Both are in
+  `data/ontario/language-foundations-continuum.json`, which records which
+  expectations each foundational skill sits behind. Any search a teacher
+  touches must span both, or her own vocabulary returns nothing.
 - Skill maps live in `/data`. Look there before inventing a skill name.
 - If the curriculum data does not cover a skill yet, add it to the JSON file
   rather than hard-coding it in a prompt.

@@ -1,10 +1,10 @@
 # Test journeys
 
-Ten walks through the app, written so a failure is unambiguous. Each step says
+Fourteen walks through the app, written so a failure is unambiguous. Each step says
 what to do and what should happen; each journey ends with the specific thing
 that counts as a bug.
 
-The automated suite (`npm test`, 129 tests) covers shapes and rules. These
+The automated suite (`npm test`, 164 tests) covers shapes and rules. These
 cover the things only a person notices — whether the copy speaks to the right
 reader, whether a plan is usable in a classroom, whether it prints.
 
@@ -15,7 +15,7 @@ This file is the one that gets updated when the app changes.
 
 ## Before you start
 
-**Journeys 1, 2, 8 and 10 need nothing configured.** They are the demo path and
+**Journeys 1, 2, 8, 10 and 11 need nothing configured.** They are the demo path and
 should work on any deployment. Run these first — if something is broken there,
 it is broken for everyone.
 
@@ -189,6 +189,72 @@ in production.
 **Bug:** a card cut in half by a page break, or anything readable on screen but
 not on paper.
 
+## 11. Browsing to an objective instead of typing one
+*No setup. `/curriculum` is public — this is also a page worth showing someone.*
+
+1. Open `/curriculum`. → Grade 3 Language by default: 12 objectives, 60
+   expectations, grouped by strand.
+2. Click through Grades K to 8. → The URL changes and the page follows. Grade K
+   says Ontario publishes Kindergarten as its own program document.
+3. Switch to Mathematics. → 9 objectives at Grade 3. Switch to Science and
+   Technology → the honest "not transcribed yet".
+4. Switch to French. → Three programs appear. Core at Grade 2 says it starts at
+   Grade 4; Immersion at Grade 2 has expectations.
+5. Open an objective, then click **Plan this**. → You land on `/session/new`
+   with that subject and expectation already selected.
+
+**Bug:** more than about a dozen objectives at any one step — the whole point is
+that no step is a scroll. Or a "Plan this" that arrives empty.
+
+## 12. Searching the words a teacher actually uses
+*Needs Supabase (the picker lives on the session form).*
+
+1. On `/session/new`, pick a Grade 3 student and Language. Type `syllable` in
+   the expectation search. → Three results: B2.1, B2.2, B2.3.
+2. Read the note above the list. → It says the match came through the
+   Foundations Continuum, and names the skill and codes.
+3. Try `decoding`. → One result, B2.5, again via the continuum.
+4. Try `spelling`. → Four results, matched directly in the wording.
+5. Try `zzzz`. → "Nothing matches" — and no invented codes.
+
+**Bug:** `syllable` or `decoding` returning nothing. Neither word appears in
+Ontario's expectation wording, so a direct-only search fails on exactly the
+vocabulary she reaches for.
+
+## 13. Placing a learner, and a class, on the 1–4 chart
+*Needs Supabase. Teachers and homeschoolers only.*
+
+1. As a teacher, on `/session/new` with a student selected. → An
+   **Achievement level** control offers Levels 1–4.
+2. Read Level 3's label. → "At the provincial standard". Never phrased as a
+   shortfall or a middling result.
+3. Select Level 1, generate a plan. → It steps down to something the child can
+   already do rather than pitching at grade level.
+4. Switch role to Parent (journey 14) and return. → The level control is gone.
+   A parent has never been asked to place their child on the chart.
+5. Create a class profile, select it. → The single-level control is replaced by
+   four counts, one per level, and the caption totals the room.
+
+**Bug:** a parent being asked for an achievement level, or any copy implying
+Level 4 is the goal and Level 3 a shortfall.
+
+## 14. Switching what you are planning for
+*Needs Supabase.*
+
+1. Open `/settings`. → A "What are you planning for?" section with Parent,
+   Homeschooler and Teacher; the current one is marked.
+2. Switch to Teacher, then open `/children/new`. → "Tell us about your
+   student", and a **One student / A whole class** switch.
+3. Choose **A whole class**. → Wording changes to class name, "where the group
+   splits", "Create class profile". The age field disappears.
+4. Switch to Parent and reopen `/children/new`. → Parent wording, and no class
+   option — a parent has one child.
+5. Use the compact switcher on `/session/new`. → It switches in place and
+   returns you to the same page.
+
+**Bug:** being stuck with whichever role you first arrived through, or a
+switcher that sends you anywhere other than back where you were.
+
 ---
 
 ## Regression watch
@@ -204,14 +270,16 @@ Bugs already fixed once, and the journey that would catch each coming back.
 | Wrong sample linked | The teacher page sent visitors to the parent plan | 1 |
 | Prep-list plans | Section 4 named materials without producing them | 2 |
 | Subject taxonomy | Reading and Writing listed as subjects, not Language strands | 5 |
+| Search vocabulary | "syllable" returned nothing; the word is not in Ontario's wording | 12 |
+| Open redirect | Switching role redirected to a raw form value | 14 |
 
 ## Not covered, because it is not built
 
-A class-level plan with no student profile attached, bulk generation across
-levels, and the Science and Technology curriculum. The class entity needs a
-migration and a new row-level security policy before it can exist at all — see
-PRODUCT_ROADMAP.md.
+Bulk generation across levels, the "celebrate a win" consolidation session, and
+the Science and Technology curriculum. Class planning now exists (journey 14);
+what is still missing is generating several difficulty levels at once from one
+topic — see PRODUCT_ROADMAP.md.
 
-Two of her notes are still too compressed to test against: "object" in *grade,
-subject, idea, object*, and the "prototype loop error" she hit during the
-walkthrough.
+One note is still open: whether she wants **R**, the level below 1 that some
+Ontario report cards use. And the "prototype loop error" she hit during the
+walkthrough has never been reproduced.
