@@ -304,6 +304,11 @@ export {
 } from "@/prompts/worksheetPrompt";
 
 export {
+  buildExplainPrompt,
+  EXPLAIN_PROMPT_VERSION,
+} from "@/prompts/explainPrompt";
+
+export {
   buildWeeklyPlanPrompt,
   WEEKLY_PLAN_PROMPT_VERSION,
 } from "@/prompts/weeklyPlanPrompt";

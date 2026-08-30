@@ -7,6 +7,9 @@ import {
 } from "@/lib/curriculum";
 import type { GradeId, Program, SubjectId } from "@/types/curriculum";
 import EmptyReason from "./EmptyReason";
+import ExpectationNote from "@/components/ExpectationNote";
+import { getServerSupabase, isSupabaseConfigured } from "@/lib/supabaseServer";
+import type { Explanation } from "@/types/explain";
 
 export const metadata = {
   title: "Browse the Ontario curriculum · AI Pocket Tutor",
@@ -27,7 +30,7 @@ function isGrade(v: string | undefined): v is GradeId {
   return !!v && (APP_GRADES as string[]).includes(v);
 }
 
-export default function CurriculumPage({
+export default async function CurriculumPage({
   searchParams,
 }: {
   searchParams: { grade?: string; subject?: string; program?: string };
@@ -35,6 +38,32 @@ export default function CurriculumPage({
   const grade: GradeId = isGrade(searchParams.grade) ? searchParams.grade : "3";
   const subject = (SUPPORTED_SUBJECTS.find((s) => s.id === searchParams.subject)?.id ??
     "language") as SubjectId;
+
+  // Cached plain-English notes for whatever is on screen. Public read, so a
+  // signed-out visitor still sees every explanation someone has already
+  // asked for — which is the point of caching them rather than generating
+  // per view.
+  const notes = new Map<string, Explanation>();
+  let canWrite = false;
+  if (isSupabaseConfigured()) {
+    const supabase = getServerSupabase();
+    const [{ data: rows }, { data: auth }] = await Promise.all([
+      supabase
+        .from("expectation_notes")
+        .select("code, plain, example, try_at_home, program")
+        .eq("subject", subject)
+        .eq("grade", grade),
+      supabase.auth.getUser(),
+    ]);
+    for (const r of rows ?? []) {
+      notes.set(String(r.code), {
+        plain: String(r.plain),
+        example: String(r.example),
+        tryAtHome: String(r.try_at_home),
+      });
+    }
+    canWrite = Boolean(auth?.user);
+  }
 
   const programs = programsFor(subject);
   const program = (programs.find((p) => p.id === searchParams.program)?.id ??
@@ -171,11 +200,19 @@ export default function CurriculumPage({
                         </span>{" "}
                         {spec.text}
                       </p>
+                      <ExpectationNote
+                        subject={subject}
+                        grade={grade}
+                        program={program ?? null}
+                        code={spec.code}
+                        initial={notes.get(spec.code) ?? null}
+                        canWrite={canWrite}
+                      />
                       <Link
                         href={`/session/new?subject=${subject}&expectation=${encodeURIComponent(spec.code)}${program ? `&program=${program}` : ""}`}
                         className="mt-3 inline-flex whitespace-nowrap rounded-full border-[3px] border-pop-night bg-pop-yellow px-3 py-1.5 font-display text-[11px] uppercase tracking-wide text-pop-night shadow-pop-sm"
                       >
-                        Plan this →
+                        Teach this →
                       </Link>
                     </li>
                   ))}

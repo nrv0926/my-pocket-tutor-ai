@@ -286,6 +286,11 @@ It creates:
   which `/upload` needs. The delete policy is not optional: the app removes
   each file after analysis, and without it that promise silently fails.
 
+Then run **`supabase/migrations/0002_expectation_notes.sql`**, which adds the
+cache for plain-English explanations on `/curriculum`. Readable by anyone,
+writable only by a signed-in user — that page is public, and an explanation
+generated on every view would let a crawler spend your money.
+
 **How to tell whether you need it:** open `/settings`. If anything is
 missing, a panel there names it and says which file fixes it. If the panel is
 not there, nothing is missing.
