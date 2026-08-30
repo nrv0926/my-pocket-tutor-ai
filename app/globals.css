@@ -82,6 +82,12 @@ footer :focus-visible {
 
   a { text-decoration: underline; }
 
+  /* A worksheet and its answer key must not share a sheet. */
+  .break-before-page { break-before: page; page-break-before: always; }
+
+  /* A printed link that says "here" is useless on paper. */
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .85em; }
+
   @page { margin: 16mm; }
 }
 

@@ -19,6 +19,7 @@ const PROTECTED_PREFIXES = [
   "/settings",
   "/plan",
   "/start",
+  "/print",
 ];  // tests/protectedRoutes.test.ts fails if a db-reading page is missing here
 
 /** Send anyone without a session to /login, keeping where they were headed. */

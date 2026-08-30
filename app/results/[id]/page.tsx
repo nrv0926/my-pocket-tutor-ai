@@ -69,10 +69,16 @@ export default async function ResultsPage({ params }: { params: { id: string } }
             Jump to worksheet
           </a>
           <Link
-            href={`/worksheet/${data.id}`}
+            href={`/print/${data.id}`}
             className="rounded-full border-[3px] border-pop-night bg-pop-yellow px-4 py-2 text-sm font-medium text-pop-night hover:bg-pop-cyan"
           >
-            Worksheet only · print
+            Print / PDF
+          </Link>
+          <Link
+            href={`/worksheet/${data.id}`}
+            className="rounded-full border-[3px] border-pop-night bg-white px-4 py-2 text-sm font-medium text-pop-night hover:bg-pop-cream"
+          >
+            Worksheet only
           </Link>
           <a
             href="#feedback"
