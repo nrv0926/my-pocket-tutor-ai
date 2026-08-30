@@ -83,6 +83,33 @@ export interface WorksheetVariant {
   answerKey: { questionId: string; answer: string }[];
 }
 
+/**
+ * The extra pieces of paper a lesson can produce, when asked for.
+ *
+ * Most of what an adult wants already exists: the mini-lesson is HOW TO
+ * TEACH IT, the vocabulary cards and word lists are `teachingMaterials`, the
+ * small-group activity is a `differentiation` track, the levelled sheets are
+ * `worksheetVariants`. Three things had nowhere to live — a check at the end
+ * of the lesson, something to take away, and a harder version for whoever
+ * finishes first.
+ *
+ * All three are practice, so they sit inside PRACTICE WORKSHEET rather than
+ * beside it. Nine means nine (CLAUDE.md §5). Generated only when asked for,
+ * because a parent who wanted a worksheet does not want homework invented
+ * for their evening.
+ */
+export type ExtraKind = "exitTicket" | "homework" | "challenge";
+
+export interface LessonExtra {
+  kind: ExtraKind;
+  /** What to call it on the page and on the paper. */
+  title: string;
+  /** The questions or steps themselves, ready to use. */
+  items: string[];
+  /** One line on how to run it. */
+  note?: string;
+}
+
 /** The structured nine-section AI output. Order is fixed — see CLAUDE.md §5. */
 export interface AnalysisResult {
   whatINotice: string;
@@ -114,6 +141,11 @@ export interface AnalysisResult {
    * one above.
    */
   worksheetVariants?: WorksheetVariant[];
+  /**
+   * Exit ticket, homework, challenge — only the ones asked for. Optional, so
+   * every session saved before today still parses.
+   */
+  extras?: LessonExtra[];
   parentTips: string[];      // 2–3
   nextStepPlan: string;
   feedbackQuestion: string;  // always: "Was this too easy, just right, or too hard?"

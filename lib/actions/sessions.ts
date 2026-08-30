@@ -32,6 +32,7 @@ import {
 import type {
   AnalysisResult,
   Difficulty,
+  ExtraKind,
   SessionInputType,
 } from "@/types/session";
 import type { ParentFeedback } from "@/types/progress";
@@ -62,6 +63,7 @@ const InputSchema = z.object({
     .nullable()
     .optional(),
   worksheetLevels: z.array(z.enum(["1", "2", "3", "4"])).max(4).optional(),
+  extras: z.array(z.enum(["exitTicket", "homework", "challenge"])).max(3).optional(),
   text: z.string().max(8000),
 })
   /**
@@ -108,6 +110,8 @@ export async function createLearningSession(input: {
    * worksheets — the class is taught together and practises apart.
    */
   worksheetLevels?: AchievementLevel[];
+  /** Extra materials the adult ticked. Never volunteered. */
+  extras?: ExtraKind[];
   text: string;
 }) {
   const parsed = InputSchema.parse(input);
@@ -233,6 +237,7 @@ export async function createLearningSession(input: {
           worksheetLevels: (parsed.worksheetLevels ?? []).filter(
             (l) => !parsed.achievementSpread || (parsed.achievementSpread[l] ?? 0) > 0
           ),
+          extras: parsed.extras ?? [],
           previous,
           progression,
           recentFeedback,

@@ -1,6 +1,6 @@
 import DifferentiationTracks from "@/components/DifferentiationTracks";
 import TeachingMaterials from "@/components/TeachingMaterials";
-import type { AnalysisResult, Worksheet } from "@/types/session";
+import type { AnalysisResult, LessonExtra, Worksheet } from "@/types/session";
 
 /**
  * Renders the fixed nine-section AI output. The shape is binding — see
@@ -11,6 +11,7 @@ export default function AnalysisResultCard({ result }: { result: AnalysisResult 
   // Stacked, not tabbed. She prints this and walks to class, and a tab strip
   // prints whichever one happened to be open (journey 10).
   const variants = result.worksheetVariants ?? [];
+  const extras = result.extras ?? [];
 
   return (
     <article className="space-y-8">
@@ -61,6 +62,9 @@ export default function AnalysisResultCard({ result }: { result: AnalysisResult 
             worksheet={v.worksheet}
             heading={`Level ${v.level}`}
           />
+        ))}
+        {extras.map((e) => (
+          <Extra key={e.kind} extra={e} />
         ))}
       </Section>
 
@@ -174,6 +178,26 @@ function AnswerList({
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+/**
+ * An exit ticket, homework or a challenge — inside PRACTICE WORKSHEET, not
+ * beside it, because all three are practice and nine means nine.
+ */
+function Extra({ extra }: { extra: LessonExtra }) {
+  return (
+    <div className="mt-5 break-inside-avoid rounded-xl border-[3px] border-pop-night bg-pop-cream p-4">
+      <p className="font-display text-sm uppercase tracking-widest text-pop-magenta">
+        {extra.title}
+      </p>
+      {extra.note && <p className="mt-1 text-sm text-pop-night/75">{extra.note}</p>}
+      <ol className="ml-5 mt-2 list-decimal space-y-1.5 text-pop-night">
+        {extra.items.map((item, i) => (
+          <li key={i}>{item}</li>
+        ))}
+      </ol>
     </div>
   );
 }

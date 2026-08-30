@@ -57,6 +57,13 @@ const WorksheetVariant = z.object({
   answerKey: z.array(z.object({ questionId: z.string().min(1), answer: z.string().min(1) })),
 });
 
+const LessonExtra = z.object({
+  kind: z.enum(["exitTicket", "homework", "challenge"]),
+  title: z.string().min(1),
+  items: z.array(z.string().min(1)).min(2).max(6),
+  note: z.string().min(1).optional(),
+});
+
 const AnalysisResultSchema = z.object({
   whatINotice: z.string().min(1),
   keySkillGaps: z.array(z.string().min(1)).min(2).max(6),
@@ -67,6 +74,7 @@ const AnalysisResultSchema = z.object({
   practiceWorksheet: Worksheet,
   answerKey: z.array(z.object({ questionId: z.string().min(1), answer: z.string().min(1) })),
   worksheetVariants: z.array(WorksheetVariant).max(4).optional(),
+  extras: z.array(LessonExtra).max(3).optional(),
   parentTips: z.array(z.string().min(1)).min(2).max(3),
   nextStepPlan: z.string().min(1),
   feedbackQuestion: z.literal(FEEDBACK_QUESTION),

@@ -8,14 +8,16 @@ import {
   achievementContext,
   planGradeContext,
   worksheetLevelsContext,
+  extrasContext,
   continuityContext,
   progressionContext,
   type PreviousSession,
   type RecentFeedbackEntry,
 } from "@/lib/prompts";
 import type { AchievementLevel, Child, Role, Subject } from "@/types/child";
+import type { ExtraKind } from "@/types/session";
 
-export const ANALYSIS_PROMPT_VERSION = "analysis@2026-08-29.7";
+export const ANALYSIS_PROMPT_VERSION = "analysis@2026-08-30.8";
 
 /**
  * Main analysis: parent input → 9-section structured plan + worksheet.
@@ -48,6 +50,8 @@ export function buildAnalysisPrompt(args: {
   achievementSpread?: Partial<Record<AchievementLevel, number>> | null;
   /** Levels that each get their own worksheet. Empty means one worksheet. */
   worksheetLevels?: AchievementLevel[];
+  /** Extra materials the adult ticked. Empty means none — never volunteered. */
+  extras?: ExtraKind[];
   /** The last session for this child, so this one continues it. */
   previous?: PreviousSession | null;
   /** Ontario's published progression at this grade, and the rung above. */
@@ -67,6 +71,7 @@ export function buildAnalysisPrompt(args: {
     achievementLevel = null,
     achievementSpread = null,
     worksheetLevels = [],
+    extras = [],
     previous = null,
     progression = null,
     recentFeedback = [],
@@ -77,6 +82,7 @@ export function buildAnalysisPrompt(args: {
   const planGradeBlock = planGradeContext(planGrade, child.grade);
   const achievementBlock = achievementContext(achievementLevel, achievementSpread);
   const levelsBlock = worksheetLevelsContext(worksheetLevels, achievementSpread);
+  const extrasBlock = extrasContext(extras);
   const continuityBlock = continuityContext(previous);
   const progressionBlock = progression
     ? progressionContext(progression.current, progression.next)
@@ -111,7 +117,7 @@ baseline assumption if there are signs of struggle.`;
 
   const taskAddendum = `
 ${task}
-${roleBlock ? `\n${roleBlock}\n` : ""}${expectationBlock ? `\n${expectationBlock}\n` : ""}${planGradeBlock ? `\n${planGradeBlock}\n` : ""}${achievementBlock ? `\n${achievementBlock}\n` : ""}${levelsBlock ? `\n${levelsBlock}\n` : ""}${continuityBlock ? `\n${continuityBlock}\n` : ""}${progressionBlock ? `\n${progressionBlock}\n` : ""}
+${roleBlock ? `\n${roleBlock}\n` : ""}${expectationBlock ? `\n${expectationBlock}\n` : ""}${planGradeBlock ? `\n${planGradeBlock}\n` : ""}${achievementBlock ? `\n${achievementBlock}\n` : ""}${levelsBlock ? `\n${levelsBlock}\n` : ""}${extrasBlock ? `\n${extrasBlock}\n` : ""}${continuityBlock ? `\n${continuityBlock}\n` : ""}${progressionBlock ? `\n${progressionBlock}\n` : ""}
 OUTPUT FORMAT
 ${NINE_SECTION_OUTPUT_SCHEMA}
 `.trim();

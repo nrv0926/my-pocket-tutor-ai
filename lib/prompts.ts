@@ -13,7 +13,7 @@
 
 import type { AchievementLevel, Child, Role } from "@/types/child";
 import type { ParentFeedback } from "@/types/progress";
-import type { Difficulty } from "@/types/session";
+import type { Difficulty, ExtraKind } from "@/types/session";
 
 /** Bumped any time SYSTEM_PROMPT changes. Used in eval logs. */
 export const SYSTEM_PROMPT_VERSION = "system@2026-04-27.1";
@@ -152,6 +152,13 @@ The JSON object MUST match this TypeScript type EXACTLY:
     }>                                           // length between 5 and 8
   },
   "answerKey": Array<{ "questionId": string, "answer": string }>,
+  "extras": Array<{                             // ONLY the kinds named below
+    "kind": "exitTicket" | "homework" | "challenge",
+    "title": string,
+    "items": string[],                          // 2-5 for an exit ticket,
+                                                 // 3-6 for homework or a challenge
+    "note": string                              // one line on how to run it
+  }>,
   "worksheetVariants": Array<{                  // ONLY when levels are named below
     "level": "1" | "2" | "3" | "4",
     "worksheet": {                              // same shape as practiceWorksheet
@@ -365,6 +372,41 @@ export function planGradeContext(
     `Pitch the work at ${name(planGrade)} and say once, plainly and without`,
     "apology, that it is pitched there and why. Never describe the learner as",
     "behind, below, or delayed — describe the work, not the child.",
+  ].join("\n");
+}
+
+/**
+ * Which extra pieces of paper to produce, and what each one is for.
+ *
+ * Asked for explicitly, never volunteered. A parent who wanted tonight's
+ * worksheet did not ask for homework, and inventing some for their evening
+ * is the opposite of help.
+ */
+export function extrasContext(kinds: ExtraKind[]): string {
+  if (kinds.length === 0) return "";
+
+  const spec: Record<ExtraKind, string> = {
+    exitTicket:
+      "EXIT TICKET — 2 to 3 questions answerable in two minutes, at the end " +
+      "of the lesson, testing only what the lesson just taught. It tells the " +
+      "adult whether to move on or repeat, so it must be quick to mark at a " +
+      "glance.",
+    homework:
+      "HOMEWORK — practice of the SAME skill, doable alone in ten minutes " +
+      "with no adult sitting alongside and nothing to print beyond this " +
+      "sheet. Never new material: homework that teaches is homework that " +
+      "fails at the kitchen table.",
+    challenge:
+      "CHALLENGE — for whoever finishes early. Deeper, not longer: the same " +
+      "skill applied somewhere less obvious. Never simply more questions of " +
+      "the kind they have already answered.",
+  };
+
+  return [
+    `ALSO PRODUCE, in "extras", exactly these and nothing else: ${kinds.join(", ")}.`,
+    ...kinds.map((k) => `- ${spec[k]}`),
+    "Produce them in full, the way the teaching materials are produced: the",
+    "actual questions, not a description of what to write.",
   ].join("\n");
 }
 

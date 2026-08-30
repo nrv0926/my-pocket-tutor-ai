@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import LoadingState from "@/components/LoadingState";
+import MaterialsPicker from "@/components/MaterialsPicker";
 import SessionModePicker, { sessionMode } from "@/components/SessionModePicker";
 import ExpectationPicker from "@/components/ExpectationPicker";
 import AchievementLevelPicker from "@/components/AchievementLevelPicker";
@@ -10,7 +11,7 @@ import { createLearningSession } from "@/lib/actions/sessions";
 import { SUBJECTS } from "@/types/child";
 import type { AchievementLevel, Grade, Subject } from "@/types/child";
 import type { GradeId, Program, SubjectId } from "@/types/curriculum";
-import type { SessionInputType } from "@/types/session";
+import type { ExtraKind, SessionInputType } from "@/types/session";
 
 /** Server actions throw this internal signal when they call redirect(). */
 function isRedirectSignal(err: unknown): boolean {
@@ -66,6 +67,7 @@ export default function NewSessionForm({
   const [level, setLevel] = useState<AchievementLevel | null>(null);
   const [spread, setSpread] = useState<LevelSpread>({});
   const [perLevel, setPerLevel] = useState(true);
+  const [extras, setExtras] = useState<ExtraKind[]>([]);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -118,6 +120,7 @@ export default function NewSessionForm({
             achievementLevel: isClass ? null : level,
             achievementSpread: isClass && Object.keys(spread).length ? spread : null,
             worksheetLevels: canSplit && perLevel ? levelsInRoom : [],
+            extras,
             text: text.trim(),
           });
           // createLearningSession redirects to /results/[id] internally.
@@ -196,6 +199,8 @@ export default function NewSessionForm({
           }}
         />
       )}
+
+      <MaterialsPicker value={extras} onChange={setExtras} />
 
       <SessionModePicker value={mode} onChange={setMode} />
 
