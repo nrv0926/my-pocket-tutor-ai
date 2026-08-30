@@ -101,6 +101,7 @@ create table if not exists public.learning_plans (
   child_id          uuid not null references public.children(id) on delete cascade,
   source_gaps       text[] not null default '{}',   -- what it was built from
   plan              jsonb not null,                 -- { weeks: [...] }, 4 weeks of 5
+  completed         text[] not null default '{}',   -- "1:Mon" keys, sessions done
   created_at        timestamptz not null default now()
 );
 create index if not exists plans_child_created_idx

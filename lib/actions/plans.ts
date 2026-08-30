@@ -128,3 +128,55 @@ export async function createWeeklyPlan(input: { childId: string }) {
   revalidatePath("/dashboard");
   redirect(`/plan/${childId}`);
 }
+
+/**
+ * Mark one session of a plan done, or undo it.
+ *
+ * The key is week and day — "2:Wed" — because that is what identifies a
+ * session inside a plan and it survives the plan being re-read. Toggling
+ * rather than only setting, since the commonest correction is ticking the
+ * wrong row.
+ *
+ * Read-modify-write on a small array. Two devices racing would let one win,
+ * which for "did we do Wednesday" is an acceptable answer.
+ */
+export async function togglePlanSession(input: {
+  childId: string;
+  key: string;
+}): Promise<string[]> {
+  const { childId, key } = z
+    .object({
+      childId: z.string().uuid(),
+      key: z.string().regex(/^[1-4]:(Mon|Tue|Wed|Thu|Fri)$/),
+    })
+    .parse(input);
+
+  const supabase = getServerSupabase();
+
+  // RLS scopes this to the owner, so a plan that is not theirs returns no
+  // row and the update below touches nothing.
+  const { data: row, error } = await supabase
+    .from("learning_plans")
+    .select("id, completed")
+    .eq("child_id", childId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !row) throw new Error("No plan to update.");
+
+  const done = new Set((row.completed ?? []) as string[]);
+  if (done.has(key)) done.delete(key);
+  else done.add(key);
+  const next = [...done].sort();
+
+  const { error: updateErr } = await supabase
+    .from("learning_plans")
+    .update({ completed: next })
+    .eq("id", row.id);
+
+  if (updateErr) throw new Error(`Could not save that: ${updateErr.message}`);
+
+  revalidatePath(`/plan/${childId}`);
+  return next;
+}

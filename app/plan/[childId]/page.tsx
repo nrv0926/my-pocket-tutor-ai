@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import LocalTime from "@/components/LocalTime";
 import WeeklyPlanCard from "@/components/WeeklyPlanCard";
+import ThisWeek from "./ThisWeek";
+import { currentWeek } from "@/lib/planWeek";
 import BuildPlanButton from "./BuildPlanButton";
 import { getServerSupabase } from "@/lib/supabaseServer";
 import type { WeeklyPlan } from "@/types/plan";
@@ -22,7 +24,7 @@ export default async function PlanPage({ params }: { params: { childId: string }
     supabase.from("children").select("id, nickname, grade").eq("id", params.childId).single(),
     supabase
       .from("learning_plans")
-      .select("id, plan, source_gaps, created_at")
+      .select("id, plan, source_gaps, completed, created_at")
       .eq("child_id", params.childId)
       .order("created_at", { ascending: false })
       .limit(1),
@@ -39,6 +41,8 @@ export default async function PlanPage({ params }: { params: { childId: string }
 
   const row = planRes.data?.[0] ?? null;
   const plan = (row?.plan ?? null) as WeeklyPlan | null;
+  const completed = ((row?.completed ?? []) as string[]) ?? [];
+  const week = plan ? currentWeek(plan, completed) : null;
   const hasGaps = (sessionRes.data ?? []).some(
     (s) => ((s.top_skill_gaps ?? []) as string[]).length > 0
   );
@@ -98,6 +102,20 @@ export default async function PlanPage({ params }: { params: { childId: string }
             <BuildPlanButton childId={params.childId} label="Rebuild from the latest session" />
           </div>
 
+          {week && (
+            <div className="mb-8">
+              <ThisWeek
+                childId={params.childId}
+                plan={plan}
+                week={week}
+                initialCompleted={completed}
+              />
+            </div>
+          )}
+
+          <h2 className="mb-3 font-display text-xs uppercase tracking-widest text-pop-night/60 print:hidden">
+            The whole month
+          </h2>
           <WeeklyPlanCard plan={plan} />
 
           <p className="mt-6 text-sm text-pop-night/60 print:hidden">

@@ -291,6 +291,9 @@ cache for plain-English explanations on `/curriculum`. Readable by anyone,
 writable only by a signed-in user — that page is public, and an explanation
 generated on every view would let a crawler spend your money.
 
+Then **`supabase/migrations/0003_plan_progress.sql`**, one column recording
+which sessions of a four-week plan have been done.
+
 **How to tell whether you need it:** open `/settings`. If anything is
 missing, a panel there names it and says which file fixes it. If the panel is
 not there, nothing is missing.
