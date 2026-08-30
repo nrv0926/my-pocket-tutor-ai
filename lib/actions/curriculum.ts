@@ -8,6 +8,7 @@ import {
   type ExpectationOption,
 } from "@/lib/curriculum";
 import { searchContinuum } from "@/lib/foundationsContinuum";
+import { plainTopicsFor } from "@/lib/plainTopics";
 import type { GradeId, Program, SubjectId } from "@/types/curriculum";
 
 export interface ExpectationGroup {
@@ -168,4 +169,27 @@ export async function getTopics(
     text: o.text,
     items: o.specifics.map((s) => ({ code: s.code, text: s.text })),
   }));
+}
+
+export interface PlainTopicOption {
+  id: string;
+  label: string;
+  codes: string[];
+}
+
+/**
+ * Topics in the adult's words, over expectations in Ontario's.
+ *
+ * Served alongside the objective list rather than instead of it: a teacher
+ * knows what B2 is and a parent does not, and one dropdown can carry both.
+ * Server-side like everything else here — the vocabulary is small, but it is
+ * matched against the ~215 KB of transcribed curriculum that must not reach
+ * a browser.
+ */
+export async function getPlainTopics(
+  subject: SubjectId,
+  grade: GradeId,
+  program?: Program["id"]
+): Promise<PlainTopicOption[]> {
+  return plainTopicsFor(subject, grade, program);
 }

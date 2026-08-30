@@ -1,0 +1,328 @@
+{
+  "note": "Plain-English topic labels for browsing. THE LABELS ARE OURS, not Ontario's — they exist because a parent does not think in strand codes. Membership is NOT ours: each topic collects the transcribed expectations whose own published wording matches its terms, so no expectation is ever filed under a topic by hand. A topic that matches nothing at a grade is not shown. See lib/plainTopics.ts and CLAUDE.md §6.",
+  "matching": "Case-insensitive, anchored at a word boundary. 'rate' must not match 'demonstrate'.",
+  "subjects": {
+    "mathematics": [
+      {
+        "id": "counting-place-value",
+        "label": "Counting and place value",
+        "terms": [
+          "count",
+          "place value",
+          "read, represent, compose",
+          "order whole number",
+          "compare and order"
+        ]
+      },
+      {
+        "id": "addition-subtraction",
+        "label": "Adding and subtracting",
+        "terms": [
+          "addition",
+          "add and subtract",
+          "adding and subtracting",
+          "subtract"
+        ]
+      },
+      {
+        "id": "multiplication-division",
+        "label": "Multiplying and dividing",
+        "terms": [
+          "multiplication",
+          "multiply",
+          "multiples",
+          "division",
+          "divide",
+          "divisib"
+        ]
+      },
+      {
+        "id": "fractions",
+        "label": "Fractions",
+        "terms": [
+          "fraction"
+        ]
+      },
+      {
+        "id": "decimals-percents",
+        "label": "Decimals and percents",
+        "terms": [
+          "decimal",
+          "percent"
+        ]
+      },
+      {
+        "id": "integers-exponents",
+        "label": "Integers, powers and roots",
+        "terms": [
+          "integer",
+          "exponent",
+          "square root",
+          "power of"
+        ]
+      },
+      {
+        "id": "ratio-rate",
+        "label": "Ratios, rates and proportion",
+        "terms": [
+          "ratio",
+          "rates",
+          "rate of",
+          "proportion",
+          "unit rate"
+        ]
+      },
+      {
+        "id": "patterns",
+        "label": "Patterns",
+        "terms": [
+          "pattern"
+        ]
+      },
+      {
+        "id": "algebra",
+        "label": "Algebra and equations",
+        "terms": [
+          "variable",
+          "equation",
+          "expression",
+          "equalit",
+          "inequalit",
+          "monomial",
+          "algebraic"
+        ]
+      },
+      {
+        "id": "coding",
+        "label": "Coding",
+        "terms": [
+          "code",
+          "coding"
+        ]
+      },
+      {
+        "id": "money",
+        "label": "Money and financial literacy",
+        "terms": [
+          "money",
+          "currenc",
+          "financial",
+          "budget",
+          "spending",
+          "interest",
+          "cost"
+        ]
+      },
+      {
+        "id": "measurement",
+        "label": "Measuring",
+        "terms": [
+          "measur",
+          "length",
+          "mass",
+          "capacit",
+          "perimeter",
+          "area",
+          "volume",
+          "metric",
+          "units of"
+        ]
+      },
+      {
+        "id": "time",
+        "label": "Telling time",
+        "terms": [
+          "clock",
+          "o'clock",
+          "elapsed time",
+          "time of day",
+          "duration"
+        ]
+      },
+      {
+        "id": "geometry",
+        "label": "Shapes and angles",
+        "terms": [
+          "shape",
+          "angle",
+          "triangle",
+          "quadrilateral",
+          "polygon",
+          "geometric",
+          "symmetr",
+          "prism",
+          "pyramid",
+          "two-dimensional",
+          "three-dimensional"
+        ]
+      },
+      {
+        "id": "location-movement",
+        "label": "Location and movement",
+        "terms": [
+          "location",
+          "movement",
+          "grid",
+          "translation",
+          "rotation",
+          "reflection",
+          "coordinate"
+        ]
+      },
+      {
+        "id": "data-graphs",
+        "label": "Data and graphs",
+        "terms": [
+          "data",
+          "graph",
+          "survey",
+          "mean, median",
+          "chart",
+          "tables of"
+        ]
+      },
+      {
+        "id": "probability",
+        "label": "Chance and probability",
+        "terms": [
+          "probabilit",
+          "likelihood",
+          "likely",
+          "chance"
+        ]
+      }
+    ],
+    "language": [
+      {
+        "id": "oral",
+        "label": "Speaking and listening",
+        "terms": [
+          "listen",
+          "speak",
+          "oral",
+          "conversation",
+          "non-verbal",
+          "presentation",
+          "discussion"
+        ]
+      },
+      {
+        "id": "word-reading",
+        "label": "Reading and spelling words",
+        "terms": [
+          "spell",
+          "decod",
+          "word-level",
+          "phonic",
+          "grapheme",
+          "phoneme",
+          "morpholog",
+          "orthograph",
+          "syllab",
+          "root word"
+        ]
+      },
+      {
+        "id": "fluency",
+        "label": "Reading fluency",
+        "terms": [
+          "fluenc",
+          "accuracy, rate",
+          "prosody",
+          "read aloud"
+        ]
+      },
+      {
+        "id": "vocabulary",
+        "label": "Vocabulary",
+        "terms": [
+          "vocabular",
+          "word meaning",
+          "unfamiliar word"
+        ]
+      },
+      {
+        "id": "comprehension",
+        "label": "Understanding what they read",
+        "terms": [
+          "comprehension",
+          "main idea",
+          "infer",
+          "summariz",
+          "making meaning",
+          "point of view",
+          "perspectiv",
+          "interpret"
+        ]
+      },
+      {
+        "id": "text-forms",
+        "label": "How texts are built",
+        "terms": [
+          "text form",
+          "text feature",
+          "elements of",
+          "organizational pattern",
+          "structure",
+          "genre"
+        ]
+      },
+      {
+        "id": "writing",
+        "label": "Writing and composing",
+        "terms": [
+          "writ",
+          "compos",
+          "draft",
+          "revis",
+          "publish",
+          "edit"
+        ]
+      },
+      {
+        "id": "grammar",
+        "label": "Grammar and punctuation",
+        "terms": [
+          "sentence",
+          "grammar",
+          "punctuation",
+          "verb",
+          "noun",
+          "pronoun",
+          "adjective",
+          "capitaliz",
+          "clause"
+        ]
+      },
+      {
+        "id": "media",
+        "label": "Media and digital literacy",
+        "terms": [
+          "media",
+          "digital"
+        ]
+      },
+      {
+        "id": "research",
+        "label": "Finding and using information",
+        "terms": [
+          "research",
+          "gather information",
+          "sources",
+          "citing",
+          "credibilit"
+        ]
+      },
+      {
+        "id": "indigenous",
+        "label": "First Nations, Métis and Inuit voices",
+        "terms": [
+          "first nations",
+          "métis",
+          "inuit",
+          "indigenous"
+        ]
+      }
+    ]
+  }
+}

@@ -3,10 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { GRADES } from "@/types/child";
 import {
+  getPlainTopics,
   getPrograms,
   getTopics,
   searchExpectations,
   type ContinuumHint,
+  type PlainTopicOption,
   type ProgramOption,
   type Topic,
 } from "@/lib/actions/curriculum";
@@ -49,6 +51,7 @@ export default function ExpectationPicker({
   onChange: (code: string, program?: Program["id"]) => void;
 }) {
   const [topics, setTopics] = useState<Topic[] | null>(null);
+  const [plain, setPlain] = useState<PlainTopicOption[]>([]);
   const [programs, setPrograms] = useState<ProgramOption[]>([]);
   const [program, setProgram] = useState<Program["id"] | undefined>(undefined);
   const [topicCode, setTopicCode] = useState("");
@@ -75,17 +78,26 @@ export default function ExpectationPicker({
   useEffect(() => {
     let live = true;
     setTopics(null);
+    setPlain([]);
     getTopics(subject, grade, program)
       .then((t) => live && setTopics(t))
       .catch(() => live && setTopics([]));
+    // Plain topics are a second way to narrow, not a replacement. A subject
+    // with no plain layer simply offers the objectives, as before.
+    getPlainTopics(subject, grade, program)
+      .then((p) => live && setPlain(p))
+      .catch(() => live && setPlain([]));
     return () => {
       live = false;
     };
   }, [subject, grade, program]);
 
-  // A code arriving from /curriculum's "Plan this" already names its topic.
+  // A code arriving from /curriculum's "Plan this" already names its
+  // objective. Only follow it when the current filter is not a plain topic,
+  // which may legitimately contain that code already.
   useEffect(() => {
-    if (value) setTopicCode(value.split(".")[0]);
+    if (value && !topicCode.startsWith("t:")) setTopicCode(value.split(".")[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   // Clear a selection the new grade or subject doesn't contain.
@@ -128,18 +140,25 @@ export default function ExpectationPicker({
   // Searching spans every topic; otherwise the chosen topic is the filter.
   const shownTopics = useMemo(() => {
     if (!topics) return [];
-    const scoped = matches
-      ? topics
-          .map((t) => ({ ...t, items: t.items.filter((i) => matches.has(i.code)) }))
-          .filter((t) => t.items.length > 0)
-      : topicCode
-        ? topics.filter((t) => t.code === topicCode)
-        : topics;
-    return scoped;
-  }, [topics, matches, topicCode]);
+    if (matches) {
+      return topics
+        .map((t) => ({ ...t, items: t.items.filter((i) => matches.has(i.code)) }))
+        .filter((t) => t.items.length > 0);
+    }
+    if (topicCode.startsWith("t:")) {
+      const picked = plain.find((p) => `t:${p.id}` === topicCode);
+      const codes = new Set(picked?.codes ?? []);
+      return topics
+        .map((t) => ({ ...t, items: t.items.filter((i) => codes.has(i.code)) }))
+        .filter((t) => t.items.length > 0);
+    }
+    if (topicCode) return topics.filter((t) => t.code === topicCode);
+    return topics;
+  }, [topics, matches, topicCode, plain]);
 
   const shown = shownTopics.reduce((n, t) => n + t.items.length, 0);
   const chosen = topics?.find((t) => t.code === topicCode) ?? null;
+  const chosenPlain = plain.find((p) => `t:${p.id}` === topicCode) ?? null;
   const steppedDown = childGrade && childGrade !== grade;
 
   return (
@@ -182,11 +201,24 @@ export default function ExpectationPicker({
             className="w-full rounded-xl border-[3px] border-pop-night bg-pop-cream px-3 py-2.5 outline-none focus:border-pop-night focus:bg-white focus:ring-4 focus:ring-pop-pink/30 disabled:opacity-60"
           >
             <option value="">All topics</option>
-            {(topics ?? []).map((t) => (
-              <option key={t.code} value={t.code}>
-                {t.code} — {truncate(t.label, 60)}
-              </option>
-            ))}
+            {plain.length > 0 && (
+              <optgroup label="By topic">
+                {plain.map((p) => (
+                  <option key={p.id} value={`t:${p.id}`}>
+                    {p.label} ({p.codes.length})
+                  </option>
+                ))}
+              </optgroup>
+            )}
+            {(topics ?? []).length > 0 && (
+              <optgroup label="By Ontario objective">
+                {(topics ?? []).map((t) => (
+                  <option key={t.code} value={t.code}>
+                    {t.code} — {truncate(t.label, 60)}
+                  </option>
+                ))}
+              </optgroup>
+            )}
           </select>
         </label>
       </div>
@@ -230,6 +262,15 @@ export default function ExpectationPicker({
           {chosen && chosen.text && (
             <p className="mt-3 rounded-xl bg-pop-cream px-3 py-2 text-xs text-pop-night/75">
               <b>{chosen.code}</b> — {chosen.text}
+            </p>
+          )}
+
+          {chosenPlain && (
+            <p className="mt-3 rounded-xl bg-pop-cream px-3 py-2 text-xs text-pop-night/75">
+              <b>{chosenPlain.label}</b> is our grouping, not Ontario&rsquo;s. It
+              gathers the {chosenPlain.codes.length} expectation
+              {chosenPlain.codes.length === 1 ? "" : "s"} at{" "}
+              {gradeName(grade)} whose own published wording is about it.
             </p>
           )}
 

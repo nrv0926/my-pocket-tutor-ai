@@ -156,6 +156,16 @@ and a tab strip prints whichever tab happened to be open.
   the same sin as an invented code, just quieter. Watch for grade bands:
   Financial Literacy really is written "Grades 1 and 2: …", and that is not
   a topic.
+- **Plain topics are ours; their membership is not.** `data/topics.json`
+  gives each grade and subject a list of topics in the words an adult uses —
+  "Multiplying and dividing", not "B2". Those **labels are ours** and the UI
+  says so. What sits inside one is **derived**: a topic collects the
+  transcribed expectations whose own published wording matches its terms, so
+  nothing is ever filed by hand. Match on a **word boundary** — a bare
+  substring put a third of Grade 8 under Ratios because "rate" is inside
+  "demonstrate". A topic with no matches at a grade is not shown, and
+  whatever no topic claims stays reachable under "All topics": the plain
+  layer narrows, it never hides.
 - **Search the continuum, not just the expectations.** Ontario words its
   expectations broadly: "syllable" appears nowhere in the Language curriculum
   and neither does "decoding". Both are in
