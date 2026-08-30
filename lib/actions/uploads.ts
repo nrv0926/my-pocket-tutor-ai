@@ -10,7 +10,14 @@ import { QuotaExceededError, consumeAIQuota } from "@/lib/quota";
 import { getRole } from "@/lib/role";
 import { mapToSkillIds } from "@/lib/skillGapEngine";
 import { getServerSupabase } from "@/lib/supabaseServer";
-import { MAX_UPLOAD_BYTES, kindOf, rejectReason, storagePath } from "@/lib/uploadRules";
+import {
+  HEIC_ADVICE,
+  MAX_UPLOAD_BYTES,
+  kindOf,
+  sizeReason,
+  sniffType,
+  storagePath,
+} from "@/lib/uploadRules";
 import type { Grade, LearningNeed } from "@/types/child";
 import type { AnalysisResult } from "@/types/session";
 
@@ -39,12 +46,11 @@ export async function analyzeUpload(formData: FormData): Promise<void> {
   if (typeof childId !== "string" || !childId) throw new Error("Choose a child first.");
   if (!(file instanceof File)) throw new Error("Choose a file to analyze.");
 
-  // The browser checks these too. A limit enforced only there is not a limit.
-  const reason = rejectReason({ type: file.type, size: file.size, name: file.name });
-  if (reason) throw new Error(reason);
-
-  const kind = kindOf(file.type);
-  if (!kind) throw new Error("We can't read that file type.");
+  // Size is knowable without reading anything. The browser checks it too — a
+  // limit enforced only there is not a limit — but the type is decided below
+  // from the bytes rather than from what the browser called it.
+  const sizeBad = sizeReason(file.size);
+  if (sizeBad) throw new Error(sizeBad);
 
   const supabase = getServerSupabase();
   const {
@@ -63,6 +69,25 @@ export async function analyzeUpload(formData: FormData): Promise<void> {
   const bytes = Buffer.from(await file.arrayBuffer());
   if (bytes.byteLength > MAX_UPLOAD_BYTES) throw new Error("That file is over 10 MB.");
 
+  // What it actually is, not what the browser called it. A phone's reported
+  // type is a guess from the extension and is regularly wrong or empty, so
+  // the bytes decide — otherwise we either refuse a file we can read or
+  // accept one we cannot and find out after it has travelled.
+  const sniffed = sniffType(bytes);
+  if (sniffed === "image/heic") throw new Error(HEIC_ADVICE);
+
+  // A .txt has no signature to match, so an unrecognised file is only
+  // trusted when the browser called it text and it reads as text.
+  const declared = kindOf(file.type);
+  const actual = sniffed ? kindOf(sniffed) : declared === "text" ? "text" : null;
+  if (!actual) {
+    throw new Error(
+      "We couldn't read that file. It may be damaged, or it may not be the kind of file its name suggests."
+    );
+  }
+  const kind = actual;
+  const mediaType = sniffed ?? file.type;
+
   const uploadId = randomUUID();
   const path = storagePath(user.id, uploadId, file.name);
 
@@ -79,7 +104,7 @@ export async function analyzeUpload(formData: FormData): Promise<void> {
     id: uploadId,
     child_id: childId,
     file_name: file.name.slice(-120),
-    file_type: file.type,
+    file_type: mediaType,
     storage_path: path,
     processing_status: "processing",
   });
@@ -144,7 +169,7 @@ export async function analyzeUpload(formData: FormData): Promise<void> {
       attachment:
         kind === "text"
           ? undefined
-          : { kind, mediaType: file.type, data: bytes.toString("base64") },
+          : { kind, mediaType, data: bytes.toString("base64") },
     });
   } catch (err) {
     await logAICall({

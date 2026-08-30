@@ -1,4 +1,6 @@
+import HealthPanel from "@/components/HealthPanel";
 import SetupStatus from "@/components/SetupStatus";
+import { readHealth } from "@/lib/health";
 import { runSetupChecks } from "@/lib/setupCheck";
 import Link from "next/link";
 import RoleSwitcher from "@/components/RoleSwitcher";
@@ -11,7 +13,7 @@ export default async function SettingsPage() {
   // Asked here rather than on the dashboard: this is where someone goes
   // when something is not working, and a permanent banner elsewhere would
   // be noise once it is fixed.
-  const checks = await runSetupChecks();
+  const [checks, health] = await Promise.all([runSetupChecks(), readHealth()]);
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <header className="mb-6">
@@ -21,8 +23,9 @@ export default async function SettingsPage() {
         <h1 className="mt-1 font-display text-3xl text-pop-night">Your account.</h1>
       </header>
 
-      <div className="mb-6">
+      <div className="mb-6 space-y-6">
         <SetupStatus checks={checks} />
+        <HealthPanel health={health} />
       </div>
 
       <section className="mb-6 rounded-2xl border-[3px] border-pop-night bg-white p-5 shadow-pop-sm">
