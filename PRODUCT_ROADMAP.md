@@ -232,6 +232,138 @@ Four notes remain too compressed to act on:
 
 ---
 
+## Reading.com-style co-play lessons — 2026-09-12
+
+Asked whether we can offer homeschool parents and parents the kind of
+activity Reading.com sells. Researched rather than guessed at, because the
+answer splits four ways and only two of them are ours.
+
+Reading.com is a co-play phonics program for ages 3–8: 99 scripted lessons a
+grown-up and child work through together at 15–20 minutes each, 60 decodable
+books, 42 letter-sound videos. The pitch is that the script means the adult
+needs no teaching training.
+
+### What it is, in four parts
+
+1. **The scripted sit-down lesson** — the adult is told the exact words to
+   say and what the child does back.
+2. **Decodable text** — a passage using only the patterns already taught, so
+   the child reads rather than guesses.
+3. **Letter-sound videos.**
+4. **A child-facing app** — the child taps the screen, plays the games,
+   collects the progress.
+
+Parts 3 and 4 are not ours and will not become ours. A video library is a
+content business, not a planning tool. A child tapping a screen is the
+permanent non-goal at the top of this file and the one CLAUDE.md §1 and §8
+both name — it is Phase 7 at the earliest, and then only supervised.
+
+Parts 1 and 2 are ours, and part 1 is mostly already built.
+
+### Part 1 is nearly shipped, and nobody noticed
+
+Every piece of the scripted lesson already exists:
+
+- `MaterialKind` already includes `"script"`, and `TeachingMaterials.tsx`
+  already renders it as quoted lines the adult reads aloud.
+- SYSTEM_PROMPT already fixes the K–3 reading lesson to the UFLI shape —
+  Sound Drill → Blend Practice → Word Reading → Sentence Reading → Dictation
+  — which is the shape Reading.com's lessons take.
+- SYSTEM_PROMPT rule 6 already sizes every plan at 10–15 minutes. Their
+  lesson is 15–20.
+- "PRODUCE THE MATERIALS, DO NOT DESCRIBE THEM" already forbids handing the
+  adult a prep list.
+
+What is missing is emphasis, not capability. `howToTeachIt` is written as
+instructions *about* the lesson ("model the sound, then have them blend it"),
+and the script is an optional material hanging off a step. For a parent who
+has never taught reading, that is the wrong way round: the words to say are
+the lesson, and the instruction is the annotation. Inverting it is a prompt
+change plus a renderer change. **No schema change, no migration.**
+
+The honest cost is output length — a scripted step is three or four times
+the words of an instruction — and a tone risk: a script that is too rigid
+reads as condescending to a confident homeschooler, who is exactly the
+reader `app/for/homeschooler/page.tsx` currently promises "you are the
+teacher" to. Likely answer is that the script is ticked, not assumed, the
+way extras already are.
+
+### Part 2 is the real gap
+
+`decodable` appears nowhere in the codebase. It is the highest-value thing
+on this page and it is genuinely inside the five verbs, under Teach.
+
+A decodable passage is the retrieval practice that makes a phonics lesson
+stick: text containing only the patterns the child has already been taught,
+so they decode instead of guessing from the picture. We are unusually well
+placed to generate one, because the constraint it needs is already binding
+on every call — the phonics progression in SYSTEM_PROMPT is strict and
+sequential, and `recentFeedbackContext()` already knows what stage the child
+is at.
+
+Two ways in, and the second is cheaper:
+
+- A new `MaterialKind` — `"decodable"` — alongside cards, word lists,
+  sentences and script. Always produced for a K–3 reading session.
+- A new `ExtraKind`, ticked in `MaterialsPicker`. This is the established
+  path: add the kind, add its paragraph to `extrasContext()`, add the
+  choice. Three small edits, all of them the same shape as work already
+  shipped, and it costs output only when asked for.
+
+Either way it lives inside HOW TO TEACH IT or PRACTICE WORKSHEET. **Nine
+means nine** (CLAUDE.md §5) — this is not a tenth section.
+
+The thing to get right is the permitted-word rule. A decodable passage that
+smuggles in one untaught pattern is worse than none, because the child
+stalls and the adult concludes they have regressed. So the prompt must name
+the stage explicitly, and name the irregular high-frequency words allowed
+alongside it, rather than trusting the model to infer both.
+
+### The reframe worth holding on to
+
+Reading.com is a **curriculum**: 99 fixed lessons, same order, every child.
+We are a **planner**: the right lesson for this child at this spot. Copying
+the 99 lessons would replace the thing that makes us different with a worse
+version of a product that already exists and is well funded.
+
+What is worth borrowing is not the sequence. It is the script — the promise
+that the adult needs no training — and the decodable text.
+
+### What actually blocks the full experience
+
+A parent who wants "the Reading.com thing" wants a *program*: open it
+tonight, be told what to do, come back tomorrow and be told the next thing.
+We generate an excellent single lesson and then forget it happened.
+
+That is already filed — **item 2, "Continuous sessions, sequenced by
+level"**, said twice in the teacher notes, which usually means it matters.
+Sequencing is what turns our planner into their program, and it would serve
+the homeschool parent and the classroom teacher with the same work. It is
+the dependency, not the script and not the decodable text.
+
+### The age gap, stated plainly
+
+Reading.com starts at 3. We start at Kindergarten, and Ontario publishes
+expectations for Grades 1–8 (CLAUDE.md §6). A three-year-old is off the
+bottom of our curriculum spine entirely — there is nothing to resolve an
+expectation against. Pre-reading for 3s and 4s would mean a body of
+content we do not have and have not decided we want. Not a blocker for the
+work above; a reason not to promise parents of preschoolers anything yet.
+
+### Build order
+
+1. Decodable passage as a ticked extra. Smallest, highest value, follows a
+   path already worn.
+2. Script-first HOW TO TEACH IT, ticked rather than assumed.
+3. Sequencing (item 2) — the real unlock, and the expensive one.
+
+Open: whether the script is ticked or always-on for K–3 reading; whether
+decodable text is an extra or a material kind; whether a confident
+homeschooler finds a full script useful or patronising, which is a question
+for a homeschool parent rather than for us.
+
+---
+
 ## Permanent non-goals
 
 - A chatbot that replaces a teacher.
