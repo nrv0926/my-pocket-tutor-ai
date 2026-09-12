@@ -20,44 +20,137 @@
     {
       "stage": 1,
       "name": "CVC",
-      "examples": ["cat", "sit", "log"],
-      "skills": ["short vowel sounds", "consonant blending"]
+      "examples": [
+        "cat",
+        "sit",
+        "log"
+      ],
+      "skills": [
+        "short vowel sounds",
+        "consonant blending"
+      ],
+      "graphemes": []
     },
     {
       "stage": 2,
       "name": "Digraphs",
-      "examples": ["ship", "chop", "thin"],
-      "skills": ["sh", "ch", "th", "wh"]
+      "examples": [
+        "ship",
+        "chop",
+        "thin"
+      ],
+      "skills": [
+        "sh",
+        "ch",
+        "th",
+        "wh"
+      ],
+      "graphemes": [
+        "sh",
+        "ch",
+        "th",
+        "wh",
+        "ck",
+        "ng",
+        "ph"
+      ]
     },
     {
       "stage": 3,
       "name": "Blends",
-      "examples": ["stop", "frog", "blend"],
-      "skills": ["initial blends", "final blends"]
+      "examples": [
+        "stop",
+        "frog",
+        "blend"
+      ],
+      "skills": [
+        "initial blends",
+        "final blends"
+      ],
+      "graphemes": []
     },
     {
       "stage": 4,
       "name": "Silent e",
-      "examples": ["cake", "ride", "hope"],
-      "skills": ["VCe pattern", "long vowel sounds"]
+      "examples": [
+        "cake",
+        "ride",
+        "hope"
+      ],
+      "skills": [
+        "VCe pattern",
+        "long vowel sounds"
+      ],
+      "graphemes": []
     },
     {
       "stage": 5,
       "name": "Vowel teams",
-      "examples": ["rain", "read", "boat"],
-      "skills": ["ai/ay", "ee/ea", "oa/ow"]
+      "examples": [
+        "rain",
+        "read",
+        "boat"
+      ],
+      "skills": [
+        "ai/ay",
+        "ee/ea",
+        "oa/ow"
+      ],
+      "graphemes": [
+        "ai",
+        "ay",
+        "ee",
+        "ea",
+        "oa",
+        "ow",
+        "oi",
+        "oy",
+        "oo",
+        "au",
+        "aw",
+        "ie",
+        "ue",
+        "ew",
+        "igh"
+      ]
     },
     {
       "stage": 6,
       "name": "R-controlled vowels",
-      "examples": ["car", "her", "sir"],
-      "skills": ["ar", "er", "ir", "or", "ur"]
+      "examples": [
+        "car",
+        "her",
+        "sir"
+      ],
+      "skills": [
+        "ar",
+        "er",
+        "ir",
+        "or",
+        "ur"
+      ],
+      "graphemes": [
+        "ar",
+        "er",
+        "ir",
+        "or",
+        "ur"
+      ]
     },
     {
       "stage": 7,
       "name": "Multisyllabic words",
-      "examples": ["picnic", "rabbit", "fantastic"],
-      "skills": ["syllable division", "schwa awareness"]
+      "examples": [
+        "picnic",
+        "rabbit",
+        "fantastic"
+      ],
+      "skills": [
+        "syllable division",
+        "schwa awareness"
+      ],
+      "graphemes": []
     }
-  ]
+  ],
+  "note": "Stage names, examples and skills follow the standard science-of-reading scope and sequence. The `graphemes` list on each stage is ours: it is what lib/decodableCheck.ts tests a generated passage against, so a word needing a pattern from a later stage can be caught before a child stalls on it. Stages 1, 3, 4 and 7 introduce no new graphemes — they are shape rules (single letters, consonant clusters, VCe, more than one syllable) and the checker detects those structurally."
 }

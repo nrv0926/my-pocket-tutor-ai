@@ -15,7 +15,8 @@ This file is the one that gets updated when the app changes.
 
 ## Before you start
 
-**Journeys 1, 2, 8, 10, 11 and 16 need nothing configured.** (17 needs Supabase.) They are the demo path and
+**Journeys 1, 2, 8, 10, 11, 16 and 18 need nothing configured** for their
+`/qa-preview` steps. (17 needs Supabase; 18 needs a key only for its eval.) They are the demo path and
 should work on any deployment. Run these first — if something is broken there,
 it is broken for everyone.
 
@@ -313,6 +314,47 @@ minutes before period three.*
 **Bug:** section 1 describing a struggle, a behaviour or a classroom moment
 nobody told us about. There is a real child on the other end of that
 sentence, and an invented noticing is worse than a short one.
+
+## 18. A decodable story she can hand straight over
+*`/qa-preview` shows the rendering with no setup. The real flow needs
+Supabase; checking whether the story is actually decodable needs an
+`ANTHROPIC_API_KEY` and the eval below.*
+
+1. Open `/qa-preview` and find **AnalysisResultCard — with a decodable
+   story**. → Section 5 holds a story titled "The duck in the shed", above it
+   a **Teach these first** strip with `the a to is`, and six sentences each
+   on its own line in large type — not a numbered question list.
+2. On `/session/new` with Language selected, look at **Also make**. → Four
+   choices now. The fourth is **Decodable story**, hinted "A short story
+   using only the sounds taught so far. They read it to you."
+3. Tick it, then switch the subject to Mathematics. → It disappears, and the
+   tick goes with it. Switch back to Language: it is offered again, unticked.
+   A maths lesson has nothing to decode.
+4. Generate a Language session with it ticked. → Section 5 holds the worksheet
+   and then the story. Count the numbered sections: still exactly nine.
+5. Read the story against the stage the lesson taught. → Every word uses that
+   stage or one below it. The only exceptions are the words in **Teach these
+   first**, and there are at most five.
+6. Print it. → The story prints with the plan, each sentence intact.
+
+**Checking step 5 properly, rather than by eye:**
+
+```
+RUN_DECODABLE_EVAL=1 ANTHROPIC_API_KEY=sk-... \
+  npx vitest run tests/decodableEval.test.ts
+```
+
+Three real generations — CVC, digraphs, blends — each fed through
+`lib/decodableCheck.ts`, which tiers every word against the seven-stage
+progression in `data/literacy-progression.json`. A failure names the word and
+the stage it needs. Without both variables the eval skips, so `npm test`
+stays free.
+
+**Bug:** a word in the story that needs a later stage than the lesson taught
+— "and" or "stop" in a digraph story, "see" or "boat" before vowel teams. One
+of those and the child stalls on it, and the adult concludes they have gone
+backwards. That is worse than no story at all, which is why the constraint is
+checkable rather than merely requested.
 
 ---
 
