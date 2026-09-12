@@ -352,15 +352,22 @@ work above; a reason not to promise parents of preschoolers anything yet.
 
 ### Build order
 
-1. Decodable passage as a ticked extra. Smallest, highest value, follows a
-   path already worn.
-2. Script-first HOW TO TEACH IT, ticked rather than assumed.
-3. Sequencing (item 2) — the real unlock, and the expensive one.
+1. ~~**Decodable passage as a ticked extra.**~~ **Done.** A fourth
+   `ExtraKind`, ticked in the same picker as the other three, offered for
+   Language only — the phonics progression it is built against is the
+   English one in `SYSTEM_PROMPT`, and maths has nothing to decode. The
+   prompt binds the passage to the stage taught and the stages below it,
+   caps the words that cannot be decoded yet at five, and names them in
+   `trickyWords` so the adult pre-teaches them rather than discovering them
+   mid-sentence. It renders as connected text, not a numbered list, inside
+   PRACTICE WORKSHEET. Nine stayed nine. No migration.
+2. **Script-first HOW TO TEACH IT**, ticked rather than assumed.
+3. **Sequencing** (item 2) — the real unlock, and the expensive one.
 
-Open: whether the script is ticked or always-on for K–3 reading; whether
-decodable text is an extra or a material kind; whether a confident
-homeschooler finds a full script useful or patronising, which is a question
-for a homeschool parent rather than for us.
+Open: whether the script is ticked or always-on for K–3 reading; whether a
+confident homeschooler finds a full script useful or patronising, which is a
+question for a homeschool parent rather than for us. Settled: decodable text
+is an extra, not a material kind — it costs output, so it is asked for.
 
 ---
 

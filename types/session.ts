@@ -93,12 +93,36 @@ export interface WorksheetVariant {
  * of the lesson, something to take away, and a harder version for whoever
  * finishes first.
  *
- * All three are practice, so they sit inside PRACTICE WORKSHEET rather than
+ * The fourth is a decodable passage: connected text built only from the
+ * patterns already taught, which is how a phonics lesson gets applied
+ * rather than merely delivered. It is practice too, and the strictest kind
+ * — one untaught pattern and the child stalls.
+ *
+ * All four are practice, so they sit inside PRACTICE WORKSHEET rather than
  * beside it. Nine means nine (CLAUDE.md §5). Generated only when asked for,
  * because a parent who wanted a worksheet does not want homework invented
  * for their evening.
  */
-export type ExtraKind = "exitTicket" | "homework" | "challenge";
+export type ExtraKind = "exitTicket" | "homework" | "challenge" | "decodable";
+
+/**
+ * Subjects an extra is offered for. Absent means every subject.
+ *
+ * One rule, read by the picker that offers the tick and by the action that
+ * honours it, so a decodable story cannot be requested for a maths lesson
+ * by a form that has drifted from the server.
+ */
+export const EXTRA_SUBJECTS: Partial<Record<ExtraKind, Subject[]>> = {
+  // The phonics progression a decodable passage is built against is the
+  // English one in SYSTEM_PROMPT. French has its own and we have not
+  // transcribed it; maths has nothing to decode.
+  decodable: ["language"],
+};
+
+export function extraOfferedFor(kind: ExtraKind, subject: Subject): boolean {
+  const only = EXTRA_SUBJECTS[kind];
+  return !only || only.includes(subject);
+}
 
 export interface LessonExtra {
   kind: ExtraKind;
@@ -108,6 +132,16 @@ export interface LessonExtra {
   items: string[];
   /** One line on how to run it. */
   note?: string;
+  /**
+   * Decodable passages only: the words in the passage that cannot be
+   * decoded at the stage just taught — irregular high-frequency words like
+   * "said" or "was". The adult pre-teaches these before handing the passage
+   * over, so they have to arrive as a list rather than buried in prose.
+   *
+   * Optional and unused by the other three kinds, whose items are questions
+   * with nothing to pre-teach.
+   */
+  trickyWords?: string[];
 }
 
 /** The structured nine-section AI output. Order is fixed — see CLAUDE.md §5. */

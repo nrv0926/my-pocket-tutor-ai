@@ -110,6 +110,36 @@ const DEMO_PLAN: WeeklyPlan = {
   ],
 };
 
+/**
+ * A decodable story, at the digraph stage.
+ *
+ * Every word below is built from short vowels, single consonants and the
+ * digraphs sh / ch / th / ck — nothing from the stages above it, so no
+ * blends ("and", "stop") and no vowel teams ("see"). The four words that
+ * cannot be sounded out at this stage are named for pre-teaching instead.
+ * That constraint is the whole feature: one untaught pattern and the child
+ * stalls on it.
+ */
+const DECODABLE_ANALYSIS: AnalysisResult = {
+  ...SAMPLE_ANALYSIS,
+  extras: [
+    {
+      kind: "decodable",
+      title: "The duck in the shed",
+      note: "Read it through once together, then let them read it alone.",
+      trickyWords: ["the", "a", "to", "is"],
+      items: [
+        "Beth got a duck.",
+        "The duck is fat.",
+        "Chad can pet the duck.",
+        "The duck ran to the shed.",
+        "Chad ran with Beth.",
+        "Beth can get the duck.",
+      ],
+    },
+  ],
+};
+
 const THREAD: Continuity = {
   childId: "demo-1",
   sessionCount: 4,
@@ -272,6 +302,10 @@ export default function PreviewGallery() {
 
       <Block label="AnalysisResultCard — one lesson, a worksheet per level">
         <AnalysisResultCard result={SPLIT_ANALYSIS} />
+      </Block>
+
+      <Block label="AnalysisResultCard — with a decodable story">
+        <AnalysisResultCard result={DECODABLE_ANALYSIS} />
       </Block>
 
       <Block label="AnalysisResultCard">

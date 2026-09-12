@@ -58,10 +58,13 @@ const WorksheetVariant = z.object({
 });
 
 const LessonExtra = z.object({
-  kind: z.enum(["exitTicket", "homework", "challenge"]),
+  // A decodable passage runs longer than a question set — 4 to 8 sentences
+  // of connected text — and carries the words to pre-teach before it.
+  kind: z.enum(["exitTicket", "homework", "challenge", "decodable"]),
   title: z.string().min(1),
-  items: z.array(z.string().min(1)).min(2).max(6),
+  items: z.array(z.string().min(1)).min(2).max(8),
   note: z.string().min(1).optional(),
+  trickyWords: z.array(z.string().min(1)).max(5).optional(),
 });
 
 const AnalysisResultSchema = z.object({
@@ -74,7 +77,7 @@ const AnalysisResultSchema = z.object({
   practiceWorksheet: Worksheet,
   answerKey: z.array(z.object({ questionId: z.string().min(1), answer: z.string().min(1) })),
   worksheetVariants: z.array(WorksheetVariant).max(4).optional(),
-  extras: z.array(LessonExtra).max(3).optional(),
+  extras: z.array(LessonExtra).max(4).optional(),
   parentTips: z.array(z.string().min(1)).min(2).max(3),
   nextStepPlan: z.string().min(1),
   feedbackQuestion: z.literal(FEEDBACK_QUESTION),

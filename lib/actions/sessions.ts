@@ -29,11 +29,12 @@ import {
   type AchievementLevel,
   type StoredSubject,
 } from "@/types/child";
-import type {
-  AnalysisResult,
-  Difficulty,
-  ExtraKind,
-  SessionInputType,
+import {
+  extraOfferedFor,
+  type AnalysisResult,
+  type Difficulty,
+  type ExtraKind,
+  type SessionInputType,
 } from "@/types/session";
 import type { ParentFeedback } from "@/types/progress";
 
@@ -63,7 +64,10 @@ const InputSchema = z.object({
     .nullable()
     .optional(),
   worksheetLevels: z.array(z.enum(["1", "2", "3", "4"])).max(4).optional(),
-  extras: z.array(z.enum(["exitTicket", "homework", "challenge"])).max(3).optional(),
+  extras: z
+    .array(z.enum(["exitTicket", "homework", "challenge", "decodable"]))
+    .max(4)
+    .optional(),
   text: z.string().max(8000),
 })
   /**
@@ -237,7 +241,9 @@ export async function createLearningSession(input: {
           worksheetLevels: (parsed.worksheetLevels ?? []).filter(
             (l) => !parsed.achievementSpread || (parsed.achievementSpread[l] ?? 0) > 0
           ),
-          extras: parsed.extras ?? [],
+          // Only extras this subject offers. The picker hides the rest,
+          // but a tick can outlive a subject change on a stale form.
+          extras: (parsed.extras ?? []).filter((k) => extraOfferedFor(k, subject)),
           previous,
           progression,
           recentFeedback,

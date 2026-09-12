@@ -183,21 +183,61 @@ function AnswerList({
 }
 
 /**
- * An exit ticket, homework or a challenge — inside PRACTICE WORKSHEET, not
- * beside it, because all three are practice and nine means nine.
+ * An exit ticket, homework, a challenge or a decodable story — inside
+ * PRACTICE WORKSHEET, not beside it, because all four are practice and nine
+ * means nine.
  */
 function Extra({ extra }: { extra: LessonExtra }) {
+  const isPassage = extra.kind === "decodable";
+  const tricky = extra.trickyWords ?? [];
+
   return (
     <div className="mt-5 break-inside-avoid rounded-xl border-[3px] border-pop-night bg-pop-cream p-4">
       <p className="font-display text-sm uppercase tracking-widest text-pop-magenta">
         {extra.title}
       </p>
       {extra.note && <p className="mt-1 text-sm text-pop-night/75">{extra.note}</p>}
-      <ol className="ml-5 mt-2 list-decimal space-y-1.5 text-pop-night">
-        {extra.items.map((item, i) => (
-          <li key={i}>{item}</li>
-        ))}
-      </ol>
+
+      {/* Pre-taught before the child starts, so they come before the text.
+          Everything else in the passage they can already sound out. */}
+      {isPassage && tricky.length > 0 && (
+        <div className="mt-3">
+          <p className="text-xs font-semibold uppercase tracking-widest text-pop-night/60">
+            Teach these first
+          </p>
+          <ul className="mt-1.5 flex flex-wrap gap-2">
+            {tricky.map((w, i) => (
+              <li
+                key={i}
+                className="rounded-lg border-[3px] border-dashed border-pop-night bg-white px-3 py-1 font-medium text-pop-night"
+              >
+                {w}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {isPassage ? (
+        // Connected text a child reads aloud, not a numbered list. Early
+        // readers track a line at a time, so each sentence gets its own.
+        <div className="mt-3 space-y-2">
+          {extra.items.map((line, i) => (
+            <p
+              key={i}
+              className="rounded-lg border-[3px] border-pop-night bg-white px-4 py-3 text-lg leading-relaxed text-pop-night"
+            >
+              {line}
+            </p>
+          ))}
+        </div>
+      ) : (
+        <ol className="ml-5 mt-2 list-decimal space-y-1.5 text-pop-night">
+          {extra.items.map((item, i) => (
+            <li key={i}>{item}</li>
+          ))}
+        </ol>
+      )}
     </div>
   );
 }

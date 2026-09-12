@@ -1,13 +1,14 @@
 "use client";
 
-import type { ExtraKind } from "@/types/session";
+import type { Subject } from "@/types/child";
+import { extraOfferedFor, type ExtraKind } from "@/types/session";
 
 /**
  * One control, not ten AI features.
  *
  * Most of what an adult asks for is already in every plan: the mini-lesson,
  * the vocabulary cards and word lists, the small-group tracks, the levelled
- * worksheets. Three things are genuinely extra, and each costs output to
+ * worksheets. Four things are genuinely extra, and each costs output to
  * write — so they are ticked, never assumed. A parent who wanted tonight's
  * worksheet did not ask for homework.
  */
@@ -27,15 +28,29 @@ const CHOICES: { kind: ExtraKind; label: string; hint: string }[] = [
     label: "Challenge",
     hint: "For whoever finishes early. Deeper, not longer.",
   },
+  {
+    kind: "decodable",
+    label: "Decodable story",
+    hint: "A short story using only the sounds taught so far. They read it to you.",
+  },
 ];
 
+/** The extras on offer for this subject, in the order above. */
+export function choicesFor(subject: Subject): ExtraKind[] {
+  return CHOICES.filter((c) => extraOfferedFor(c.kind, subject)).map((c) => c.kind);
+}
+
 export default function MaterialsPicker({
+  subject,
   value,
   onChange,
 }: {
+  subject: Subject;
   value: ExtraKind[];
   onChange: (next: ExtraKind[]) => void;
 }) {
+  const offered = CHOICES.filter((c) => extraOfferedFor(c.kind, subject));
+
   const toggle = (k: ExtraKind) =>
     onChange(value.includes(k) ? value.filter((v) => v !== k) : [...value, k]);
 
@@ -48,8 +63,8 @@ export default function MaterialsPicker({
         The lesson, materials and worksheet always come. These do not, unless
         you ask.
       </p>
-      <div className="grid gap-2 sm:grid-cols-3">
-        {CHOICES.map((c) => (
+      <div className="grid gap-2 sm:grid-cols-2">
+        {offered.map((c) => (
           <label
             key={c.kind}
             className={`flex cursor-pointer items-start gap-2.5 rounded-xl border-[3px] border-pop-night p-3 transition ${

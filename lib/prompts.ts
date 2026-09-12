@@ -153,11 +153,16 @@ The JSON object MUST match this TypeScript type EXACTLY:
   },
   "answerKey": Array<{ "questionId": string, "answer": string }>,
   "extras": Array<{                             // ONLY the kinds named below
-    "kind": "exitTicket" | "homework" | "challenge",
+    "kind": "exitTicket" | "homework" | "challenge" | "decodable",
     "title": string,
     "items": string[],                          // 2-5 for an exit ticket,
-                                                 // 3-6 for homework or a challenge
-    "note": string                              // one line on how to run it
+                                                 // 3-6 for homework or a challenge,
+                                                 // 4-8 sentences for a decodable
+                                                 // passage, in reading order
+    "note": string,                             // one line on how to run it
+    "trickyWords": string[]                     // DECODABLE ONLY: words in the
+                                                 // passage that cannot be decoded
+                                                 // yet. Max 5. Omit for the rest.
   }>,
   "worksheetVariants": Array<{                  // ONLY when levels are named below
     "level": "1" | "2" | "3" | "4",
@@ -400,6 +405,24 @@ export function extrasContext(kinds: ExtraKind[]): string {
       "CHALLENGE — for whoever finishes early. Deeper, not longer: the same " +
       "skill applied somewhere less obvious. Never simply more questions of " +
       "the kind they have already answered.",
+    decodable:
+      "DECODABLE PASSAGE — 4 to 8 connected sentences the child reads ALOUD " +
+      "once the lesson is taught, built so that every word is decodable " +
+      "using the pattern this lesson teaches and the stages BELOW it in the " +
+      "phonics progression. Nothing above it, ever. The constraint is the " +
+      "entire point: this is where a taught pattern becomes a read one, and " +
+      "a single untaught pattern is worse than no passage at all, because " +
+      "the child stalls on it and the adult concludes they have gone " +
+      "backwards. " +
+      "Put every word the child cannot yet decode in \"trickyWords\" — " +
+      "irregular high-frequency words only (the, said, was, of, you), at " +
+      "most five, and name them so the adult pre-teaches them before " +
+      "handing the passage over. If a sentence needs a sixth, rewrite the " +
+      "sentence rather than extend the list. " +
+      "It must read as connected text that is actually about something, not " +
+      "a word list broken into sentences, and it must never rely on a " +
+      "picture: there is no picture, and guessing from one is the exact " +
+      "habit this practice exists to break.",
   };
 
   return [

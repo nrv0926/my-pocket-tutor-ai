@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import LoadingState from "@/components/LoadingState";
-import MaterialsPicker from "@/components/MaterialsPicker";
+import MaterialsPicker, { choicesFor } from "@/components/MaterialsPicker";
 import SessionModePicker, { sessionMode } from "@/components/SessionModePicker";
 import ExpectationPicker from "@/components/ExpectationPicker";
 import AchievementLevelPicker from "@/components/AchievementLevelPicker";
@@ -82,6 +82,16 @@ export default function NewSessionForm({
   useEffect(() => {
     setPlanGrade(null);
   }, [childId]);
+
+  // Extras are offered per subject, so a tick can outlive the subject that
+  // offered it — and once it is off screen there is no way to untick it.
+  // Drop anything the new subject does not offer.
+  useEffect(() => {
+    const offered = choicesFor(subject);
+    setExtras((prev) =>
+      prev.every((k) => offered.includes(k)) ? prev : prev.filter((k) => offered.includes(k))
+    );
+  }, [subject]);
 
   const grade = planGrade ?? selectedGrade;
 
@@ -200,7 +210,7 @@ export default function NewSessionForm({
         />
       )}
 
-      <MaterialsPicker value={extras} onChange={setExtras} />
+      <MaterialsPicker subject={subject} value={extras} onChange={setExtras} />
 
       <SessionModePicker value={mode} onChange={setMode} />
 
