@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { existsSync, readFileSync } from "node:fs";
 import { generate } from "@/lib/aiService";
 import { buildAnalysisPrompt } from "@/prompts/analysisPrompt";
 import { checkPassage, stageName } from "@/lib/decodableCheck";
@@ -12,12 +13,44 @@ import type { AnalysisResult } from "@/types/session";
  * an API key AND RUN_DECODABLE_EVAL=1. `npm test` stays free and green
  * without them.
  *
- *   RUN_DECODABLE_EVAL=1 ANTHROPIC_API_KEY=sk-... npx vitest run tests/decodableEval.test.ts
+ * Put both in .env.local (gitignored) and just run:
+ *
+ *   npx vitest run tests/decodableEval.test.ts
+ *
+ * Shell variables still work and still win over the file.
  *
  * A failure here names the exact word that reached above its stage, which
  * is the whole point — "the passage looked fine" does not survive contact
  * with a child who stalls on "and".
  */
+/**
+ * Read .env.local the way `npm run dev` already does.
+ *
+ * Vitest does not load it, so this eval used to need both variables set in
+ * the shell — and on Windows that is a reliable way to lose an afternoon:
+ * `set KEY=...` takes quotes literally, keeps trailing spaces, and a pasted
+ * block silently welds the next line onto the end of the value. A key in a
+ * file has none of those failure modes and survives closing the window.
+ *
+ * Deliberately tiny: KEY=VALUE, first `=` wins, `#` comments and blanks
+ * skipped, surrounding quotes stripped, and the real environment always
+ * wins so CI and an exported shell variable still override the file.
+ */
+function loadEnvLocal(file = ".env.local"): void {
+  if (!existsSync(file)) return;
+  for (const line of readFileSync(file, "utf8").split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const eq = trimmed.indexOf("=");
+    if (eq < 1) continue;
+    const key = trimmed.slice(0, eq).trim();
+    if (process.env[key]) continue;
+    process.env[key] = trimmed.slice(eq + 1).trim().replace(/^["']|["']$/g, "");
+  }
+}
+
+loadEnvLocal();
+
 const LIVE =
   process.env.RUN_DECODABLE_EVAL === "1" && Boolean(process.env.ANTHROPIC_API_KEY);
 
