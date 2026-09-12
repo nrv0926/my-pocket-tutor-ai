@@ -155,3 +155,58 @@ export function checkPassage(
     unusedTrickyWords: [...tricky].filter((w) => !seen.has(w)),
   };
 }
+
+/**
+ * The stage rules, written for the model instead of for the checker.
+ *
+ * The first eval run failed exactly where inference was required: told a
+ * child had not been taught sh/ch/th, the model still wrote "ship", "fish",
+ * "dish" and "shut", because the prompt said "the stages below it" and left
+ * it to work out that stage 1 forbids a digraph. Classic early-reader
+ * vocabulary is stage 2 and up, so that inference had to beat a very strong
+ * prior, and it lost. It passed at the blends stage, where almost nothing
+ * needed resisting.
+ *
+ * So this spells the patterns out, names the words that actually broke it,
+ * and says what to do instead. It lives here rather than in lib/prompts.ts
+ * so the rule the model is given and the rule it is judged by come from one
+ * module and cannot drift apart.
+ */
+export function decodableStageGuide(): string {
+  const g = (stage: number) =>
+    (STAGES.find((s) => s.stage === stage)?.graphemes ?? []).join(" ");
+
+  return [
+    "THE SEVEN STAGES, AND EXACTLY WHAT EACH ONE ALLOWS.",
+    "",
+    "Work out first which stage this lesson teaches. Every word in the",
+    "passage must then be spellable using the patterns at that stage or",
+    "below it. Below stage 7, every word is ONE SYLLABLE.",
+    "",
+    `1. CVC — single consonants and short vowels, nothing else.`,
+    `   FORBIDDEN: ${g(2)}, and any two consonants sounded together.`,
+    `   "lid" is legal; "list", "pond", "trip", "and" are not.`,
+    `2. Digraphs — stage 1 plus ${g(2)}.`,
+    `   STILL FORBIDDEN: consonant blends. "fish" is legal; "and",`,
+    `   "chips", "stop", "fast" are not.`,
+    `3. Blends — stages 1-2 plus consonants sounded together (st fr nd mp str).`,
+    `   STILL FORBIDDEN: silent e, vowel teams, r-controlled vowels.`,
+    `4. Silent e — stages 1-3 plus the VCe pattern (cake, ride, hope).`,
+    `5. Vowel teams — stages 1-4 plus ${g(5)}.`,
+    `6. R-controlled — stages 1-5 plus ${g(6)}.`,
+    `7. Multisyllabic — stages 1-6 plus words of more than one syllable.`,
+    "",
+    'THE TRAP: "and" is a BLEND (nd), not a CVC word. It is illegal below',
+    'stage 3. So are "pond", "trip", "stop", "fast", "chips". These are the',
+    "words that most often slip in; check every one of them before you finish.",
+    "",
+    "If a word you want needs a pattern above the stage, you have exactly two",
+    "options and there is no third: choose a different word, or list that word",
+    'in "trickyWords". Never simply use it and hope.',
+    "",
+    "Before you return, read your own passage back one word at a time and ask",
+    "of each: can a child who only knows this stage sound this out? If not, it",
+    "is either replaced or declared. A story the child stalls on is worse than",
+    "a duller story they can read.",
+  ].join("\n");
+}

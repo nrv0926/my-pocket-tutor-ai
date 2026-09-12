@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { checkPassage, stageOf, stageName, MAX_STAGE } from "@/lib/decodableCheck";
+import {
+  checkPassage,
+  decodableStageGuide,
+  stageOf,
+  stageName,
+  MAX_STAGE,
+} from "@/lib/decodableCheck";
 
 /**
  * The decodable extra promises the model will not reach above the stage it
@@ -100,5 +106,88 @@ describe("checking a whole passage", () => {
   it("reports each offending word once, however often it appears", () => {
     const r = checkPassage(["and and and."], 2, []);
     expect(r.violations).toHaveLength(1);
+  });
+});
+
+/**
+ * Real model output from the first live eval run (analysis@2026-09-12.9),
+ * kept as fixtures. Two of three cases reached above their stage, and these
+ * are the exact passages. If the checker ever stops flagging them it has
+ * gone blind to the failure it exists for.
+ */
+describe("the first live run, kept as a regression", () => {
+  it("catches the digraphs a CVC passage should not have contained", () => {
+    // Told the child had not been taught sh, ch or th, the model wrote
+    // "ship", "fish", "dish" and "shut" anyway.
+    const r = checkPassage(
+      [
+        "Sam has a big ship.",
+        "The ship is in the pond.",
+        "A fish can sit in a dish.",
+        "Sam put the fish in the ship.",
+        "The fish is wet.",
+        "Sam had to shut the lid.",
+        "The ship and the fish go on a trip.",
+      ],
+      1,
+      ["the", "a", "to", "of"],
+    );
+    const words = r.violations.map((v) => v.word);
+    expect(words).toEqual(
+      expect.arrayContaining(["ship", "fish", "dish", "shut", "pond", "and", "trip"]),
+    );
+    // "Sam", "big", "sit", "wet", "lid", "put", "can", "has", "go" are legal.
+    expect(words).not.toContain("sam");
+    expect(words).not.toContain("lid");
+  });
+
+  it("catches the blends a digraph passage should not have contained", () => {
+    const r = checkPassage(
+      [
+        "Dad had a shop.",
+        "The shop had fish and chips.",
+        "A man ran in.",
+        'He said, "I wish for fish!"',
+        "Dad had a big dish.",
+        "He put fish and chips in the dish.",
+        "The man had his fish.",
+        "The man had a chat with Dad.",
+      ],
+      2,
+      ["the", "a", "said", "I", "for"],
+    );
+    const words = r.violations.map((v) => v.word);
+    expect(words).toEqual(expect.arrayContaining(["and", "chips"]));
+    // Digraphs are legal at stage 2 — these must NOT be flagged.
+    for (const ok of ["fish", "shop", "wish", "dish", "chat", "with"]) {
+      expect(words, ok).not.toContain(ok);
+    }
+  });
+});
+
+describe("what the model is told about the stages", () => {
+  const guide = decodableStageGuide();
+
+  it("names the letter patterns instead of only naming the stage", () => {
+    // The failure was an inference the model had to make and got wrong.
+    expect(guide).toMatch(/sh ch th wh ck ng ph/);
+    expect(guide).toMatch(/ai ay ee ea/);
+    expect(guide).toMatch(/ar er ir or ur/);
+  });
+
+  it("names the words that actually broke it", () => {
+    for (const trap of ["and", "pond", "trip", "chips", "stop", "fast"]) {
+      expect(guide, trap).toContain(`"${trap}"`);
+    }
+  });
+
+  it("leaves exactly two ways out, and closes the third", () => {
+    expect(guide).toMatch(/exactly two\s*\n?\s*options/);
+    expect(guide).toMatch(/trickyWords/);
+    expect(guide).toMatch(/Never simply use it/);
+  });
+
+  it("states the one-syllable rule the checker enforces", () => {
+    expect(guide).toMatch(/ONE SYLLABLE/);
   });
 });

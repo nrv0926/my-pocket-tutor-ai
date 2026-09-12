@@ -102,7 +102,7 @@ describe("the analysis prompt", () => {
   });
 
   it("bumps its version when the contract changes", () => {
-    expect(build([]).version).toBe("analysis@2026-09-12.9");
+    expect(build([]).version).toBe("analysis@2026-09-12.10");
   });
 });
 

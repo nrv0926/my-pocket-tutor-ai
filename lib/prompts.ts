@@ -13,6 +13,7 @@
 
 import type { AchievementLevel, Child, Role } from "@/types/child";
 import type { ParentFeedback } from "@/types/progress";
+import { decodableStageGuide } from "@/lib/decodableCheck";
 import type { Difficulty, ExtraKind } from "@/types/session";
 
 /** Bumped any time SYSTEM_PROMPT changes. Used in eval logs. */
@@ -425,12 +426,19 @@ export function extrasContext(kinds: ExtraKind[]): string {
       "habit this practice exists to break.",
   };
 
-  return [
+  const lines = [
     `ALSO PRODUCE, in "extras", exactly these and nothing else: ${kinds.join(", ")}.`,
     ...kinds.map((k) => `- ${spec[k]}`),
     "Produce them in full, the way the teaching materials are produced: the",
     "actual questions, not a description of what to write.",
-  ].join("\n");
+  ];
+
+  // The stage table is long, so only a decodable story pays for it. Naming
+  // the patterns beats naming the stage: the first eval run wrote "ship" and
+  // "fish" for a child who had not been taught sh.
+  if (kinds.includes("decodable")) lines.push("", decodableStageGuide());
+
+  return lines.join("\n");
 }
 
 /**

@@ -140,6 +140,15 @@ describe("a decodable story, which only reading has", () => {
     expect(ctx).toMatch(/connected text/);
   });
 
+  it("carries the stage table, and only when it is ticked", () => {
+    // The table is long. An exit ticket should not pay for it.
+    expect(extrasContext(["decodable"])).toMatch(/THE SEVEN STAGES/);
+    expect(extrasContext(["exitTicket", "homework", "challenge"])).not.toMatch(
+      /THE SEVEN STAGES/,
+    );
+    expect(build([]).system).not.toMatch(/THE SEVEN STAGES/);
+  });
+
   it("is never volunteered alongside another kind", () => {
     // The schema documents all four kinds always — that is the type talking.
     // What must stay absent until ticked is the instruction to write one.

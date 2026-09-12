@@ -17,7 +17,7 @@ import {
 import type { AchievementLevel, Child, Role, Subject } from "@/types/child";
 import type { ExtraKind } from "@/types/session";
 
-export const ANALYSIS_PROMPT_VERSION = "analysis@2026-09-12.9";
+export const ANALYSIS_PROMPT_VERSION = "analysis@2026-09-12.10";
 
 /**
  * Main analysis: parent input → 9-section structured plan + worksheet.
