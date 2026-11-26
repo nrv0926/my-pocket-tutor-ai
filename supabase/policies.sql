@@ -8,6 +8,7 @@ alter table public.users               enable row level security;
 alter table public.children            enable row level security;
 alter table public.learning_sessions   enable row level security;
 alter table public.learning_plans      enable row level security;
+alter table public.expectation_notes   enable row level security;
 alter table public.progress_records    enable row level security;
 alter table public.item_observations   enable row level security;
 alter table public.uploads             enable row level security;
@@ -148,6 +149,23 @@ drop policy if exists "subs owner read" on public.subscriptions;
 
 create policy "subs owner read"
   on public.subscriptions for select using (auth.uid() = user_id);
+
+-- --------- expectation_notes ---------
+-- The odd one out, deliberately. /curriculum is a public page and a note is
+-- a gloss on a public government document, so there is no user data to
+-- protect by hiding it — anyone may read. Writing is limited to a signed-in
+-- user, which is what keeps the model bill bounded: a crawler cannot make
+-- us generate anything.
+drop policy if exists "notes public read"     on public.expectation_notes;
+drop policy if exists "notes signed-in write" on public.expectation_notes;
+
+create policy "notes public read"
+  on public.expectation_notes for select
+  using (true);
+
+create policy "notes signed-in write"
+  on public.expectation_notes for insert
+  with check (auth.uid() is not null);
 
 -- =====================================================================
 -- Storage bucket

@@ -27,6 +27,16 @@ export interface SetupCheck {
 }
 
 const MIGRATION = "supabase/migrations/0001_plans_and_uploads.sql";
+const STORAGE = "supabase/storage.sql";
+
+/**
+ * The same name and the same default the app itself uses, read from the same
+ * variable. This probe used to look for a bucket called "uploads", which is
+ * not what anything creates or writes to, so a correctly configured project
+ * was told its bucket was missing — and pointed at the wrong file to fix it.
+ * A setup check that cries wolf is worse than no setup check.
+ */
+const BUCKET = process.env.SUPABASE_UPLOADS_BUCKET || "child-uploads";
 
 export async function runSetupChecks(): Promise<SetupCheck[]> {
   if (!isSupabaseConfigured()) {
@@ -55,15 +65,16 @@ export async function runSetupChecks(): Promise<SetupCheck[]> {
     return "unknown";
   };
 
-  const [plans, sessions] = await Promise.all([
+  const [plans, sessions, notes] = await Promise.all([
     table("learning_plans"),
     table("learning_sessions"),
+    table("expectation_notes"),
   ]);
 
   // Listing an absent bucket errors; listing an empty one returns [].
   let bucket: CheckStatus = "unknown";
   let bucketDetail = "";
-  const { error: bucketErr } = await supabase.storage.from("uploads").list("", { limit: 1 });
+  const { error: bucketErr } = await supabase.storage.from(BUCKET).list("", { limit: 1 });
   if (!bucketErr) {
     bucket = "ok";
   } else if (/not found|does not exist|bucket/i.test(bucketErr.message)) {
@@ -90,13 +101,26 @@ export async function runSetupChecks(): Promise<SetupCheck[]> {
       blocks: "The four-week plan",
     },
     {
+      id: "notes",
+      label: "expectation_notes table",
+      status: notes,
+      detail:
+        notes === "ok"
+          ? ""
+          : "Not created yet. Run supabase/schema.sql and supabase/policies.sql again — " +
+            "this table was only in migration 0002 until 2026-11-26, so a project " +
+            "bootstrapped before then does not have it.",
+      blocks: "Plain-English explanations on /curriculum",
+    },
+    {
       id: "bucket",
       label: "Private uploads bucket",
       status: bucket,
       detail:
         bucket === "ok"
           ? ""
-          : `No bucket named "uploads". Run ${MIGRATION} — it creates it private, with the same 10 MB limit and file types the app enforces.${
+          : `No bucket named "${BUCKET}". Run ${STORAGE} — it creates it private, ` +
+            `which is the non-negotiable bit, and adds the owner-scoped object policy.${
               bucketDetail ? ` (${bucketDetail})` : ""
             }`,
       blocks: "Report card and worksheet upload",

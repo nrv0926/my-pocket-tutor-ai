@@ -157,6 +157,41 @@ create index if not exists plans_child_created_idx
   on public.learning_plans(child_id, created_at desc);
 
 -- ---------------------------------------------------------------------
+-- expectation_notes  (migration 0002)
+--
+-- Plain-English glosses on individual curriculum expectations, so a parent
+-- can read /curriculum without knowing what "phonological awareness" means.
+-- Cached rather than generated on view: that page is public, and an
+-- explanation that costs a model call every time a crawler walks past is a
+-- bill rather than a feature.
+--
+-- This table was missing from this file until 2026-11-26 while living in
+-- migration 0002, so a database bootstrapped from the three SQL files had
+-- no expectation_notes and /curriculum broke the first time anybody asked
+-- for an explanation. Schema files in the repo ARE the schema for a fresh
+-- project; a table that only exists in a migration is a table new projects
+-- do not get.
+-- ---------------------------------------------------------------------
+create table if not exists public.expectation_notes (
+  id           uuid primary key default uuid_generate_v4(),
+  subject      text not null,
+  grade        text not null,
+  program      text,                       -- FSL only; null elsewhere
+  code         text not null,              -- Ontario's own code, e.g. "B2.1"
+  plain        text not null,
+  example      text not null,
+  try_at_home  text not null,
+  created_by   uuid references public.users(id) on delete set null,
+  created_at   timestamptz not null default now()
+);
+
+-- One note per expectation. B1.1 at Grade 1 is a different expectation from
+-- B1.1 at Grade 3, so the grade is part of the identity — and so is the FSL
+-- program, where the same code differs between Core and Immersion.
+create unique index if not exists expectation_notes_key
+  on public.expectation_notes (subject, grade, coalesce(program, ''), code);
+
+-- ---------------------------------------------------------------------
 -- progress_records
 -- ---------------------------------------------------------------------
 create table if not exists public.progress_records (
