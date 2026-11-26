@@ -19,6 +19,12 @@ import { join } from "node:path";
  * file.
  */
 const INTENTIONALLY_PUBLIC: Record<string, string> = {
+  "/demo":
+    "The showcase. The five verbs on one page, built so the product can be " +
+    "shown to somebody with no sign-in, no database and no API key. Being " +
+    "seen is the whole point of it. Carries a hand-written plan and " +
+    "synthetic cases only — tests/showcase.test.ts asserts no real learner " +
+    "appears in it.",
   "/demo/loop":
     "The only surface where the assess→teach→practise→recheck loop can be " +
     "driven without Supabase, a sign-in and a saved profile. Reads no " +
