@@ -215,7 +215,13 @@ function decide(
       prerequisiteLabel: under?.label ?? null,
       reason: under
         ? `Check ${under.label} first — a gap underneath is usually the real cause.`
-        : "no prerequisite mapped",
+        : // Nothing underneath to step down to: this is where the sequence
+          // starts. "no prerequisite mapped" was the old text here and it is
+          // developer shorthand in a field a parent reads at 9pm, which
+          // CLAUDE.md §2 rules out. Say what to do instead.
+          "This is the first step in the sequence, so there is nothing " +
+          "underneath to check. Reteach it in smaller pieces, with more " +
+          "help, before moving on.",
     };
   }
 

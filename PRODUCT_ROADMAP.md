@@ -371,6 +371,103 @@ is an extra, not a material kind — it costs output, so it is asked for.
 
 ---
 
+## Gaps the 116 test scenarios exposed — 2026-11-26
+
+Running the uploaded scenario workbook found no engine bugs, but it named
+eleven things that do not exist. They are recorded here rather than built,
+per CLAUDE.md §9: none of them is a next step the engine gets wrong, and
+several are decisions rather than work.
+
+Grouped by what they cost.
+
+### The one that is a decision, and should be made soon
+
+- **Science and Technology is offered with nothing behind it** (SU-08).
+  `data/ontario/subjects.json` marks it `supported: true`, so
+  `SUPPORTED_SUBJECTS` offers it and an adult can pick it. There is no
+  `science.json`. `subjectsWithExpectations()` returns Language, Mathematics
+  and French — three of the four. So a Science plan has no expectation to
+  resolve against, while the prompt still tells the model to work from the
+  Ontario curriculum. That is precisely the shape §6 calls out: an invented
+  code is worse than a missing one, because a teacher will trust it.
+
+  Two ways out, and both are yours:
+  transcribe the Science and Technology curriculum, which is the same
+  careful work the other three took; or set `supported: false` until it is
+  done, which is one line and is what §6's own "not yet beats pretending"
+  argues for. Either is fine. Offering it with nothing behind it is not.
+
+  A test now pins the gap in both directions
+  (`tests/scenariosCoverage.test.ts`, SU-08), so neither side can move by
+  accident.
+
+### Two that are small and should go first
+
+- **Capture has no server-side idempotency** (C-08). The rapid double-tap is
+  guarded in the browser (`disabled={saving}`), so the realistic case is
+  covered. A genuine resubmit, a restored tab or a flaky connection writes
+  attempt 2 instead of being ignored. The attempt-2 row is harmless to the
+  decision — only attempt 1 counts — but it is a lie in the history, and the
+  adult did not retry anything.
+- **`saveCapture()` is not one transaction** (C-09). It issues several
+  statements, so a connection dropped midway can leave some items saved and
+  the session unclosed. "All rows or none" is what the scenario asks for and
+  is the right behaviour for a six-tap screen the adult will walk away from.
+
+### A standing accommodation, which is the one that will actually bite
+
+- **No per-child accommodation that persists** (LC-04, LC-08, LC-10). A child
+  who needs every maths question read aloud needs it read aloud every week.
+  Today the adult taps "Help, but not this skill" on each item, every
+  session, forever — and the scenario note is right that this will not last.
+  The same shape covers a child whose timed items never count and one whose
+  prompts must avoid figurative wording. This is a profile field plus a
+  default at capture time, and it is worth doing properly rather than three
+  times.
+- **No "unsure" at capture** (LC-07). The database already has
+  `pending_review` and the engine already excludes it until it is confirmed,
+  so this is a button and a confirm step, not a model change. An adult who
+  did not quite hear the answer currently has to guess right or wrong, and a
+  guess is worse evidence than an admission.
+- **Exclusion is per question only** (LC-15). A session that went badly for
+  reasons that have nothing to do with the skill needs one action, not six.
+
+### Three that need a decision before any code
+
+- **Open written responses before Phase 4** (SU-06). Right-or-wrong carries a
+  three-sentence answer badly. The rubric work in 0008 is the real answer;
+  until it is wired to the capture screen, Phase 1 needs one consistent
+  behaviour, and "whatever the adult taps" is not it. Candidate: such an item
+  defaults to `pending_review` and never scores itself.
+- **One `planGrade` per child, not per subject** (LC-13). A Grade 2 child can
+  be ready for Grade 3 maths and need Grade 1 writing. Today the picker
+  reaches down for the whole child. This is the twice-exceptional case and
+  the scenario is right that it is important to know; it is also a schema
+  change, so it is a decision first.
+- **No way for the adult to overrule the suggestion** (LC-20). She knows
+  things the evidence does not. An override has to be recorded and then
+  stop mattering — the next suggestion still comes from the evidence, or the
+  card becomes a sticky note.
+
+### Two about generated items
+
+- **No per-grade scope check on generated numbers** (GR-02, GR-03). Ontario
+  2020 maths puts Grade 1 at 50, Grade 2 at 200, Grade 3 at 1,000 — the
+  wording is in `data/ontario/mathematics.json` and the numbers are
+  transcribed, so the ranges can be derived rather than typed. An item
+  outside the range should be dropped before it is printed. `lib/answerCheck.ts`
+  now gives the arithmetic half of this; the range half is not built.
+- **Large print** (LC-09). The print stylesheet is the MVP's only export
+  (CLAUDE.md §8). A low-vision learner needs it to scale, diagrams included,
+  without anything cut off.
+
+Not on this list, because it is already answered: the scenarios' worry that
+maths would be stepped down because of reading, or one sibling's result move
+another's plan. Skills are grouped separately and `recommendAll()` reports
+them separately; LC-01, SU-10 and MC-02 are tests, and they pass.
+
+---
+
 ## Permanent non-goals
 
 - A chatbot that replaces a teacher.

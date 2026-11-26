@@ -80,7 +80,9 @@ describe("table row: two sessions, 5/6, 2/6, 4/6", () => {
   it("check_prerequisite says so plainly when none is mapped", () => {
     const r = run([...session("s1", 1, 3), ...session("s2", 1, 3)]);
     expect(r.prerequisite).toBeNull();
-    expect(r.reason).toBe("no prerequisite mapped");
+    // Scenario LC-18: the field is read by a parent, so it has to name an
+    // action, not report a missing graph edge.
+    expect(r.reason).toMatch(/first step in the sequence/);
   });
 });
 

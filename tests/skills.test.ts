@@ -116,7 +116,17 @@ describe("what to check first", () => {
   });
 
   it("returns null for a root rather than inventing a step", () => {
-    expect(prerequisiteFor("math.place_value_100")).toBeNull();
+    // Counting is where the maths chain starts: data/math-progression.json
+    // has nothing below K / number.
+    expect(prerequisiteFor("math.counting_to_30")).toBeNull();
+    expect(prerequisiteFor("math.addition_within_20")).toBeNull();
+  });
+
+  it("place value rests on counting", () => {
+    // math-progression.json: K / number "Counting to 30 by 1s" sits below
+    // Grade 1 / number "Place value to 100", and its own rule is to step
+    // down one grade on the same strand.
+    expect(prerequisiteFor("math.place_value_100")?.id).toBe("math.counting_to_30");
   });
 
   it("falls back to the id rather than rendering blank", () => {
@@ -164,16 +174,21 @@ describe("done when: regrouping proposes place value by name", () => {
     expect(rec.reason).not.toBe("no prerequisite mapped");
   });
 
-  it("still says so plainly when the graph has no edge", () => {
+  it("gives the adult something to do at the bottom of the chain", () => {
+    // Scenario LC-18. Counting has nothing underneath it, so there is no
+    // step down to offer — and the answer still has to be useful.
     const rootRec = recommend(
       [...session("s1", 1, 3), ...session("s2", 1, 3)].map((r) => ({
         ...r,
-        skillId: "math.place_value_100",
+        skillId: "math.counting_to_30",
       })),
       { now: new Date("2026-11-26T10:00:00Z") },
     );
+    expect(rootRec.decision).toBe("check_prerequisite");
     expect(rootRec.prerequisite).toBeNull();
-    expect(rootRec.reason).toBe("no prerequisite mapped");
+    expect(rootRec.reason).toMatch(/first step in the sequence/);
+    expect(rootRec.reason).toMatch(/smaller pieces/);
+    expect(rootRec.reason).not.toMatch(/prerequisite|null|undefined/i);
   });
 
   it("a caller can supply its own ordering", () => {

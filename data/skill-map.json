@@ -255,11 +255,24 @@
       ]
     },
     {
+      "id": "math.counting_to_30",
+      "subject": "math",
+      "label": "Counting to 30",
+      "minGrade": "K",
+      "prerequisiteIds": [],
+      "terms": [
+        "count",
+        "counting"
+      ]
+    },
+    {
       "id": "math.place_value_100",
       "subject": "math",
       "label": "Place value to 100",
       "minGrade": "1",
-      "prerequisiteIds": [],
+      "prerequisiteIds": [
+        "math.counting_to_30"
+      ],
       "terms": [
         "place value",
         "tens",

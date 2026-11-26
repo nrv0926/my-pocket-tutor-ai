@@ -120,10 +120,19 @@ describe("R — recommend()", () => {
     // 1/4 + 1/4 = 25%. The sheet's fixture names the skill "regrouping",
     // which is not an id in data/skill-map.json, so there is nothing
     // underneath to name and the engine says so rather than inventing one.
+    //
+    // DEVIATION, raised in the report: R-03 quotes the reason as the exact
+    // string "no prerequisite mapped". That string is gone. Scenario LC-18
+    // in the same sheet asks for "a clear, useful result ... no null" at
+    // the bottom of a chain, and CLAUDE.md §2 forbids jargon in a field a
+    // parent reads. Both cannot hold, so the substance of R-03 is kept
+    // (prerequisite is null and the card says there is nothing underneath)
+    // and the developer shorthand is not.
     const r = recommend([...session("s1", 1, 4), ...session("s2", 1, 4)], { now: NOW });
     expect(r.decision).toBe("check_prerequisite");
     expect(r.prerequisite).toBeNull();
-    expect(r.reason).toBe("no prerequisite mapped");
+    expect(r.prerequisiteLabel).toBeNull();
+    expect(r.reason).toMatch(/nothing underneath to check/);
   });
 
   it("R-03 (note) a mapped skill names its prerequisite", () => {

@@ -136,37 +136,242 @@ S = {
                   "one assertion that could not fail; fixed in b01e0d5."),
 }
 
-wb = openpyxl.load_workbook(SRC)
-ws = wb["Scenarios"]
-assert ws.cell(4, 1).value == "ID", "expected the header on row 4"
-assert ws.cell(4, 6).value == "Status" and ws.cell(4, 9).value == "Notes"
-missing = []
-for r in range(5, 71):
-    sid = ws.cell(r, 1).value
-    if sid not in S:
-        missing.append(sid); continue
-    status, note = S[sid]
-    ws.cell(r, 6).value = status
-    old = (ws.cell(r, 9).value or "").strip()
-    ws.cell(r, 9).value = f"{old} — {note}" if old else note
-    ws.cell(r, 9).alignment = openpyxl.styles.Alignment(wrap_text=True, vertical="top")
 
-assert not missing, f"unmapped: {missing}"
-assert len(S) == 66, len(S)
+# ---- added in the CSV revision (116 rows) ----
+APP = "Blocked: needs a Supabase project, a signed-in adult and a saved profile."
+GAP = "CONFIRMED GAP, recorded in PRODUCT_ROADMAP.md rather than built: "
+
+S.update({
+ "GR-01": ("Blocked", APP + " The note is worth acting on: if every K item needs "
+                      "Accommodated tapped, it should be the K default. Roadmapped with the "
+                      "other standing-accommodation work."),
+ "GR-02": ("Fail", "There is no scope check. The row's expected result refers to one, and "
+                   "nothing in lib/ or data/ constrains a generated number to a grade's range. "
+                   "The ranges themselves are transcribed and could be derived (Grade 1 to 50, "
+                   "Grade 2 to 200, Grade 3 to 1,000 are in data/ontario/mathematics.json). "
+                   "lib/answerCheck.ts, added this run, gives the arithmetic half; the range "
+                   "half is roadmapped."),
+ "GR-03": ("Blocked", APP + " Depends on the same missing range check as GR-02."),
+ "GR-04": ("Blocked", APP),
+ "GR-05": ("Blocked", APP),
+ "GR-06": ("Pass", "tests/scenariosCoverage.test.ts GR-06: June evidence falls outside the "
+                   "30-day window, so the answer is collect_more_evidence. The engine never "
+                   "reads a grade, so a grade change cannot break it. The 'history still "
+                   "visible' clause needs the app."),
+ "GR-07": ("Blocked", "RAISED: the row's premise contradicts CLAUDE.md §6, which supports "
+                      "Grades K through 8. Grade 5 is squarely inside that range, and one of "
+                      "the three children is in it. If the intent was a grade above 8 or below "
+                      "K, say so and it becomes testable."),
+
+ "SU-01": ("Pass", "ADDED THIS RUN. lib/answerCheck.ts checkArithmeticKey() recomputes a "
+                   "simple two-number item and compares it with its key: 20 x 4 keyed as 4000 "
+                   "is caught. Abstains ('unparsed') on anything it cannot recompute rather "
+                   "than guessing."),
+ "SU-02": ("Pass", "ADDED THIS RUN. validateChoices() rejects a distractor that is the right "
+                   "answer (3x3 with 9 among the options), the same distractor twice, and two "
+                   "that are one number written two ways (0.5 and 1/2)."),
+ "SU-03": ("Fail", "There is no calendar-pattern item. The handoff's reference module had "
+                   "calendarPattern and it was not ported; its acceptance row is one of the "
+                   "eight listed at the foot of lib/recommend.ts as belonging elsewhere. "
+                   "Nothing to compare a printed key against."),
+ "SU-04": ("Blocked", APP),
+ "SU-05": ("Blocked", APP + " lib/decodableCheck.ts already tiers words by phonics stage "
+                      "rather than grade and is covered by 13 unit tests."),
+ "SU-06": ("Blocked", "RAISED: the row asks us to decide what Phase 1 does with an open "
+                      "written response, and there is no consistent behaviour today. "
+                      "Roadmapped with a candidate (default to pending_review, never "
+                      "self-score)."),
+ "SU-07": ("Blocked", APP),
+ "SU-08": ("Fail", "THE MOST IMPORTANT FINDING OF THIS PASS, and the row is right. "
+                   "subjects.json marks Science and Technology supported: true, so the app "
+                   "offers it, and there is no science.json: subjectsWithExpectations() "
+                   "returns language, mathematics, french. A Science plan has no expectation "
+                   "to resolve against while the prompt still says to use the Ontario "
+                   "curriculum, which is how an invented code reaches a teacher. RAISED, not "
+                   "resolved: transcribe Science, or set supported: false until it is done. "
+                   "Pinned in both directions by a test."),
+ "SU-09": ("Blocked", APP + " Related to SU-08: there is no 'enrichment, not curriculum' "
+                      "label in the subject model at all."),
+ "SU-10": ("Pass", "tests/scenariosCoverage.test.ts SU-10: recommendAll() returns one decision "
+                   "per skill and each one's evidence holds only its own items."),
+ "SU-11": ("Blocked", "Needs a human with the Ministry documents open. data/ontario/README.md "
+                      "records the transcription provenance; 1,189 expectations are loaded and "
+                      "every one carries a well-formed code (tests/curriculum.test.ts)."),
+
+ "N-01": ("Blocked", APP + " Engine half is R-09 and LC-08: accommodated counts."),
+ "N-02": ("Blocked", APP + " Engine half is R-10 and LC-04."),
+ "N-03": ("Blocked", APP + " Engine half is LC-12."),
+ "N-04": ("Blocked", APP + " Engine half is R-07."),
+ "N-05": ("Blocked", APP + " Engine half is R-03 and LC-02."),
+ "N-06": ("Blocked", APP + " The decision does follow the score — feedback never enters "
+                     "recommend(). The row's 'ideally the page notes the mismatch' is not "
+                     "built."),
+ "N-07": ("Blocked", APP + " Engine half is R-12 and LC-03."),
+ "N-08": ("Pass", "tests/scenariosCoverage.test.ts N-08, and it answers the row's question "
+                  "explicitly: ALL qualifying sessions in the window count, not the last two. "
+                  "The fixture is chosen so the two policies disagree (0/4, 4/4, 4/4 is 67% "
+                  "and practise across the window; the last two alone would be 100% and "
+                  "transfer). The choice is Phase 2's and is documented in lib/recommend.ts."),
+
+ "CL-01": ("Blocked", APP + " differentiation is already a required field inside HOW TO TEACH "
+                      "IT for a class (CLAUDE.md §5)."),
+ "CL-02": ("Blocked", APP + " The database and the server action both refuse a class profile; "
+                      "asserted in SQL."),
+
+ "MC-01": ("Blocked", APP + " Evidence is selected by child_id throughout and RLS proves "
+                      "ownership per child."),
+ "MC-02": ("Blocked", APP + " Engine half is SU-10 and LC-01: separate skills, separate "
+                      "decisions."),
+
+ "LC-01": ("Pass", "tests/scenariosCoverage.test.ts LC-01. The fail sign the row names — maths "
+                   "stepped down because of reading — is asserted against directly."),
+ "LC-02": ("Pass", "NEEDED A BUILD. The chain stopped at place value, which was a root: "
+                   "data/skill-map.json had no counting layer. math.counting_to_30 added, "
+                   "traceable to data/math-progression.json (K / number, 'Counting to 30 by "
+                   "1s') and to that file's own rule about stepping down one grade on the same "
+                   "strand. Now regrouping names place value, place value names counting, and "
+                   "counting at 80% is the solid floor."),
+ "LC-03": ("Pass", "tests/scenariosCoverage.test.ts LC-03: after session 2 and after session 3 "
+                   "the decision is practise or transfer, never check_prerequisite, and the "
+                   "three skipped items never became zeros."),
+ "LC-04": ("Pass", "Engine verified: 10/10 on the untimed evidence, timed items excluded. The "
+                   "row's real question — must she exclude them every session? — is yes, and "
+                   "that is roadmapped as the standing-accommodation gap."),
+ "LC-05": ("Pass", "tests/scenariosCoverage.test.ts LC-05: 8/14 = 57% practises rather than "
+                   "stepping down, and all 14 items are in the evidence for the adult to read, "
+                   "which is what makes the multi-step pattern visible."),
+ "LC-06": ("Blocked", APP + " Depends on SU-06, which is a decision."),
+ "LC-07": ("Blocked", GAP + "the capture screen has no 'unsure'. The engine half IS verified: "
+                      "pending_review carries no score, is excluded from recommend(), and "
+                      "counts once confirmed. The database and the engine are ready; it is a "
+                      "button and a confirm step."),
+ "LC-08": ("Pass", "Engine verified: accommodated phonics items keep the progression moving, "
+                   "8/10 to transfer, no false check_prerequisite. The standing-accommodation "
+                   "gap is roadmapped."),
+ "LC-09": ("Blocked", GAP + "there is no large-print option."),
+ "LC-10": ("Blocked", GAP + "there is no per-child plain-literal wording setting."),
+ "LC-11": ("Pass", "tests/scenariosCoverage.test.ts LC-11: the refused session contributes "
+                   "nothing, is not in the evidence, and the percentage is never 0."),
+ "LC-12": ("Pass", "tests/scenariosCoverage.test.ts LC-12: maths transfers on translated-key-"
+                   "word evidence, Language has nothing to decide from yet, and the Spanish "
+                   "group never merges into Language."),
+ "LC-13": ("Blocked", GAP + "there is one planned grade per child, not per subject, so the "
+                      "twice-exceptional case cannot be expressed. The row is right that this "
+                      "is important to know. It is a schema change, so it is a decision "
+                      "first."),
+ "LC-14": ("Pass", "tests/scenariosCoverage.test.ts LC-14: after the first November session, "
+                   "collect more; after the second, check_prerequisite on 3/10 from November "
+                   "alone."),
+ "LC-15": ("Blocked", GAP + "exclusion is per question only; there is no one action for a "
+                      "whole session."),
+ "LC-16": ("Pass", "tests/scenariosCoverage.test.ts LC-16, the row's 'best single test of the "
+                   "filters', and it is. 9/11 = 82% to transfer, with exactly the 11 items in "
+                   "the evidence. NOTE: the row is headed '(10 items)' and then lists eleven; "
+                   "its own expected numbers (5/6 in S1, 9/11 overall) need eleven, so eleven "
+                   "is what the test uses."),
+ "LC-17": ("Pass", "NEEDED A BUILD. The cycle check existed only as a local function inside "
+                   "tests/skills.test.ts, so it could only ever be run against the file we "
+                   "ship — a graph arriving any other way had nothing to validate it. "
+                   "validateSkillGraph() is now exported from lib/skills.ts, takes its nodes "
+                   "as an argument, and reports cycles (with the loop), self-edges and "
+                   "dangling edges. A -> B -> A is rejected, so is A -> B -> C -> A."),
+ "LC-18": ("Pass", "NEEDED A BUILD. The bottom of the chain used to answer 'no prerequisite "
+                   "mapped', which is developer shorthand in a field a parent reads at 9pm. It "
+                   "now says there is nothing underneath and to reteach in smaller pieces with "
+                   "more help. See the R-03 note: that string is what R-03 quoted, and the two "
+                   "rows could not both hold."),
+ "LC-19": ("Blocked", APP + " Needs live generations to sweep. The prompt already forbids "
+                      "naming a condition (lib/prompts.ts) and CLAUDE.md §7 makes it binding. "
+                      "A code search is not the test: the words appear legitimately in the "
+                      "profile form, in the prompt's own prohibition, and in copy explaining "
+                      "the policy."),
+ "LC-20": ("Blocked", GAP + "there is no override action. The row's second half is the "
+                      "important one: an override must be recorded and then stop mattering, or "
+                      "the card becomes a sticky note."),
+})
+
+HEADERS = ["ID", "Area", "Scenario", "Steps", "Expected result", "Status",
+           "How to run", "Phase", "Notes"]
+
+
+def note_for(sid, existing):
+    status, note = S[sid]
+    existing = (existing or "").strip()
+    return status, (f"{existing} \u2014 {note}" if existing else note)
+
+
+rows = []          # (id, area, scenario, how, status, note)
+missing = []
+
+if SRC.lower().endswith(".csv"):
+    import csv
+
+    with open(SRC, newline="", encoding="utf-8-sig") as fh:
+        table = list(csv.reader(fh))
+    head = next(i for i, r in enumerate(table) if r and r[0].strip() == "ID")
+    assert table[head][:9] == HEADERS, table[head][:9]
+
+    for r in table[head + 1:]:
+        if not r or not r[0].strip():
+            continue
+        sid = r[0].strip()
+        if sid not in S:
+            missing.append(sid)
+            continue
+        while len(r) < 9:
+            r.append("")
+        r[5], r[8] = note_for(sid, r[8])
+        rows.append((sid, r[1], r[2], r[6], r[5], r[8]))
+
+    # Refresh the summary counters, which are stored as literal text here.
+    from collections import Counter as _C
+
+    tally = _C(r[4] for r in rows)
+    for i, r in enumerate(table):
+        if r and r[0].strip() == "Total":
+            table[i + 1][:5] = [str(len(rows)), str(tally["Pass"]), str(tally["Fail"]),
+                                str(tally["Blocked"]), str(tally["Not run"])]
+            break
+
+    with open(OUT, "w", newline="", encoding="utf-8") as fh:
+        csv.writer(fh).writerows(table)
+
+else:
+    wb = openpyxl.load_workbook(SRC)
+    ws = wb["Scenarios"]
+    head = next(r for r in range(1, 20) if ws.cell(r, 1).value == "ID")
+    assert ws.cell(head, 6).value == "Status" and ws.cell(head, 9).value == "Notes"
+
+    r = head + 1
+    while ws.cell(r, 1).value:
+        sid = str(ws.cell(r, 1).value).strip()
+        if sid not in S:
+            missing.append(sid)
+        else:
+            status, note = note_for(sid, ws.cell(r, 9).value)
+            ws.cell(r, 6).value = status
+            ws.cell(r, 9).value = note
+            ws.cell(r, 9).alignment = openpyxl.styles.Alignment(wrap_text=True, vertical="top")
+            rows.append((sid, ws.cell(r, 2).value, ws.cell(r, 3).value,
+                         ws.cell(r, 7).value, status, note))
+        r += 1
+    wb.save(OUT)
+
+assert not missing, f"unmapped rows: {missing}"
 
 from collections import Counter
-c = Counter(v[0] for v in S.values())
-print("Pass", c["Pass"], "| Fail", c["Fail"], "| Blocked", c["Blocked"], "| Not run", c["Not run"], "| total", sum(c.values()))
 
-# ---- committed traceability record, generated from the same map ----
-rows = []
-for r in range(5, 71):
-    sid = ws.cell(r, 1).value
-    rows.append((sid, ws.cell(r, 2).value, ws.cell(r, 3).value, ws.cell(r, 7).value, *S[sid]))
+c = Counter(r[4] for r in rows)
+print(f"Pass {c['Pass']} | Fail {c['Fail']} | Blocked {c['Blocked']} "
+      f"| Not run {c['Not run']} | total {len(rows)}")
+print("wrote", OUT)
+
+n_pass, n_fail = c["Pass"], c["Fail"]
+n_blocked, n_notrun = c["Blocked"], c["Not run"]
 
 MD = "docs/assessment/SCENARIO_COVERAGE.md"
 with open(MD, "w") as f:
-    f.write("""# Assessment engine — scenario coverage
+    f.write(f"""# Assessment engine — scenario coverage
 
 Where each row of `Pocket_Tutor___Assessment_Engine_Test_Scenarios.xlsx` is
 answered, and what it says. Generated, not hand-maintained: regenerate with
@@ -175,16 +380,25 @@ disagree.
 
 Run of **2026-11-26** against `claude/affectionate-galileo-j60265`.
 
-| | count | what it means |
-|---|---|---|
-| **Pass** | 38 | asserted by a test that was proved able to fail |
-| **Fail** | 0 | |
-| **Blocked** | 27 | needs a Supabase project, a signed-in adult and a saved profile — or is a question for Nicolas, not a test |
-| **Not run** | 1 | deferred by design (Phase 1b) |
+A row is **Pass** when its decisive assertion is covered by a test that was
+proved able to fail; anything the row also asks of the running app is named in
+its note. **Blocked** means it needs a Supabase project, a signed-in adult and
+a saved profile — or is a question for Nicolas rather than a test. **Fail**
+means the thing the row describes does not exist.
 
-Two rows are raised rather than answered, per the standing instruction not to
-resolve a conflict unilaterally: **C-07** (no edit path for a mis-tap) and
-**R-18** (the row says nine acceptance cases; the document has eleven).
+| | count |
+|---|---|
+| **Pass** | {n_pass} |
+| **Fail** | {n_fail} |
+| **Blocked** | {n_blocked} |
+| **Not run** | {n_notrun} |
+
+Raised rather than answered, per the standing instruction not to resolve a
+conflict unilaterally: **SU-08** (Science is offered with no transcribed
+expectations), **C-07** (no edit path for a mis-tap), **R-18** (the row says
+nine acceptance cases; the document has eleven), **GR-07** (its premise
+contradicts CLAUDE.md §6) and **SU-06** (what Phase 1 does with an open
+written response).
 
 | ID | Area | Scenario | How to run | Status | Where / what |
 |---|---|---|---|---|---|
@@ -192,6 +406,4 @@ resolve a conflict unilaterally: **C-07** (no edit path for a mis-tap) and
     for sid, area, scen, how, status, note in rows:
         cell = lambda x: (x or "").replace("|", "\\|").replace("\n", " ")
         f.write(f"| `{sid}` | {cell(area)} | {cell(scen)} | {cell(how)} | **{status}** | {cell(note)} |\n")
-wb.save(OUT)
-print("wrote", OUT)
 print("wrote", MD, len(rows), "rows")
