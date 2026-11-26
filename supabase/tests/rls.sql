@@ -35,6 +35,7 @@ declare
   session_a uuid;
   upload_a uuid;
   n int;
+  impersonated boolean;
 begin
   -- Seed auth.users + public.users for both. Supabase's auth.users has
   -- non-null defaults that vary by version; we provide just id + email.
@@ -131,11 +132,22 @@ begin
   begin
     insert into public.ai_calls (user_id, child_id, prompt_version, model, status, latency_ms)
     values (uid_a, child_a, 'analysis@test', 'claude-test', 'ok', 5);
-    raise exception 'LEAK: user B inserted an ai_calls row impersonating user A';
+    impersonated := true;
   exception
     when insufficient_privilege or check_violation or others then
-      raise notice 'ok: ai_calls — user B cannot INSERT a row for user A';
+      impersonated := false;
   end;
+
+  -- Raised OUTSIDE the handler above, and that placement is the whole point:
+  -- `when ... or others` catches anything the block raises, so a LEAK raised
+  -- inside it was caught by its own handler and reported as a pass. This one
+  -- assertion could not fail. The broad catch has to stay -- the rejection
+  -- arrives as insufficient_privilege or check_violation depending on which
+  -- rule fires first -- so the verdict moves out instead.
+  if impersonated then
+    raise exception 'LEAK: user B inserted an ai_calls row impersonating user A';
+  end if;
+  raise notice 'ok: ai_calls — user B cannot INSERT a row for user A';
 
   raise notice '======================================';
   raise notice 'ALL RLS CHECKS PASSED — no cross-user leaks';
