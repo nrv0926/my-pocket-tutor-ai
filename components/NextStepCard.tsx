@@ -12,7 +12,9 @@ import type { Recommendation } from "@/lib/recommend";
  */
 
 const HEADLINE: Record<Recommendation["decision"], (skill: string) => string> = {
-  try_transfer: (s) => `Ready to stretch ${s}`,
+  // A colon, because the skill is a label and not the object of the verb:
+  // "Ready to stretch Add within 100" reads as a run-on.
+  try_transfer: (s) => `Ready to stretch: ${s}`,
   practise_same_skill: (s) => `Practise ${s} again`,
   check_prerequisite: (s) => `Look underneath ${s}`,
   collect_more_evidence: () => "Not enough recorded yet",
