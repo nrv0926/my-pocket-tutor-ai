@@ -35,6 +35,14 @@ create table if not exists public.children (
   location        text not null default 'ON-CA', -- e.g. 'ON-CA' (Ontario, Canada)
   curriculum      text not null default 'ontario',
   learning_needs  text[] not null default '{}',  -- e.g. {'adhd','dyslexia','anxiety'}
+  -- Standing accommodations (0011). What the adult does every session to
+  -- make the work fair, so she is not re-tapping it on every question for
+  -- the rest of the year. Changes what capture DEFAULTS to and what the
+  -- prompt is told; never a label for the child (CLAUDE.md §7).
+  accommodations  text[] not null default '{}'
+                  check (accommodations <@ array[
+                    'read_aloud','timed_never_counts','plain_literal_wording'
+                  ]::text[]),
   main_concern    text,
   strengths       text,
   weaknesses      text,
@@ -89,12 +97,35 @@ create table if not exists public.learning_sessions (
   -- Set when the adult saves the capture screen. Only closed sessions feed
   -- adaptation: a plan generated and never taught is not evidence.
   closed_at         timestamptz,
+  -- The adult judged the whole sitting unrepresentative (0010): a meltdown,
+  -- illness, a fire alarm. Kept in history, left out of what to teach next.
+  -- Separate from closed_at, because a session can be finished AND not fair.
+  excluded_from_adaptation boolean not null default false,
+  excluded_reason   text,
   -- Pre-0007 question ids, by position, for each of the four places a
   -- question id appears. Present only on rows 0007 rewrote.
   item_ids_before   jsonb,
-  created_at        timestamptz not null default now()
+  created_at        timestamptz not null default now(),
+
+  constraint sessions_excluded_reason_length
+    check (excluded_reason is null or char_length(excluded_reason) <= 300),
+  -- A reason with no exclusion is a note nobody acts on. An exclusion with
+  -- no reason is fine: at 9pm she may not want to type one.
+  constraint sessions_excluded_reason_needs_exclusion
+    check (excluded_reason is null or excluded_from_adaptation)
 );
 create index if not exists sessions_child_id_idx on public.learning_sessions(child_id);
+create index if not exists sessions_child_counted
+  on public.learning_sessions (child_id, closed_at)
+  where excluded_from_adaptation = false;
+
+-- Duplicates are deduped by zod on the way in rather than by a constraint
+-- here: Postgres forbids a subquery in a CHECK, and the alternatives are a
+-- trigger or one array_positions() clause per value -- a clause somebody
+-- will forget to add the next time the vocabulary grows. The containment
+-- check above is the one that matters, because an unknown value would mean
+-- nothing to the capture screen. A repeated value means exactly what one
+-- does.
 
 -- Redundant against the primary key, and there for one reason:
 -- item_observations points at both columns at once, so a row cannot pair
@@ -183,6 +214,9 @@ create table if not exists public.item_observations (
   rubric_scores            jsonb,
   suggested_score          int,
   confirmed_at             timestamptz,
+  -- Which save wrote this row (0009). Rows sharing a key were one tap on
+  -- Save, which is how a resubmit is told apart from a deliberate retry.
+  capture_key              uuid,
   created_at               timestamptz not null default now(),
 
   constraint item_obs_rubric_confirmed check (
@@ -207,6 +241,11 @@ create index if not exists item_obs_child_skill_idx
   on public.item_observations (child_id, skill_id, created_at desc);
 create index if not exists item_obs_child_topic_idx
   on public.item_observations (child_id, topic_id, created_at desc);
+-- A replay of the same save cannot write a second row for the same item
+-- (0009). Partial, so rows written before capture_key existed are unaffected.
+create unique index if not exists item_obs_capture_key_item
+  on public.item_observations (session_id, item_id, capture_key)
+  where capture_key is not null;
 
 -- A class profile has no individual items to observe. The server action
 -- checks this too; the trigger is what makes it true regardless.
@@ -228,6 +267,127 @@ drop trigger if exists item_observations_no_class on public.item_observations;
 create trigger item_observations_no_class
   before insert or update on public.item_observations
   for each row execute function public.item_observations_reject_class();
+
+-- ---------------------------------------------------------------------
+-- save_capture_rows  (0009)
+--
+-- One capture, one transaction, saved once. Takes rows the application has
+-- already validated and resolved, assigns each its attempt number, writes
+-- them, closes the session and syncs the per-session summary -- all or
+-- nothing. Idempotent per capture_key, so a resubmit is not a retry.
+--
+-- SECURITY INVOKER on purpose: it runs as the caller, so every statement
+-- inside goes through the same row-level security as the direct writes it
+-- replaces. A SECURITY DEFINER function here would be a second policy path.
+-- ---------------------------------------------------------------------
+create or replace function public.save_capture_rows(
+  p_session_id  uuid,
+  p_capture_key uuid,
+  p_rows        jsonb,
+  p_mode        text
+)
+returns jsonb
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  v_child_id  uuid;
+  v_closed_at timestamptz;
+  v_existing  int;
+  v_attempt   int;
+  v_saved     int;
+begin
+  if p_capture_key is null then
+    raise exception 'save_capture_rows needs a capture_key';
+  end if;
+  if p_rows is null or jsonb_typeof(p_rows) <> 'array' or jsonb_array_length(p_rows) = 0 then
+    raise exception 'save_capture_rows needs at least one row';
+  end if;
+
+  -- RLS decides whether this session is the caller's to write to. No rows
+  -- visible means not found, exactly as a direct select would behave.
+  select child_id, closed_at into v_child_id, v_closed_at
+  from public.learning_sessions
+  where id = p_session_id;
+
+  if v_child_id is null then
+    raise exception 'Session not found' using errcode = 'no_data_found';
+  end if;
+
+  -- Already saved under this key: say what happened the first time and
+  -- change nothing. This is the double-tap and the resubmit.
+  select count(*), coalesce(max(attempt), 0)
+    into v_existing, v_attempt
+  from public.item_observations
+  where session_id = p_session_id and capture_key = p_capture_key;
+
+  if v_existing > 0 then
+    return jsonb_build_object(
+      'saved', v_existing, 'attempt', v_attempt, 'replayed', true
+    );
+  end if;
+
+  with incoming as (
+    select
+      (r->>'item_id')::text                                as item_id,
+      (r->>'status')::text                                 as status,
+      nullif(r->>'score', '')::int                         as score,
+      nullif(r->>'max_points', '')::int                    as max_points,
+      (r->>'mode_of_support')::text                        as mode_of_support,
+      coalesce((r->>'exclude_from_adaptation')::boolean, false) as excluded,
+      nullif(r->>'answer', '')                             as answer,
+      nullif(r->>'skill_id', '')                           as skill_id,
+      nullif(r->>'topic_id', '')                           as topic_id
+    from jsonb_array_elements(p_rows) as r
+  )
+  insert into public.item_observations (
+    child_id, session_id, item_id, skill_id, topic_id, answer,
+    mode_of_support, status, score, max_points,
+    exclude_from_adaptation, attempt, capture_key
+  )
+  select
+    v_child_id, p_session_id, i.item_id, i.skill_id, i.topic_id, i.answer,
+    i.mode_of_support, i.status, i.score, i.max_points,
+    i.excluded,
+    coalesce(
+      (select max(o.attempt)
+         from public.item_observations o
+        where o.session_id = p_session_id and o.item_id = i.item_id),
+      0
+    ) + 1,
+    p_capture_key
+  from incoming i;
+
+  select count(*), coalesce(max(attempt), 0)
+    into v_saved, v_attempt
+  from public.item_observations
+  where session_id = p_session_id and capture_key = p_capture_key;
+
+  -- Saving is what closes a session. Only closed sessions are evidence.
+  if v_closed_at is null then
+    update public.learning_sessions
+       set closed_at = now()
+     where id = p_session_id;
+  end if;
+
+  -- Keep the per-session summary in step with the per-item truth.
+  if p_mode is not null then
+    update public.progress_records
+       set mode_of_support = p_mode,
+           completed_independently = (p_mode = 'independent')
+     where session_id = p_session_id;
+  end if;
+
+  return jsonb_build_object('saved', v_saved, 'attempt', v_attempt, 'replayed', false);
+end;
+$$;
+
+comment on function public.save_capture_rows(uuid, uuid, jsonb, text) is
+  'Write one capture atomically. Idempotent per capture_key. SECURITY '
+  'INVOKER so row-level security still applies to every statement inside.';
+
+grant execute on function public.save_capture_rows(uuid, uuid, jsonb, text) to authenticated;
 
 -- ---------------------------------------------------------------------
 -- ai_call_quota  (daily per-user cap on AI generations)

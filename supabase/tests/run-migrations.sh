@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # =====================================================================
-# Apply migrations 0004-0007 to a database that already holds data, and
+# Apply migrations 0004-0011 to a database that already holds data, and
 # check the backfills.
 #
 # run-local.sh proves schema.sql is right for a FRESH database. It says
 # nothing about the path an existing project takes, which is the one that
 # can lose data. So this stands up the schema as it was BEFORE these
 # migrations (read straight out of git), seeds rows of every shape the
-# backfills have to handle, applies 0004 through 0007, and asserts.
+# backfills have to handle, applies 0004 through 0011, and asserts.
 #
 # Requires: postgresql-16, git. Usage: bash supabase/tests/run-migrations.sh
 # =====================================================================
@@ -97,14 +97,14 @@ BEFORE_F=$(psql -tAc "select count(*) from public.progress_records where complet
 BEFORE_N=$(psql -tAc "select count(*) from public.progress_records where completed_independently is null")
 echo "    before: true=$BEFORE_T false=$BEFORE_F null=$BEFORE_N"
 
-echo "==> applying 0004 .. 0007"
-for m in 0004_mode_of_support 0005_session_close 0006_item_observations 0007_worksheet_item_ids 0008_rubrics; do
+echo "==> applying 0004 .. 0011"
+for m in 0004_mode_of_support 0005_session_close 0006_item_observations 0007_worksheet_item_ids 0008_rubrics 0009_capture_transaction 0010_session_exclusion 0011_accommodations; do
   psql -f "$SQL_DIR/migrations/$m.sql"
   echo "    $m ok"
 done
 
 echo "==> applying them a second time (idempotence)"
-for m in 0004_mode_of_support 0005_session_close 0006_item_observations 0007_worksheet_item_ids 0008_rubrics; do
+for m in 0004_mode_of_support 0005_session_close 0006_item_observations 0007_worksheet_item_ids 0008_rubrics 0009_capture_transaction 0010_session_exclusion 0011_accommodations; do
   psql -f "$SQL_DIR/migrations/$m.sql"
 done
 echo "    re-run clean"
@@ -203,8 +203,47 @@ begin
           3, now());
   raise notice 'ok: a confirmed rubric item keeps the suggestion beside it';
 
+  -- ============ 0010: a whole session can be set aside ============
+  -- Default false, so nothing that already exists stops counting.
+  select count(*) into n from public.learning_sessions
+   where excluded_from_adaptation = false;
+  if n = 0 then raise exception '0010: every existing session was excluded'; end if;
+  raise notice 'ok: 0010 leaves every existing session counting (% rows)', n;
+
+  -- A reason without the exclusion is a note nobody acts on.
+  begin
+    update public.learning_sessions
+       set excluded_reason = 'meltdown'
+     where id = (select id from public.learning_sessions limit 1);
+    raise exception '0010: a reason was accepted without the exclusion';
+  exception when check_violation then
+    raise notice 'ok: 0010 refuses a reason without the exclusion';
+  end;
+
+  update public.learning_sessions
+     set excluded_from_adaptation = true, excluded_reason = 'Meltdown halfway through.'
+   where id = (select id from public.learning_sessions limit 1);
+  raise notice 'ok: 0010 accepts the exclusion with its reason';
+
+  -- ============ 0011: standing accommodations ============
+  select count(*) into n from public.children where accommodations = '{}';
+  if n = 0 then raise exception '0011: expected existing children to start with none'; end if;
+  raise notice 'ok: 0011 defaults to no accommodations (% rows)', n;
+
+  begin
+    update public.children set accommodations = array['read_aloud','not_a_thing']
+     where id = (select id from public.children limit 1);
+    raise exception '0011: an unknown accommodation was accepted';
+  exception when check_violation then
+    raise notice 'ok: 0011 refuses an accommodation it does not know';
+  end;
+
+  update public.children set accommodations = array['read_aloud','timed_never_counts']
+   where id = (select id from public.children limit 1);
+  raise notice 'ok: 0011 accepts the two it does know';
+
   raise notice '=========================================';
-  raise notice 'MIGRATION 0004-0008 CHECKS PASSED';
+  raise notice 'MIGRATION 0004-0011 CHECKS PASSED';
   raise notice '=========================================';
 end $$;
 CHECK

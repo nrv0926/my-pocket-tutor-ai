@@ -5,6 +5,7 @@ import AnalysisResultCard from "@/components/AnalysisResultCard";
 import PlanBridge from "@/components/PlanBridge";
 import WorksheetClient from "@/app/worksheet/[id]/WorksheetClient";
 import CaptureClient from "./CaptureClient";
+import type { Accommodation } from "@/components/CaptureCard";
 import { getServerSupabase } from "@/lib/supabaseServer";
 import type { AnalysisResult, Worksheet } from "@/types/session";
 
@@ -24,7 +25,9 @@ export default async function ResultsPage({ params }: { params: { id: string } }
   const supabase = getServerSupabase();
   const { data, error } = await supabase
     .from("learning_sessions")
-    .select("id, child_id, subject, analysis_result, worksheet, answer_key, closed_at, created_at")
+    .select(
+      "id, child_id, subject, analysis_result, worksheet, answer_key, closed_at, excluded_from_adaptation, created_at",
+    )
     .eq("id", params.id)
     .single();
 
@@ -34,7 +37,11 @@ export default async function ResultsPage({ params }: { params: { id: string } }
   // to open it. Both queries are RLS-scoped, so a session that is not theirs
   // never got this far.
   const [childRes, planRes] = await Promise.all([
-    supabase.from("children").select("nickname, kind").eq("id", data.child_id).single(),
+    supabase
+      .from("children")
+      .select("nickname, kind, accommodations")
+      .eq("id", data.child_id)
+      .single(),
     supabase
       .from("learning_plans")
       .select("id")
@@ -127,6 +134,10 @@ export default async function ResultsPage({ params }: { params: { id: string } }
             worksheet={worksheet}
             answerKey={answerKey}
             alreadyClosed={Boolean(data.closed_at)}
+            sessionExcluded={Boolean(data.excluded_from_adaptation)}
+            accommodations={
+              (childRes.data?.accommodations ?? []) as Accommodation[]
+            }
           />
         </section>
       )}

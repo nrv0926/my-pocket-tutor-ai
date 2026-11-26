@@ -52,21 +52,24 @@ export default async function ChildProgressPage({
     : await supabase
         .from("item_observations")
         .select(
-          "item_id, session_id, skill_id, topic_id, mode_of_support, status, score, max_points, attempt, exclude_from_adaptation, created_at, learning_sessions!inner(closed_at)"
+          "item_id, session_id, skill_id, topic_id, mode_of_support, status, score, max_points, attempt, exclude_from_adaptation, created_at, learning_sessions!inner(closed_at, excluded_from_adaptation)"
         )
         .eq("child_id", params.childId)
         .order("created_at", { ascending: false })
         .limit(400);
 
   const observations: ObservationRow[] = (obsRes.data ?? []).map((r) => {
-    const joined = r.learning_sessions as unknown as
-      | { closed_at: string | null }
-      | { closed_at: string | null }[];
-    const closedAt = Array.isArray(joined) ? (joined[0]?.closed_at ?? null) : (joined?.closed_at ?? null);
+    type Joined = { closed_at: string | null; excluded_from_adaptation: boolean | null };
+    const joined = r.learning_sessions as unknown as Joined | Joined[];
+    const session = Array.isArray(joined) ? joined[0] : joined;
+    const closedAt = session?.closed_at ?? null;
     return {
       itemId: r.item_id as string,
       sessionId: r.session_id as string,
       sessionClosedAt: closedAt,
+      // The adult set this whole sitting aside (migration 0010). Still in
+      // history, out of the decision.
+      sessionExcluded: Boolean(session?.excluded_from_adaptation),
       skillId: (r.skill_id ?? null) as string | null,
       topicId: (r.topic_id ?? null) as string | null,
       modeOfSupport: r.mode_of_support,

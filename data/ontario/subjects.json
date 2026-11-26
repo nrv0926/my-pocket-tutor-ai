@@ -165,7 +165,7 @@
       "id": "science-technology",
       "name": "Science and Technology",
       "policyYear": 2022,
-      "supported": true,
+      "supported": false,
       "source": "https://www.dcp.edu.gov.on.ca/en/curriculum/science-technology",
       "strands": [
         {
@@ -238,7 +238,8 @@
           "overall": [],
           "specific": {}
         }
-      ]
+      ],
+      "supportedNote": "Strand names and codes are transcribed; no expectations are. Until science-technology.json exists there is nothing for a plan to resolve against, and a subject offered with nothing behind it is how an invented expectation code reaches a teacher. Set this back to true in the same commit that adds the expectations."
     },
     {
       "id": "french",

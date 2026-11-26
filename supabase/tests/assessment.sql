@@ -28,6 +28,12 @@ declare
   sess_a    uuid;
   child_c   uuid;
   sess_c    uuid;
+  child_d   uuid;
+  sess_d    uuid;
+  key_1     uuid := gen_random_uuid();
+  key_2     uuid := gen_random_uuid();
+  res       jsonb;
+  v_closed_check timestamptz;
   ok        boolean;
   n         int;
 begin
@@ -240,6 +246,81 @@ begin
   select count(*) into n from public.learning_sessions where child_id = child_c;
   if n <> 0 then raise exception 'FAILED: % sessions outlived their child', n; end if;
   raise notice 'ok: deleting a child removes its sessions and observations';
+
+  -- ========== 0009: one capture, one transaction, saved once ==========
+  -- Still user A here. A fresh child so the counts are unambiguous.
+  insert into public.children (user_id, nickname, grade, kind)
+    values (uid_a, 'Capture case', '3', 'student') returning id into child_d;
+  insert into public.learning_sessions (child_id, input_type, subject, analysis_result)
+    values (child_d, 'plan', 'mathematics', '{}'::jsonb) returning id into sess_d;
+
+  res := public.save_capture_rows(
+    sess_d, key_1,
+    jsonb_build_array(
+      jsonb_build_object('item_id','q1','status','scored','score',1,'max_points',1,
+                         'mode_of_support','independent','topic_id','regrouping'),
+      jsonb_build_object('item_id','q2','status','scored','score',0,'max_points',1,
+                         'mode_of_support','independent','topic_id','regrouping'),
+      jsonb_build_object('item_id','q3','status','skipped',
+                         'mode_of_support','independent','topic_id','regrouping')
+    ),
+    'independent'
+  );
+  if (res->>'saved')::int <> 3 or (res->>'attempt')::int <> 1 then
+    raise exception 'FAILED: first save reported %', res;
+  end if;
+  if (res->>'replayed')::boolean then raise exception 'FAILED: first save called itself a replay'; end if;
+  raise notice 'ok: a capture writes every item at attempt 1';
+
+  -- Saving is what closes a session.
+  select closed_at into v_closed_check from public.learning_sessions where id = sess_d;
+  if v_closed_check is null then raise exception 'FAILED: saving did not close the session'; end if;
+  raise notice 'ok: saving closes the session';
+
+  -- C-08: the same key again is the same save. No second set of rows.
+  res := public.save_capture_rows(
+    sess_d, key_1,
+    jsonb_build_array(
+      jsonb_build_object('item_id','q1','status','scored','score',1,'max_points',1,
+                         'mode_of_support','independent')
+    ),
+    'independent'
+  );
+  if not (res->>'replayed')::boolean then
+    raise exception 'FAILED: a replay was not recognised: %', res;
+  end if;
+  select count(*) into n from public.item_observations where session_id = sess_d;
+  if n <> 3 then raise exception 'FAILED: a replay wrote rows; now % of them', n; end if;
+  raise notice 'ok: the same capture_key twice writes nothing the second time';
+
+  -- C-06 still holds: a DELIBERATE recapture is a new key, and attempt 2.
+  res := public.save_capture_rows(
+    sess_d, key_2,
+    jsonb_build_array(
+      jsonb_build_object('item_id','q2','status','scored','score',1,'max_points',1,
+                         'mode_of_support','independent')
+    ),
+    'independent'
+  );
+  if (res->>'attempt')::int <> 2 then
+    raise exception 'FAILED: a new capture_key should be attempt 2, got %', res;
+  end if;
+  select count(*) into n from public.item_observations
+   where session_id = sess_d and item_id = 'q2';
+  if n <> 2 then raise exception 'FAILED: expected q2 to have 2 attempts, got %', n; end if;
+  raise notice 'ok: a new capture_key is a retry, at attempt 2';
+
+  -- A capture with no key is refused: without one there is no way to tell
+  -- a resubmit from a retry, which is the whole point.
+  ok := false;
+  begin
+    res := public.save_capture_rows(sess_d, null, jsonb_build_array(
+      jsonb_build_object('item_id','q9','status','scored','score',1,'max_points',1,
+                         'mode_of_support','independent')), 'independent');
+  exception when others then ok := true;
+  end;
+  if not ok then raise exception 'FAILED: a capture with no key was accepted'; end if;
+  raise notice 'ok: a capture with no key is refused';
 
   -- ================= logged out =================
   -- auth.uid() is null for anon, so every policy's ownership test fails.

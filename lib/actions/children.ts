@@ -13,6 +13,15 @@ const ChildInputSchema = z.object({
   location: z.string().min(2).default("ON-CA"),
   curriculum: z.enum(["ontario", "common-core", "other"]).default("ontario"),
   learningNeeds: z.array(z.enum(["adhd", "dyslexia", "anxiety", "esl", "other"])).default([]),
+  /**
+   * Deduped here rather than by a database constraint: Postgres forbids a
+   * subquery in a CHECK, and the vocabulary check is the one that matters.
+   * A repeated value means exactly what one does.
+   */
+  accommodations: z
+    .array(z.enum(["read_aloud", "timed_never_counts", "plain_literal_wording"]))
+    .default([])
+    .transform((a) => [...new Set(a)]),
   mainConcern: z.string().nullable().optional(),
   strengths: z.string().nullable().optional(),
   weaknesses: z.string().nullable().optional(),
@@ -42,6 +51,7 @@ export async function createChild(input: ChildInput): Promise<{ id: string }> {
       location: parsed.location,
       curriculum: parsed.curriculum,
       learning_needs: parsed.learningNeeds,
+      accommodations: parsed.accommodations,
       main_concern: parsed.mainConcern ?? null,
       strengths: parsed.strengths ?? null,
       weaknesses: parsed.weaknesses ?? null,

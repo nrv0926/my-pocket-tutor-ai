@@ -16,7 +16,20 @@ export const GRADES: Grade[] = ["K", "1", "2", "3", "4", "5", "6", "7", "8"];
  */
 export type Subject = "language" | "mathematics" | "science-technology" | "french";
 
-export const SUBJECTS: Subject[] = ["language", "mathematics", "science-technology", "french"];
+/**
+ * The subjects actually offered today.
+ *
+ * science-technology is absent on purpose: its strand names are transcribed
+ * but none of its expectations are, so a plan for it would have nothing to
+ * resolve against while the prompt still says to work from the Ontario
+ * curriculum. It stays in the Subject union and in STORED_SUBJECTS so a
+ * session already saved under it still resolves and still renders.
+ *
+ * Put it back here in the same commit that adds the expectations, and flip
+ * `supported` in data/ontario/subjects.json with it — a test asserts the two
+ * lists agree.
+ */
+export const SUBJECTS: Subject[] = ["language", "mathematics", "french"];
 
 /**
  * Values accepted on the way in, including the three written before the
@@ -58,6 +71,35 @@ export function normalizeSubject(stored: StoredSubject | string): Subject {
 }
 
 export type LearningNeed = "adhd" | "dyslexia" | "anxiety" | "esl" | "other";
+
+/**
+ * Standing accommodations: what the adult does every session to make the
+ * work fair. See migration 0011.
+ *
+ * Not a diagnosis and never rendered as one (CLAUDE.md §7). A learning need
+ * is something the adult told us about the child; an accommodation is
+ * something the adult does about the work. The second is a fact about the
+ * sitting, which is why it can change what capture counts.
+ */
+export type Accommodation = "read_aloud" | "timed_never_counts" | "plain_literal_wording";
+
+export const ACCOMMODATIONS: { id: Accommodation; label: string; hint: string }[] = [
+  {
+    id: "read_aloud",
+    label: "I read the questions aloud",
+    hint: "Counts as their own work, because reading the question is not the skill being measured.",
+  },
+  {
+    id: "timed_never_counts",
+    label: "Timed rounds never count",
+    hint: "Speed is not what we are measuring for this learner.",
+  },
+  {
+    id: "plain_literal_wording",
+    label: "Plain, literal wording",
+    hint: "No idioms or figures of speech in the questions.",
+  },
+];
 
 export type Role = "parent" | "homeschooler" | "teacher";
 
@@ -106,6 +148,7 @@ export interface ChildInput {
   location: string;
   curriculum: Child["curriculum"];
   learningNeeds: LearningNeed[];
+  accommodations: Accommodation[];
   mainConcern: string | null;
   strengths: string | null;
   weaknesses: string | null;

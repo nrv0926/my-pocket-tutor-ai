@@ -64,3 +64,39 @@ export interface ProgressSummary {
   strugglingCount: number;
   recentSkills: { skill: string; status: SkillStatus; lastSeen: string }[];
 }
+
+/** What the adult tapped for one question on the capture screen. */
+export type CaptureVerdict = "correct" | "wrong" | "skipped" | "unsure";
+
+/**
+ * How a verdict becomes evidence. One mapping, shared.
+ *
+ * It lives here rather than in lib/actions/observations.ts because a
+ * "use server" file may only export async functions, and because there are
+ * two callers: the real capture action and the /demo/loop page. They had
+ * drifted — the demo scored an "unsure" answer as zero, which is the exact
+ * mistake scenario LC-07 exists to prevent. A missing judgement is not a
+ * zero; zero is a mark, and it has to be chosen.
+ *
+ * The four statuses are four different facts:
+ *   correct / wrong  scored, out of 1
+ *   skipped          nobody answered
+ *   unsure           somebody answered and the adult could not judge it,
+ *                    so it waits at pending_review and is not counted
+ */
+export function verdictToObservation(verdict: CaptureVerdict): {
+  status: "scored" | "skipped" | "pending_review";
+  score: number | null;
+  maxPoints: number | null;
+} {
+  switch (verdict) {
+    case "skipped":
+      return { status: "skipped", score: null, maxPoints: null };
+    case "unsure":
+      return { status: "pending_review", score: null, maxPoints: null };
+    case "correct":
+      return { status: "scored", score: 1, maxPoints: 1 };
+    case "wrong":
+      return { status: "scored", score: 0, maxPoints: 1 };
+  }
+}

@@ -5,6 +5,7 @@ import CaptureCard, { type CaptureRow } from "@/components/CaptureCard";
 import NextStepCard from "@/components/NextStepCard";
 import { recommend, type ObservationRow } from "@/lib/recommend";
 import { ASSESSMENT_DEFAULTS } from "@/lib/config/assessment";
+import { verdictToObservation } from "@/types/progress";
 import { LEARNERS, type DemoLearner } from "./fixtures";
 
 /**
@@ -42,9 +43,10 @@ export default function LoopClient() {
         skillId: learner.skillId,
         topicId: learner.skillId,
         modeOfSupport: r.mode,
-        status: (r.verdict === "skipped" ? "skipped" : "scored") as ObservationRow["status"],
-        score: r.verdict === "skipped" ? null : r.verdict === "correct" ? 1 : 0,
-        maxPoints: r.verdict === "skipped" ? null : 1,
+        // One shared mapping with the real capture action. This used to be
+        // written out here and scored an "unsure" answer as zero, which is
+        // the mistake scenario LC-07 exists to prevent.
+        ...verdictToObservation(r.verdict),
         attempt: 1,
         excludeFromAdaptation: r.excluded,
         createdAt: now,

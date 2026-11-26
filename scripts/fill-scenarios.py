@@ -290,6 +290,73 @@ S.update({
                       "the card becomes a sticky note."),
 })
 
+# ---- fixed in the 2026-11-26 follow-up pass ----
+S.update({
+ "GR-02": ("Pass", "BUILT. lib/gradeScope.ts derives each grade's whole-number ceiling from "
+                   "the published wording of the Number strand's B1.1 — Grade 1 to 50, Grade 2 "
+                   "to 200, Grade 3 to 1,000, Grade 4 to 10 000 (a space, not a comma), Grade 6 "
+                   "to \"one million\" in words. Nobody types a range into a config, so nobody "
+                   "can type the wrong one. dropOutOfScope() keeps the items that belong and "
+                   "reports the rest rather than silently printing a shorter worksheet."),
+ "GR-03": ("Pass", "BUILT with GR-02. The same item is in scope at Grade 3 and out of scope at "
+                   "Grade 2, asserted directly. Grade 8 states no ceiling (it moves to "
+                   "scientific notation) and K has no published curriculum, so both abstain "
+                   "rather than inventing a bound."),
+ "SU-03": ("Pass", "BUILT. lib/calendarPattern.ts, ported from the handoff's own reference "
+                   "module, which also settles acceptance row 1 — one of the eight rows nothing "
+                   "had claimed. The handoff fixture passes exactly (start 2026-11-02, step 6, "
+                   "three shown, term 4 → 2026-11-20, proof 02/08/14/20), plus a leap-year "
+                   "February, a December-to-January crossing, and a daylight-saving boundary. "
+                   "An impossible date is refused rather than rolled forward: new Date() turns "
+                   "2026-02-30 into March 2 quite happily. calendarPatternItem() returns the "
+                   "prompt, the answer and the working from ONE calculation, so the printed key "
+                   "and the on-screen key cannot disagree."),
+ "SU-08": ("Pass", "RESOLVED, on your call. science-technology is no longer offered: supported "
+                   "is false in data/ontario/subjects.json and it is out of the SUBJECTS list. "
+                   "Its strands stay transcribed and it stays in the Subject union, so a "
+                   "session already saved under it still resolves and renders — \"not yet\" "
+                   "beats pretending it does not exist (§6). The test now asserts the INVARIANT "
+                   "rather than the exception: nothing is offered that has no expectations "
+                   "behind it. Re-offering Science without transcribing it fails two tests."),
+ "C-08": ("Pass", "BUILT. Migration 0009 adds capture_key and save_capture_rows(). The same key "
+                  "twice writes nothing the second time; a new key is a deliberate recapture at "
+                  "attempt 2, so C-06 still holds. The capture screen mints one key per "
+                  "filled-in form and a fresh one the moment anything is changed after a save, "
+                  "which is exactly the difference between a double tap and a retry. SQL-tested "
+                  "both ways, and the replay assertion was proved able to fail."),
+ "C-09": ("Pass", "BUILT. The four separate writes — insert, close the session, sync "
+                  "progress_records — are now one SECURITY INVOKER function, so all of it "
+                  "happens or none of it does, and row-level security still proves ownership on "
+                  "every statement inside. No second policy path."),
+ "LC-04": ("Pass", "Engine verified, and the standing accommodation is now BUILT: "
+                   "children.accommodations (migration 0011) carries read_aloud, "
+                   "timed_never_counts and plain_literal_wording, set once on the profile. "
+                   "read_aloud defaults every item to \"accommodated\" at capture, so she is no "
+                   "longer re-tapping it every week. NOTE: timed_never_counts cannot be applied "
+                   "automatically yet — nothing marks a question as timed, so there is no "
+                   "per-item signal to act on. Stored, not yet acted on."),
+ "LC-07": ("Pass", "BUILT. A fourth verdict, \"Not sure\", saves pending_review with no score "
+                   "and stays out of the decision until confirmed. The mapping now lives once, "
+                   "in types/progress.ts, because writing it twice had already produced the bug "
+                   "this row warns about: /demo/loop was scoring an unsure answer as ZERO. "
+                   "Driven in a browser: two of six marked Not sure, and the card reads 10 of "
+                   "10 rather than 10 of 12."),
+ "LC-08": ("Pass", "Engine verified, and read_aloud now sets the capture default from the "
+                   "profile (migration 0011), so the hearing-dependent items do not need "
+                   "re-tapping each session."),
+ "LC-10": ("Blocked", "Half built: plain_literal_wording is now a stored accommodation "
+                      "(migration 0011) and survives on the profile. Nothing consumes it yet — "
+                      "the prompt is not told about it — so the row's expectation is not met. "
+                      "The field is the part that needed a migration; wiring it to the prompt is "
+                      "a prompt-version bump."),
+ "LC-15": ("Pass", "BUILT. learning_sessions.excluded_from_adaptation (migration 0010) plus one "
+                   "checkbox: \"Today wasn't a fair test.\" The session stays in history and "
+                   "stops being counted — recommend() drops every row from an excluded session. "
+                   "A reason is optional, but a reason WITHOUT the exclusion is refused by the "
+                   "database, because that is a note nobody acts on. Asserted both ways: 8/8 "
+                   "and transfer with the exclusion, 8/13 and practise without it."),
+})
+
 HEADERS = ["ID", "Area", "Scenario", "Steps", "Expected result", "Status",
            "How to run", "Phase", "Notes"]
 
@@ -393,12 +460,16 @@ means the thing the row describes does not exist.
 | **Blocked** | {n_blocked} |
 | **Not run** | {n_notrun} |
 
-Raised rather than answered, per the standing instruction not to resolve a
-conflict unilaterally: **SU-08** (Science is offered with no transcribed
-expectations), **C-07** (no edit path for a mis-tap), **R-18** (the row says
-nine acceptance cases; the document has eleven), **GR-07** (its premise
-contradicts CLAUDE.md §6) and **SU-06** (what Phase 1 does with an open
-written response).
+Still raised rather than answered, per the standing instruction not to
+resolve a conflict unilaterally: **C-07** (no edit path for a mis-tap —
+correcting one still becomes attempt 2), **SU-06** (what Phase 1 does with an
+open written response), **R-18** (the row says nine acceptance cases; the
+document has eleven) and **GR-07** (its premise contradicts CLAUDE.md §6,
+which supports Grades K through 8).
+
+**SU-08 is resolved**: Science and Technology is no longer offered, and the
+test now asserts that nothing is offered without transcribed expectations
+behind it.
 
 | ID | Area | Scenario | How to run | Status | Where / what |
 |---|---|---|---|---|---|

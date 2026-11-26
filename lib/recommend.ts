@@ -46,6 +46,12 @@ export interface ObservationRow {
   sessionId: string;
   /** Null means the adult never finished the session. Never evidence. */
   sessionClosedAt: string | null;
+  /**
+   * The adult set this whole sitting aside — a meltdown, illness, a fire
+   * alarm. Optional so existing callers and fixtures are unaffected; absent
+   * means the session counts, which is the default in the database too.
+   */
+  sessionExcluded?: boolean;
   skillId: string | null;
   topicId: string | null;
   modeOfSupport: ModeOfSupport;
@@ -116,6 +122,7 @@ export function qualifies(row: ObservationRow, cutoff: Date): boolean {
   if (row.attempt !== 1) return false;                       // retries are history
   if (row.status !== "scored") return false;                 // skipped says nothing
   if (row.excludeFromAdaptation) return false;               // adult said it is off-target
+  if (row.sessionExcluded) return false;                     // the whole sitting was set aside
   if (!INDEPENDENT_MODES.includes(row.modeOfSupport)) return false;
   if (!row.sessionClosedAt) return false;                    // never finished
   if (row.score === null || row.maxPoints === null) return false;

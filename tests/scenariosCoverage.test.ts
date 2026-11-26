@@ -6,6 +6,7 @@ import {
   loadedExpectationCount,
   subjectsWithExpectations,
 } from "@/lib/curriculum";
+import { verdictToObservation } from "@/types/progress";
 import {
   checkArithmeticKey,
   parseNumber,
@@ -110,7 +111,7 @@ describe("SU — subjects", () => {
     expect(validateChoices("9", ["6", "12", "18"])).toEqual([]);
   });
 
-  it("SU-08 a supported subject has no expectations behind it — RAISED", () => {
+  it("SU-08 every offered subject has transcribed expectations behind it", () => {
     // data/ontario/subjects.json marks Science and Technology supported, and
     // lib/curriculum.ts therefore offers it. There is no science.json, so it
     // has NOTHING transcribed: no strand, no expectation, no code.
@@ -121,22 +122,19 @@ describe("SU — subjects", () => {
     // Ontario curriculum. An invented code is "worse than a missing one,
     // because a teacher will trust it".
     //
-    // RAISED, NOT RESOLVED. Two ways out and both are Nicolas's call:
-    // transcribe the Science and Technology curriculum, or set supported to
-    // false until it is done ("not yet" beats pretending, §6). Flipping the
-    // flag removes a subject the app currently advertises, which is a
-    // product decision, not a test fix.
+    // RESOLVED 2026-11-26: science-technology is no longer offered. Its
+    // strands stay in data/ontario/subjects.json with supported: false, and
+    // it stays in the Subject union so a session already saved under it
+    // still resolves — "not yet" beats pretending it does not exist (§6).
     //
-    // Pinned the way the repo already pins a known data gap, so it cannot
-    // drift in either direction: transcribe Science and this test tells you
-    // to shorten the list; mark a fifth subject supported without data and
-    // it tells you that too.
-    const KNOWN_GAP = ["science-technology"];
+    // This now asserts the invariant rather than the exception: nothing is
+    // offered that has no expectations behind it. Transcribe Science and
+    // flip both lists together, and this keeps passing.
     const withExpectations = subjectsWithExpectations();
     const offeredButEmpty = SUPPORTED_SUBJECTS.map((s) => s.id).filter(
       (id) => !withExpectations.includes(id),
     );
-    expect(offeredButEmpty).toEqual(KNOWN_GAP);
+    expect(offeredButEmpty).toEqual([]);
 
     // The three that are real are genuinely loaded.
     expect(withExpectations).toEqual(["language", "mathematics", "french"]);
@@ -437,5 +435,82 @@ describe("LC — learning challenges", () => {
     expect(r.reason).toMatch(/first step in the sequence/);
     expect(r.reason).toMatch(/smaller pieces/);
     expect(r.reason).not.toMatch(/null|undefined|unmapped|prerequisite/i);
+  });
+});
+
+describe("LC-15 — a whole session set aside", () => {
+  it("one action takes the sitting out of the decision, not six taps", () => {
+    const good = [...run("s1", 4, 4), ...run("s2", 4, 4)];
+    // The bad day: answers recorded, but the adult judged the sitting unfair.
+    const badDay = run("s3", 0, 5, { sessionExcluded: true });
+
+    const r = recommend([...good, ...badDay], { now: NOW });
+    expect(r.evidence.score).toBe(8);
+    expect(r.evidence.maxPoints).toBe(8);
+    expect(r.evidence.sessionIds.sort()).toEqual(["s1", "s2"]);
+    expect(r.decision).toBe("try_transfer");
+
+    // Without the exclusion the same evidence reads 8/13 and practises, which
+    // is the outcome the adult knew was wrong.
+    const counted = recommend([...good, ...run("s3", 0, 5)], { now: NOW });
+    expect(counted.evidence.maxPoints).toBe(13);
+    expect(counted.decision).toBe("practise_same_skill");
+  });
+
+  it("the session is set aside, not deleted — its items are still rows", () => {
+    const badDay = run("s3", 0, 5, { sessionExcluded: true });
+    expect(badDay).toHaveLength(5);
+    expect(badDay.every((r) => r.status === "scored")).toBe(true);
+  });
+});
+
+describe("LC-07 — the adult could not tell", () => {
+  it("one shared mapping, and an unsure answer is never a zero", () => {
+    expect(verdictToObservation("correct")).toEqual({ status: "scored", score: 1, maxPoints: 1 });
+    expect(verdictToObservation("wrong")).toEqual({ status: "scored", score: 0, maxPoints: 1 });
+    expect(verdictToObservation("skipped")).toEqual({
+      status: "skipped",
+      score: null,
+      maxPoints: null,
+    });
+
+    // The one that matters. A missing judgement is not a zero.
+    expect(verdictToObservation("unsure")).toEqual({
+      status: "pending_review",
+      score: null,
+      maxPoints: null,
+    });
+    expect(verdictToObservation("unsure").score).not.toBe(0);
+  });
+
+  it("skipped and unsure are different facts, both uncounted", () => {
+    // Nobody answered, versus somebody answered and the adult could not
+    // judge it. Neither is evidence; they are not the same row.
+    const skipped = verdictToObservation("skipped");
+    const unsure = verdictToObservation("unsure");
+    expect(skipped.status).not.toBe(unsure.status);
+    for (const r of [skipped, unsure]) {
+      expect(r.score).toBeNull();
+      expect(r.maxPoints).toBeNull();
+    }
+  });
+
+  it("an unsure item stays out of the decision until it is confirmed", () => {
+    const mk = (sessionId: string, itemId: string, v: Parameters<typeof verdictToObservation>[0]) =>
+      obs({ sessionId, itemId, ...verdictToObservation(v) });
+
+    const rows = [
+      ...run("s1", 4, 4),
+      ...run("s2", 4, 4),
+      mk("s1", "u1", "unsure"),
+      mk("s2", "u2", "unsure"),
+    ];
+    expect(recommend(rows, { now: NOW }).evidence.maxPoints).toBe(8);
+
+    // Confirmed later: now it counts.
+    const confirmed = rows.map((r) =>
+      r.status === "pending_review" ? { ...r, ...verdictToObservation("correct") } : r,
+    );
+    expect(recommend(confirmed, { now: NOW }).evidence.maxPoints).toBe(10);
   });
 });

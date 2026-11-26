@@ -380,9 +380,18 @@ several are decisions rather than work.
 
 Grouped by what they cost.
 
-### The one that is a decision, and should be made soon
+### ~~The one that is a decision~~ — decided 2026-11-26
 
-- **Science and Technology is offered with nothing behind it** (SU-08).
+- ~~**Science and Technology is offered with nothing behind it**~~ (SU-08).
+  **Done.** Nicolas chose the one-line route: `supported: false`, and out of
+  the offered `SUBJECTS` list. Its strands stay transcribed and it stays in
+  the `Subject` union, so a session already saved under it still resolves.
+  The test now asserts the invariant rather than the exception — nothing is
+  offered without expectations behind it — so re-offering Science without
+  transcribing it fails two tests. Put both lists back in the same commit
+  that adds `science-technology.json`.
+
+  The original finding, for the record:
   `data/ontario/subjects.json` marks it `supported: true`, so
   `SUPPORTED_SUBJECTS` offers it and an adult can pick it. There is no
   `science.json`. `subjectsWithExpectations()` returns Language, Mathematics
@@ -401,7 +410,16 @@ Grouped by what they cost.
   (`tests/scenariosCoverage.test.ts`, SU-08), so neither side can move by
   accident.
 
-### Two that are small and should go first
+### ~~Two that are small and should go first~~ — both done 2026-11-26
+
+**Done**, in migration 0009: `capture_key` plus a `save_capture_rows()`
+function that does the whole write in one transaction and is idempotent per
+key. The four unsynchronised writes are one call; a resubmit writes nothing
+the second time; a deliberate recapture is still attempt 2. `SECURITY
+INVOKER`, so row-level security still proves ownership on every statement
+inside — no second policy path.
+
+The original entries:
 
 - **Capture has no server-side idempotency** (C-08). The rapid double-tap is
   guarded in the browser (`disabled={saving}`), so the realistic case is
@@ -414,7 +432,25 @@ Grouped by what they cost.
   the session unclosed. "All rows or none" is what the scenario asks for and
   is the right behaviour for a six-tap screen the adult will walk away from.
 
-### A standing accommodation, which is the one that will actually bite
+### A standing accommodation — built 2026-11-26, two thirds wired
+
+**Done**, in migration 0011: `children.accommodations`, set once on the
+profile. `read_aloud` now defaults every item at capture to `accommodated`,
+so she is not re-tapping it every week, and that is the mode that keeps a
+reading difficulty from dragging maths down. `pending_review` got its
+button too — "Not sure" — which is all LC-07 needed, the database and the
+engine having been ready already. Whole-session exclusion is in 0010.
+
+Two remain, both stored but not yet acted on:
+
+- **`timed_never_counts` has nothing to act on.** Nothing marks a question
+  as timed, so there is no per-item signal. The flag survives on the
+  profile; wiring it needs a `timed` flag on a worksheet question.
+- **`plain_literal_wording` is not passed to the prompt.** A prompt-version
+  bump, per CLAUDE.md §4.
+
+The original entry:
+
 
 - **No per-child accommodation that persists** (LC-04, LC-08, LC-10). A child
   who needs every maths question read aloud needs it read aloud every week.

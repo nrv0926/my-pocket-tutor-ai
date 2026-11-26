@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { ChildInput, Grade, LearningNeed, Role } from "@/types/child";
-import { GRADES } from "@/types/child";
+import type { Accommodation, ChildInput, Grade, LearningNeed, Role } from "@/types/child";
+import { ACCOMMODATIONS, GRADES } from "@/types/child";
 import type { LearnerKind } from "@/types/child";
 import { learnerCopy } from "@/lib/roleCopy";
 
@@ -26,6 +26,7 @@ export default function ChildProfileForm({
   allowClass?: boolean;
 }) {
   const [needs, setNeeds] = useState<LearningNeed[]>([]);
+  const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [kind, setKind] = useState<LearnerKind>("student");
   const copy = learnerCopy(role, kind);
@@ -44,6 +45,7 @@ export default function ChildProfileForm({
           location: String(f.get("location") || "ON-CA"),
           curriculum: "ontario",
           learningNeeds: needs,
+          accommodations,
           mainConcern: nullable(f.get("mainConcern")),
           strengths: nullable(f.get("strengths")),
           weaknesses: nullable(f.get("weaknesses")),
@@ -174,6 +176,44 @@ export default function ChildProfileForm({
           We use these to soften the plan. We never diagnose.
         </p>
       </Field>
+
+      {kind === "student" && (
+        <Field label="How you help (optional — so you don't re-tick it every week)">
+          <div className="flex flex-wrap gap-2">
+            {ACCOMMODATIONS.map((a) => {
+              const active = accommodations.includes(a.id);
+              return (
+                <button
+                  key={a.id}
+                  type="button"
+                  title={a.hint}
+                  aria-pressed={active}
+                  onClick={() =>
+                    setAccommodations((prev) =>
+                      prev.includes(a.id)
+                        ? prev.filter((p) => p !== a.id)
+                        : [...prev, a.id]
+                    )
+                  }
+                  className={[
+                    "rounded-full border px-3 py-1.5 text-sm",
+                    active
+                      ? "border-pop-night bg-pop-pink text-pop-night"
+                      : "border-pop-night text-pop-night/80 hover:border-pop-night",
+                  ].join(" ")}
+                >
+                  {a.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-xs text-pop-night/60">
+            Reading a question aloud is not the skill being tested, so it still
+            counts as their own work. We set this for you each session instead
+            of asking you to tick it on every question.
+          </p>
+        </Field>
+      )}
 
       <Field label={copy.goalLabel}>
         <textarea

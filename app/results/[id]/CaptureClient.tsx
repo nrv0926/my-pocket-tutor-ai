@@ -1,7 +1,7 @@
 "use client";
 
-import CaptureCard, { type CaptureRow } from "@/components/CaptureCard";
-import { saveCapture } from "@/lib/actions/observations";
+import CaptureCard, { type Accommodation, type CaptureRow } from "@/components/CaptureCard";
+import { saveCapture, setSessionExcluded } from "@/lib/actions/observations";
 import type { Worksheet } from "@/types/session";
 
 /**
@@ -14,19 +14,28 @@ export default function CaptureClient({
   worksheet,
   answerKey,
   alreadyClosed,
+  sessionExcluded,
+  accommodations,
 }: {
   sessionId: string;
   worksheet: Worksheet;
   answerKey: { questionId: string; answer: string }[];
   alreadyClosed: boolean;
+  sessionExcluded: boolean;
+  accommodations: Accommodation[];
 }) {
   return (
     <CaptureCard
       worksheet={worksheet}
       answerKey={answerKey}
       alreadyClosed={alreadyClosed}
-      onSave={async (rows: CaptureRow[]) => {
-        await saveCapture({ sessionId, items: rows });
+      sessionExcluded={sessionExcluded}
+      accommodations={accommodations}
+      onSave={async (rows: CaptureRow[], captureKey: string) => {
+        await saveCapture({ sessionId, captureKey, items: rows });
+      }}
+      onExcludeSession={async (excluded: boolean, reason: string) => {
+        await setSessionExcluded({ sessionId, excluded, reason });
       }}
     />
   );
