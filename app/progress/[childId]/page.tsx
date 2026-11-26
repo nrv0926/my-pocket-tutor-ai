@@ -1,9 +1,11 @@
 import LocalTime from "@/components/LocalTime";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import NextStepCard from "@/components/NextStepCard";
 import ProgressTracker from "@/components/ProgressTracker";
 import { isRepeatedStruggle, summarize } from "@/lib/progressEngine";
 import { getServerSupabase } from "@/lib/supabaseServer";
+import { recommend, type ObservationRow } from "@/lib/recommend";
 import type { ProgressRecord } from "@/types/progress";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +28,7 @@ export default async function ChildProgressPage({
   const [childRes, recordsRes] = await Promise.all([
     supabase
       .from("children")
-      .select("id, nickname, grade, location")
+      .select("id, nickname, grade, location, kind")
       .eq("id", params.childId)
       .single(),
     supabase
@@ -40,6 +42,44 @@ export default async function ChildProgressPage({
 
   if (childRes.error || !childRes.data) notFound();
   const child = childRes.data;
+
+  // A class has no individual next step: the evidence is per learner and
+  // item_observations refuses class profiles outright.
+  const isClass = child.kind === "class";
+
+  const obsRes = isClass
+    ? { data: [] }
+    : await supabase
+        .from("item_observations")
+        .select(
+          "item_id, session_id, skill_id, topic_id, mode_of_support, status, score, max_points, attempt, exclude_from_adaptation, created_at, learning_sessions!inner(closed_at)"
+        )
+        .eq("child_id", params.childId)
+        .order("created_at", { ascending: false })
+        .limit(400);
+
+  const observations: ObservationRow[] = (obsRes.data ?? []).map((r) => {
+    const joined = r.learning_sessions as unknown as
+      | { closed_at: string | null }
+      | { closed_at: string | null }[];
+    const closedAt = Array.isArray(joined) ? (joined[0]?.closed_at ?? null) : (joined?.closed_at ?? null);
+    return {
+      itemId: r.item_id as string,
+      sessionId: r.session_id as string,
+      sessionClosedAt: closedAt,
+      skillId: (r.skill_id ?? null) as string | null,
+      topicId: (r.topic_id ?? null) as string | null,
+      modeOfSupport: r.mode_of_support,
+      status: r.status,
+      score: r.score === null ? null : Number(r.score),
+      maxPoints: r.max_points === null ? null : Number(r.max_points),
+      attempt: Number(r.attempt),
+      excludeFromAdaptation: Boolean(r.exclude_from_adaptation),
+      createdAt: r.created_at as string,
+    };
+  });
+
+  const nextStep = isClass ? null : recommend(observations);
 
   const records: ProgressRecord[] = (recordsRes.data ?? []).map((r) => ({
     id: r.id,
@@ -116,6 +156,15 @@ export default async function ChildProgressPage({
       </header>
 
       <ProgressTracker summary={summary} />
+
+      {/* Counted evidence, ahead of the summaries: it is the only part of
+          this page that says what to do rather than what happened. A class
+          shows nothing — the evidence is per learner. */}
+      {nextStep && (
+        <div className="mt-8">
+          <NextStepCard rec={nextStep} />
+        </div>
+      )}
 
       {records.length === 0 ? (
         <p className="mt-8 rounded-2xl border border-dashed border-pop-night bg-white p-8 text-center text-sm text-pop-night/60 shadow-pop-sm">

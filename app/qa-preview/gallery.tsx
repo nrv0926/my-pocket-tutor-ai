@@ -13,6 +13,8 @@ import LevelSpreadPicker, { type LevelSpread } from "@/components/LevelSpreadPic
 import SessionModePicker, { sessionMode } from "@/components/SessionModePicker";
 import ContinueCard from "@/components/ContinueCard";
 import CaptureCard from "@/components/CaptureCard";
+import NextStepCard from "@/components/NextStepCard";
+import { recommend, type ObservationRow } from "@/lib/recommend";
 import WeeklyPlanCard from "@/components/WeeklyPlanCard";
 import type { WeeklyPlan } from "@/types/plan";
 import type { Continuity } from "@/lib/continuity";
@@ -140,6 +142,28 @@ const DECODABLE_ANALYSIS: AnalysisResult = {
     },
   ],
 };
+
+
+/**
+ * Two finished sessions of counted evidence, run through the real
+ * recommend() so the card shows what the engine actually decides.
+ */
+const DEMO_OBS: ObservationRow[] = ["s1", "s2"].flatMap((sessionId, s) =>
+  Array.from({ length: 4 }, (_, i) => ({
+    itemId: `q${i + 1}`,
+    sessionId,
+    sessionClosedAt: new Date(Date.now() - (s === 0 ? 5 : 2) * 86400000).toISOString(),
+    skillId: null,
+    topicId: "math.multi_digit_mult",
+    modeOfSupport: (i === 3 ? "accommodated" : "independent") as ObservationRow["modeOfSupport"],
+    status: "scored" as const,
+    score: i < (s === 0 ? 2 : 1) ? 1 : 0,
+    maxPoints: 1,
+    attempt: 1,
+    excludeFromAdaptation: false,
+    createdAt: new Date(Date.now() - (s === 0 ? 5 : 2) * 86400000).toISOString(),
+  })),
+);
 
 const THREAD: Continuity = {
   childId: "demo-1",
@@ -303,6 +327,10 @@ export default function PreviewGallery() {
 
       <Block label="AnalysisResultCard — one lesson, a worksheet per level">
         <AnalysisResultCard result={SPLIT_ANALYSIS} />
+      </Block>
+
+      <Block label="NextStepCard — what to do next, from counted evidence">
+        <NextStepCard rec={recommend(DEMO_OBS)} />
       </Block>
 
       <Block label="CaptureCard — how did each question go (adult only)">
