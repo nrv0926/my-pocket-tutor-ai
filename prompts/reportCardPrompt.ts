@@ -3,12 +3,13 @@ import {
   SYSTEM_PROMPT,
   childContext,
   recentFeedbackContext,
+  type ItemEvidenceRow,
   roleContext,
   type RecentFeedbackEntry,
 } from "@/lib/prompts";
 import type { Child, Role } from "@/types/child";
 
-export const REPORT_CARD_PROMPT_VERSION = "report-card@2026-09-12.3";
+export const REPORT_CARD_PROMPT_VERSION = "report-card@2026-11-26.4";
 
 /**
  * Specialised analysis for a school report card comment / teacher note.
@@ -35,9 +36,10 @@ export function buildReportCardPrompt(args: {
   attached?: boolean;
   role?: Role | null;
   recentFeedback?: RecentFeedbackEntry[];
+  itemEvidence?: ItemEvidenceRow[];
 }): { system: string; user: string; version: string } {
   const { child, reportText, attached = false, role = null, recentFeedback = [] } = args;
-  const feedbackBlock = recentFeedbackContext(recentFeedback);
+  const feedbackBlock = recentFeedbackContext(recentFeedback, { items: args.itemEvidence ?? [] });
   const roleBlock = roleContext(role);
 
   const taskAddendum = `

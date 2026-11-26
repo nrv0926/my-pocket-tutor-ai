@@ -206,12 +206,74 @@ export interface RecentFeedbackEntry {
  * Returns "" when there is nothing useful to say (no rows, or no ratings),
  * so the caller can simply concatenate without a conditional.
  */
+/**
+ * One question, as adaptation sees it.
+ *
+ * Only rows that actually count reach here: first attempt, scored, done
+ * independently (or with help that did not supply the skill), not marked
+ * as off-target, from a session the adult closed.
+ */
+export interface ItemEvidenceRow {
+  topicId: string | null;
+  /** Plain-English name for the topic, resolved by the caller. */
+  label?: string | null;
+  sessionId: string;
+  score: number;
+  maxPoints: number;
+}
+
+/**
+ * Per-question evidence, summarised per topic.
+ *
+ * This is a COUNT, not a rating. parent_feedback stays what it always
+ * was — how the session felt — and is never turned into a score; the two
+ * blocks sit side by side so the model can see the difference between
+ * "that felt hard" and "four of six were wrong on her own".
+ */
+export function itemEvidenceContext(rows: ItemEvidenceRow[]): string {
+  if (rows.length === 0) return "";
+
+  const byTopic = new Map<string, { label: string; score: number; max: number; sessions: Set<string> }>();
+  for (const r of rows) {
+    const key = r.topicId ?? "unspecified";
+    const bucket = byTopic.get(key) ?? {
+      label: r.label || key,
+      score: 0,
+      max: 0,
+      sessions: new Set<string>(),
+    };
+    bucket.score += r.score;
+    bucket.max += r.maxPoints;
+    bucket.sessions.add(r.sessionId);
+    byTopic.set(key, bucket);
+  }
+
+  const lines = [...byTopic.values()]
+    .sort((a, b) => a.score / a.max - b.score / b.max)
+    .map((b) => {
+      const n = b.sessions.size;
+      return `- ${b.label}: ${b.score}/${b.max} right on their own, over ${n} session${n === 1 ? "" : "s"}`;
+    });
+
+  return [
+    "WHAT THEY GOT RIGHT ON THEIR OWN (counted per question, weakest first)",
+    ...lines,
+    "",
+    "These are counts of first attempts the adult marked as unaided. Work",
+    "done with a prompt or a worked example is deliberately not in here, and",
+    "neither is anything the adult flagged as not testing the skill.",
+    "Treat a low count as the place to start, not as a grade.",
+  ].join("\n");
+}
+
 export function recentFeedbackContext(
   entries: RecentFeedbackEntry[],
-  now: Date = new Date(),
+  opts: { items?: ItemEvidenceRow[]; now?: Date } = {},
 ): string {
+  const now = opts.now ?? new Date();
+  const itemBlock = itemEvidenceContext(opts.items ?? []);
   const rated = entries.filter((e) => e.parentFeedback !== null);
-  if (rated.length === 0) return "";
+  if (rated.length === 0) return itemBlock;
 
   const lines = rated.map((e) => {
     const ageMs = now.getTime() - new Date(e.createdAt).getTime();
@@ -235,6 +297,7 @@ export function recentFeedbackContext(
     "- If 'too_hard' or 'needed help' dominates → step DOWN one stage in the phonics/skill progression and shrink the worksheet.",
     "- If 'too_easy' AND 'done independently' dominate → step UP one stage within the same family. Never skip a stage.",
     "- If mixed or 'just_right' → hold the current level and vary the practice.",
+    ...(itemBlock ? ["", itemBlock] : []),
   ].join("\n");
 }
 

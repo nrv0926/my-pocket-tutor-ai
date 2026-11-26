@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getServerSupabase } from "@/lib/supabaseServer";
+import { booleanToMode } from "@/types/progress";
 import type { ParentFeedback, SkillStatus } from "@/types/progress";
 import type { Difficulty } from "@/types/session";
 
@@ -54,7 +55,10 @@ export async function saveParentFeedback(input: {
     status,
     difficulty: session.difficulty ?? null,
     parent_feedback: parsed.feedback,
+    // Dual-written. completed_independently is deprecated but four read
+    // paths still depend on it, so both move together until they don't.
     completed_independently: parsed.completedIndependently,
+    mode_of_support: booleanToMode(parsed.completedIndependently),
     notes: null,
   }));
 

@@ -9,6 +9,7 @@ alter table public.children            enable row level security;
 alter table public.learning_sessions   enable row level security;
 alter table public.learning_plans      enable row level security;
 alter table public.progress_records    enable row level security;
+alter table public.item_observations   enable row level security;
 alter table public.uploads             enable row level security;
 alter table public.subscriptions       enable row level security;
 alter table public.ai_call_quota       enable row level security;
@@ -84,6 +85,22 @@ create policy "progress owner all"
   with check (
     exists (select 1 from public.children c
             where c.id = progress_records.child_id
+              and c.user_id = auth.uid())
+  );
+
+-- --------- item_observations ---------
+drop policy if exists "item_obs owner all" on public.item_observations;
+
+create policy "item_obs owner all"
+  on public.item_observations for all
+  using (
+    exists (select 1 from public.children c
+            where c.id = item_observations.child_id
+              and c.user_id = auth.uid())
+  )
+  with check (
+    exists (select 1 from public.children c
+            where c.id = item_observations.child_id
               and c.user_id = auth.uid())
   );
 

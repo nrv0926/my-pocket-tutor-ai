@@ -11,8 +11,10 @@ import {
   type RecentFeedbackEntry,
 } from "@/lib/prompts";
 import { QuotaExceededError, consumeAIQuota } from "@/lib/quota";
+import { assignQuestionIds } from "@/lib/worksheetIds";
+import { INDEPENDENT_MODES } from "@/types/progress";
 import { getRole } from "@/lib/role";
-import { mapToSkillIds } from "@/lib/skillGapEngine";
+import { mapToSkillIds, skillLabel } from "@/lib/skillGapEngine";
 import { getServerSupabase } from "@/lib/supabaseServer";
 import { findExpectation } from "@/lib/curriculum";
 import {
@@ -20,7 +22,7 @@ import {
   continuumFor,
   nextGradeFor,
 } from "@/lib/foundationsContinuum";
-import type { PreviousSession } from "@/lib/prompts";
+import type { ItemEvidenceRow, PreviousSession } from "@/lib/prompts";
 import type { GradeId } from "@/types/curriculum";
 import type { Grade, LearningNeed, Subject } from "@/types/child";
 import {
@@ -163,6 +165,30 @@ export async function createLearningSession(input: {
     completedIndependently: (r.completed_independently ?? null) as boolean | null,
   }));
 
+  // Per-question evidence, which is what "she can multiply by ten and
+  // cannot break a number apart" is made of. Only what counts: the first
+  // attempt, scored, done unaided (or with help that did not supply the
+  // skill), not flagged as off-target, from a session the adult closed.
+  const { data: evidenceRows } = await supabase
+    .from("item_observations")
+    .select("topic_id, session_id, score, max_points, learning_sessions!inner(closed_at)")
+    .eq("child_id", parsed.childId)
+    .eq("attempt", 1)
+    .eq("status", "scored")
+    .eq("exclude_from_adaptation", false)
+    .in("mode_of_support", INDEPENDENT_MODES)
+    .not("learning_sessions.closed_at", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(120);
+
+  const itemEvidence: ItemEvidenceRow[] = (evidenceRows ?? []).map((r) => ({
+    topicId: (r.topic_id ?? null) as string | null,
+    label: r.topic_id ? skillLabel(r.topic_id as string) : null,
+    sessionId: r.session_id as string,
+    score: Number(r.score),
+    maxPoints: Number(r.max_points),
+  }));
+
   // The last plan for this child. Session two should continue session one,
   // not re-teach it — feedback alone never carried what was actually taught.
   const { data: lastRows } = await supabase
@@ -226,6 +252,7 @@ export async function createLearningSession(input: {
           reportText: parsed.text,
           role,
           recentFeedback,
+          itemEvidence,
         })
       : buildAnalysisPrompt({
           child: childForPrompt,
@@ -247,6 +274,7 @@ export async function createLearningSession(input: {
           previous,
           progression,
           recentFeedback,
+          itemEvidence,
         });
 
   // Per-user daily cap. Throws QuotaExceededError with a friendly message
@@ -298,7 +326,11 @@ export async function createLearningSession(input: {
     usage: aiResponse.usage,
   });
 
-  const result = aiResponse.result;
+  // Server-assigned question ids, before anything reads or stores them.
+  // item_observations.item_id points at these, so they cannot be left to
+  // the model. assignQuestionIds also drags the answer key along, which
+  // joins on them (see lib/worksheetIds.ts).
+  const result = assignQuestionIds(aiResponse.result);
   const skillIds = mapToSkillIds(result);
 
   const { data: inserted, error: insertErr } = await supabase

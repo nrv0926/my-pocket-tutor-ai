@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import AnalysisResultCard from "@/components/AnalysisResultCard";
 import PlanBridge from "@/components/PlanBridge";
 import WorksheetClient from "@/app/worksheet/[id]/WorksheetClient";
+import CaptureClient from "./CaptureClient";
 import { getServerSupabase } from "@/lib/supabaseServer";
 import type { AnalysisResult, Worksheet } from "@/types/session";
 
@@ -23,7 +24,7 @@ export default async function ResultsPage({ params }: { params: { id: string } }
   const supabase = getServerSupabase();
   const { data, error } = await supabase
     .from("learning_sessions")
-    .select("id, child_id, subject, analysis_result, worksheet, answer_key, created_at")
+    .select("id, child_id, subject, analysis_result, worksheet, answer_key, closed_at, created_at")
     .eq("id", params.id)
     .single();
 
@@ -33,7 +34,7 @@ export default async function ResultsPage({ params }: { params: { id: string } }
   // to open it. Both queries are RLS-scoped, so a session that is not theirs
   // never got this far.
   const [childRes, planRes] = await Promise.all([
-    supabase.from("children").select("nickname").eq("id", data.child_id).single(),
+    supabase.from("children").select("nickname, kind").eq("id", data.child_id).single(),
     supabase
       .from("learning_plans")
       .select("id")
@@ -41,6 +42,7 @@ export default async function ResultsPage({ params }: { params: { id: string } }
       .limit(1),
   ]);
   const nickname = childRes.data?.nickname ?? "them";
+  const isClass = childRes.data?.kind === "class";
   const hasPlan = (planRes.data ?? []).length > 0;
 
   const result = data.analysis_result as AnalysisResult;
@@ -116,11 +118,24 @@ export default async function ResultsPage({ params }: { params: { id: string } }
         />
       </section>
 
+      {/* 5. Per-question capture. Adult-only, and only for one learner:
+          a class has no individual items to observe. */}
+      {!isClass && (
+        <section id="capture" className="mt-10 scroll-mt-24">
+          <CaptureClient
+            sessionId={data.id}
+            worksheet={worksheet}
+            answerKey={answerKey}
+            alreadyClosed={Boolean(data.closed_at)}
+          />
+        </section>
+      )}
+
       <section id="feedback" className="mt-10 rounded-2xl border-[3px] border-pop-night bg-white p-5 text-sm text-pop-night/80 shadow-pop-sm">
         <h2 className="font-display text-lg text-pop-night">After the session</h2>
         <p className="mt-2">
-          Once you&apos;ve worked through the worksheet, save your feedback above.
-          We&apos;ll use it to choose the next session&apos;s difficulty.{" "}
+          Once you&apos;ve worked through the worksheet, record how each question
+          went above. That is what chooses the next session.{" "}
           <Link className="text-pop-magenta underline" href={`/progress/${data.child_id}`}>
             View this child&apos;s full progress →
           </Link>

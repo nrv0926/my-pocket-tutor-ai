@@ -12,6 +12,7 @@ import AchievementLevelPicker from "@/components/AchievementLevelPicker";
 import LevelSpreadPicker, { type LevelSpread } from "@/components/LevelSpreadPicker";
 import SessionModePicker, { sessionMode } from "@/components/SessionModePicker";
 import ContinueCard from "@/components/ContinueCard";
+import CaptureCard from "@/components/CaptureCard";
 import WeeklyPlanCard from "@/components/WeeklyPlanCard";
 import type { WeeklyPlan } from "@/types/plan";
 import type { Continuity } from "@/lib/continuity";
@@ -302,6 +303,17 @@ export default function PreviewGallery() {
 
       <Block label="AnalysisResultCard — one lesson, a worksheet per level">
         <AnalysisResultCard result={SPLIT_ANALYSIS} />
+      </Block>
+
+      <Block label="CaptureCard — how did each question go (adult only)">
+        <CaptureCard
+          worksheet={SAMPLE_ANALYSIS.practiceWorksheet}
+          answerKey={SAMPLE_ANALYSIS.answerKey}
+          alreadyClosed={false}
+          onSave={async () => {
+            await new Promise((r) => setTimeout(r, 400));
+          }}
+        />
       </Block>
 
       <Block label="AnalysisResultCard — with a decodable story">

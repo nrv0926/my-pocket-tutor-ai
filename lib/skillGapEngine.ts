@@ -56,3 +56,11 @@ const STOPWORDS = new Set([
   "their", "them", "into", "onto", "what", "when", "where", "while",
   "for", "are", "but", "not", "now", "out", "use", "using",
 ]);
+
+/**
+ * Plain-English name for a skill-map id, for prompts and summaries.
+ * Falls back to the id, which is readable enough to be worth showing.
+ */
+export function skillLabel(id: string): string {
+  return SKILLS.find((s) => s.id === id)?.label ?? id;
+}

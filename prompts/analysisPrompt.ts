@@ -11,13 +11,14 @@ import {
   extrasContext,
   continuityContext,
   progressionContext,
+  type ItemEvidenceRow,
   type PreviousSession,
   type RecentFeedbackEntry,
 } from "@/lib/prompts";
 import type { AchievementLevel, Child, Role, Subject } from "@/types/child";
 import type { ExtraKind } from "@/types/session";
 
-export const ANALYSIS_PROMPT_VERSION = "analysis@2026-09-12.10";
+export const ANALYSIS_PROMPT_VERSION = "analysis@2026-11-26.11";
 
 /**
  * Main analysis: parent input → 9-section structured plan + worksheet.
@@ -60,6 +61,8 @@ export function buildAnalysisPrompt(args: {
     next: { section: string; label: string; text: string }[];
   } | null;
   recentFeedback?: RecentFeedbackEntry[];
+  /** Per-question evidence that already counts. See lib/prompts.ts. */
+  itemEvidence?: ItemEvidenceRow[];
 }): { system: string; user: string; version: string } {
   const {
     child,
@@ -75,8 +78,9 @@ export function buildAnalysisPrompt(args: {
     previous = null,
     progression = null,
     recentFeedback = [],
+    itemEvidence = [],
   } = args;
-  const feedbackBlock = recentFeedbackContext(recentFeedback);
+  const feedbackBlock = recentFeedbackContext(recentFeedback, { items: itemEvidence });
   const roleBlock = roleContext(role);
   const expectationBlock = expectationContext(expectation);
   const planGradeBlock = planGradeContext(planGrade, child.grade);

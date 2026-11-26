@@ -86,9 +86,27 @@ create table if not exists public.learning_sessions (
   worksheet         jsonb,                 -- { questions: [...], difficulty: 'easy'|'medium'|'hard' }
   answer_key        jsonb,
   difficulty        text check (difficulty in ('easy','medium','hard')),
+  -- Set when the adult saves the capture screen. Only closed sessions feed
+  -- adaptation: a plan generated and never taught is not evidence.
+  closed_at         timestamptz,
+  -- Pre-0007 question ids, by position, for each of the four places a
+  -- question id appears. Present only on rows 0007 rewrote.
+  item_ids_before   jsonb,
   created_at        timestamptz not null default now()
 );
 create index if not exists sessions_child_id_idx on public.learning_sessions(child_id);
+
+-- Redundant against the primary key, and there for one reason:
+-- item_observations points at both columns at once, so a row cannot pair
+-- one person's child with another person's session.
+do $$
+begin
+  alter table public.learning_sessions
+    add constraint learning_sessions_id_child_key unique (id, child_id);
+exception
+  when duplicate_object then null;
+  when duplicate_table  then null;
+end $$;
 
 -- ---------------------------------------------------------------------
 -- learning_plans
@@ -118,12 +136,89 @@ create table if not exists public.progress_records (
   status                      text not null check (status in ('practiced','mastered','struggling')),
   difficulty                  text check (difficulty in ('easy','medium','hard')),
   parent_feedback             text check (parent_feedback in ('too_easy','just_right','too_hard')),
+  -- DEPRECATED, still dual-written. See mode_of_support below.
   completed_independently     boolean,
+  -- How much help was given. 'accommodated' is help that did NOT supply the
+  -- skill being measured (reading a maths story aloud), and so counts as
+  -- independent for adaptation; reading aloud a word whose decoding is the
+  -- thing being tested does supply it, and is 'prompted'.
+  mode_of_support             text
+    check (mode_of_support in ('independent','prompted','modelled','accommodated')),
   notes                       text,
   created_at                  timestamptz not null default now()
 );
 create index if not exists progress_child_id_idx on public.progress_records(child_id);
 create index if not exists progress_skill_idx    on public.progress_records(skill);
+
+-- ---------------------------------------------------------------------
+-- item_observations
+--   One row per question, per attempt. progress_records holds one row per
+--   SKILL per session, all carrying the same verdict, so it can say "that
+--   session went badly" but never "she can multiply by ten and cannot
+--   break a number apart". Adaptation needs the second sentence.
+--
+--   Only attempt 1 is the official result. A row that is not 'scored'
+--   carries no score at all, so a skipped question and a wrong answer stay
+--   different kinds of evidence.
+-- ---------------------------------------------------------------------
+create table if not exists public.item_observations (
+  id                       uuid primary key default uuid_generate_v4(),
+  child_id                 uuid not null references public.children(id) on delete cascade,
+  session_id               uuid not null,
+  item_id                  text not null,          -- server-assigned: q1..qN by position
+  skill_id                 text,                   -- null until data/skills.json exists
+  topic_id                 text,                   -- the fallback grouping key
+  answer                   text,
+  mode_of_support          text not null
+    check (mode_of_support in ('independent','prompted','modelled','accommodated')),
+  status                   text not null
+    check (status in ('scored','skipped','pending_review')),
+  score                    int,
+  max_points               int,
+  attempt                  smallint not null default 1 check (attempt >= 1),
+  exclude_from_adaptation  boolean not null default false,
+  created_at               timestamptz not null default now(),
+
+  constraint item_obs_session_child_fk
+    foreign key (session_id, child_id)
+    references public.learning_sessions (id, child_id) on delete cascade,
+  constraint item_obs_unique_attempt
+    unique (session_id, item_id, attempt),
+  constraint item_obs_scored_iff_points check (
+    (status = 'scored') = (score is not null and max_points is not null)
+  ),
+  constraint item_obs_points_positive check (
+    max_points is null or max_points > 0
+  ),
+  constraint item_obs_score_in_range check (
+    score is null or (max_points is not null and score >= 0 and score <= max_points)
+  )
+);
+create index if not exists item_obs_child_skill_idx
+  on public.item_observations (child_id, skill_id, created_at desc);
+create index if not exists item_obs_child_topic_idx
+  on public.item_observations (child_id, topic_id, created_at desc);
+
+-- A class profile has no individual items to observe. The server action
+-- checks this too; the trigger is what makes it true regardless.
+create or replace function public.item_observations_reject_class()
+returns trigger language plpgsql as $$
+begin
+  if exists (
+    select 1 from public.children c
+     where c.id = new.child_id and c.kind = 'class'
+  ) then
+    raise exception
+      'item_observations: child_id % is a class profile, which has no individual items to observe',
+      new.child_id;
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists item_observations_no_class on public.item_observations;
+create trigger item_observations_no_class
+  before insert or update on public.item_observations
+  for each row execute function public.item_observations_reject_class();
 
 -- ---------------------------------------------------------------------
 -- ai_call_quota  (daily per-user cap on AI generations)

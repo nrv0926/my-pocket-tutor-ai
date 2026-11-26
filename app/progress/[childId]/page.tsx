@@ -32,7 +32,7 @@ export default async function ChildProgressPage({
     supabase
       .from("progress_records")
       .select(
-        "id, child_id, session_id, skill, status, difficulty, parent_feedback, completed_independently, notes, created_at"
+        "id, child_id, session_id, skill, status, difficulty, parent_feedback, completed_independently, mode_of_support, notes, created_at"
       )
       .eq("child_id", params.childId)
       .order("created_at", { ascending: false }),
@@ -50,6 +50,7 @@ export default async function ChildProgressPage({
     difficulty: r.difficulty,
     parentFeedback: r.parent_feedback,
     completedIndependently: r.completed_independently,
+    modeOfSupport: r.mode_of_support,
     notes: r.notes,
     createdAt: r.created_at,
   }));

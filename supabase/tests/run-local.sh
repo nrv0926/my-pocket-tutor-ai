@@ -91,7 +91,7 @@ grant select on auth.users to anon, authenticated, service_role;
 GRANTS
 
 fail=0
-for t in rls app-writes; do
+for t in rls app-writes assessment; do
   echo "==> tests/$t.sql"
   if command psql -h /tmp -p "$PORT" -U postgres -v ON_ERROR_STOP=1 \
        -f "$SQL_DIR/tests/$t.sql" 2>&1 | grep -E 'NOTICE|ERROR' | sed 's/^psql:[^ ]* //'; then :; fi

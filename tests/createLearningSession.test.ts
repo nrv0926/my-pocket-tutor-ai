@@ -43,6 +43,11 @@ function fakeSupabase() {
       const chain: Record<string, unknown> = {
         select: () => chain,
         eq: () => chain,
+        // item_observations is queried with .in() and .not(); without
+        // these the chain returns undefined and the action dies before
+        // it ever reaches the insert.
+        in: () => chain,
+        not: () => chain,
         order: () => chain,
         limit: async () => ({ data: [], error: null }),
         single: async () => {
