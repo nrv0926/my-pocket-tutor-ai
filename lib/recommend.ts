@@ -1,4 +1,5 @@
 import { ASSESSMENT_DEFAULTS, type AssessmentConfig } from "@/lib/config/assessment";
+import { prerequisiteFor } from "@/lib/skills";
 import { INDEPENDENT_MODES, type ModeOfSupport } from "@/types/progress";
 
 /**
@@ -71,8 +72,14 @@ export interface Recommendation {
   /** The skill or topic chosen. Null when there is nothing to name yet. */
   skillKey: string | null;
   evidence: Evidence;
-  /** Only on check_prerequisite. Null until data/skills.json exists. */
+  /**
+   * Only on check_prerequisite: the skill to check underneath this one.
+   * Still null where the graph has no edge — a root skill has nothing
+   * beneath it, and saying so is better than inventing a step.
+   */
   prerequisite?: string | null;
+  /** That prerequisite's plain-English name, for the page. */
+  prerequisiteLabel?: string | null;
   /** Why, in words, when the decision needs one. */
   reason?: string;
 }
@@ -80,6 +87,12 @@ export interface Recommendation {
 export interface RecommendOptions extends Partial<AssessmentConfig> {
   /** Defaults to now. Passed in by tests so they do not depend on a clock. */
   now?: Date;
+  /**
+   * How to find what sits underneath a skill. Defaults to the real graph
+   * in lib/skills.ts; injected by tests so they do not depend on the data
+   * file, and overridable if a caller ever needs a different ordering.
+   */
+  prerequisiteLookup?: (skillKey: string) => { id: string; label: string } | null;
 }
 
 const emptyEvidence = (items: ObservationRow[] = []): Evidence => ({
@@ -181,12 +194,22 @@ export function recommend(
   };
 
   if (pick.percent < cfg.prerequisiteBelow) {
+    const lookup =
+      options.prerequisiteLookup ??
+      ((key: string) => {
+        const node = prerequisiteFor(key);
+        return node ? { id: node.id, label: node.label } : null;
+      });
+    const under = lookup(pick.key);
     return {
       decision: "check_prerequisite",
       skillKey: pick.key,
       evidence,
-      prerequisite: null,
-      reason: "no prerequisite mapped",
+      prerequisite: under?.id ?? null,
+      prerequisiteLabel: under?.label ?? null,
+      reason: under
+        ? `Check ${under.label} first — a gap underneath is usually the real cause.`
+        : "no prerequisite mapped",
     };
   }
 

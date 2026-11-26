@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getServerSupabase } from "@/lib/supabaseServer";
+import { skillById } from "@/lib/skills";
 import { aggregateMode } from "@/types/progress";
 
 /**
@@ -71,11 +72,16 @@ export async function saveCapture(input: {
     );
   }
 
-  // Until data/skills.json exists (Phase 3), the session's primary
-  // skill-map id is the grouping key. It comes from data/skill-map.json
-  // via mapToSkillIds, so it is catalog data rather than a guess.
+  // The session's primary skill, from mapToSkillIds, which matches the
+  // analysis against data/skill-map.json. skill_id is set only when the
+  // id is actually in the graph, because recommend() uses it to look up
+  // a prerequisite and a key that resolves to nothing is worse than
+  // none. topic_id keeps the raw value either way, as the fallback
+  // grouping key for anything the graph does not yet know about.
   const gaps = (session.top_skill_gaps ?? []) as string[];
-  const topicId = gaps.length > 0 ? gaps[0] : null;
+  const primary = gaps.length > 0 ? gaps[0] : null;
+  const topicId = primary;
+  const skillId = primary && skillById(primary) ? primary : null;
 
   // Retries never overwrite attempt 1: they become attempt 2, 3, …
   const { data: prior } = await supabase
@@ -94,7 +100,7 @@ export async function saveCapture(input: {
     child_id: session.child_id,
     session_id: session.id,
     item_id: item.itemId,
-    skill_id: null,
+    skill_id: skillId,
     topic_id: topicId,
     answer: item.answer ?? null,
     mode_of_support: item.mode,

@@ -1,4 +1,4 @@
-import { skillLabel } from "@/lib/skillGapEngine";
+import { skillName } from "@/lib/skills";
 import type { Recommendation } from "@/lib/recommend";
 
 /**
@@ -30,7 +30,7 @@ const EXPLAIN: Record<Recommendation["decision"], string> = {
 };
 
 export default function NextStepCard({ rec }: { rec: Recommendation }) {
-  const name = rec.skillKey ? skillLabel(rec.skillKey) : "";
+  const name = rec.skillKey ? skillName(rec.skillKey) : "";
   const { score, maxPoints, sessionIds, items } = rec.evidence;
   const sessions = sessionIds.length;
 
@@ -58,11 +58,17 @@ export default function NextStepCard({ rec }: { rec: Recommendation }) {
         <p className="mt-2 max-w-prose text-sm text-pop-night/60">{rec.reason}</p>
       )}
 
-      {rec.decision === "check_prerequisite" && rec.prerequisite === null && (
+      {rec.decision === "check_prerequisite" && rec.prerequisite && (
+        <p className="mt-3 rounded-xl border-[3px] border-pop-night bg-pop-cyan px-3 py-2 text-pop-night">
+          Start with <strong>{rec.prerequisiteLabel}</strong>.
+        </p>
+      )}
+
+      {rec.decision === "check_prerequisite" && !rec.prerequisite && (
         <p className="mt-2 max-w-prose text-sm text-pop-night/60">
-          We haven&apos;t mapped what comes before this one yet, so you&apos;ll
-          need to pick it. The usual candidates are the step just before it in
-          the same strand.
+          Nothing is mapped underneath this one — it is already a starting
+          point in its strand. Repeat it with smaller steps rather than
+          looking for something before it.
         </p>
       )}
 

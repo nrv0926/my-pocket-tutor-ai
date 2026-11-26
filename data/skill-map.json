@@ -1,36 +1,434 @@
 {
   "version": "0.1.0",
-  "note": "Canonical, machine-friendly IDs for every teachable skill the MVP can reference. Keep these stable; they appear in progress_records.skill.",
+  "note": "Canonical, machine-friendly IDs for every teachable skill the MVP can reference. Keep these stable; they appear in progress_records.skill and item_observations.skill_id. `label` and `prerequisiteIds` are OURS: the labels are plain English, and the ordering follows the progressions already in this directory — the seven phonics stages and the five science-of-reading pillars in literacy-progression.json, and the grade sequence in math-progression.json. They are not Ontario's and must never be presented as Ontario's. `terms` are ours too, and are search terms ONLY: they are matched at a word boundary against Ontario's own published wording and against the Language Foundations Continuum to DERIVE which expectations a skill covers. No expectation code is ever stored here, because a stored code is a code somebody typed, and an invented one is worse than a missing one.",
   "skills": [
-    { "id": "phonemic_awareness.rhyming",       "subject": "reading", "label": "Rhyming words",                "minGrade": "K" },
-    { "id": "phonemic_awareness.segmenting",    "subject": "reading", "label": "Segmenting sounds in a word",  "minGrade": "K" },
-    { "id": "phonics.cvc",                       "subject": "reading", "label": "Reading CVC words",            "minGrade": "K" },
-    { "id": "phonics.digraphs",                  "subject": "reading", "label": "Reading digraphs (sh, ch, th)","minGrade": "1" },
-    { "id": "phonics.blends",                    "subject": "reading", "label": "Reading consonant blends",     "minGrade": "1" },
-    { "id": "phonics.silent_e",                  "subject": "reading", "label": "Silent e words",               "minGrade": "1" },
-    { "id": "phonics.vowel_teams",               "subject": "reading", "label": "Vowel team words",             "minGrade": "2" },
-    { "id": "phonics.r_controlled",              "subject": "reading", "label": "R-controlled vowels",          "minGrade": "2" },
-    { "id": "phonics.multisyllabic",             "subject": "reading", "label": "Multisyllabic words",          "minGrade": "3" },
-    { "id": "fluency.expression",                "subject": "reading", "label": "Reading with expression",      "minGrade": "1" },
-    { "id": "vocabulary.context_clues",          "subject": "reading", "label": "Using context for meaning",    "minGrade": "2" },
-    { "id": "comprehension.main_idea",           "subject": "reading", "label": "Main idea of a passage",       "minGrade": "2" },
-    { "id": "comprehension.inference",           "subject": "reading", "label": "Making an inference",          "minGrade": "3" },
-    { "id": "writing.sentence_structure",        "subject": "writing", "label": "Complete sentences",           "minGrade": "1" },
-    { "id": "writing.paragraph",                 "subject": "writing", "label": "Topic + supporting sentences", "minGrade": "3" },
-    { "id": "writing.opinion_piece",             "subject": "writing", "label": "Opinion piece with reasons",   "minGrade": "5" },
-    { "id": "math.addition_within_20",           "subject": "math",    "label": "Add within 20",                "minGrade": "1" },
-    { "id": "math.subtraction_within_20",        "subject": "math",    "label": "Subtract within 20",           "minGrade": "1" },
-    { "id": "math.place_value_100",              "subject": "math",    "label": "Place value to 100",           "minGrade": "1" },
-    { "id": "math.addition_within_100",          "subject": "math",    "label": "Add within 100",               "minGrade": "2" },
-    { "id": "math.subtraction_within_100",       "subject": "math",    "label": "Subtract within 100",          "minGrade": "2" },
-    { "id": "math.multiplication_facts",         "subject": "math",    "label": "Multiplication facts",         "minGrade": "3" },
-    { "id": "math.division_facts",               "subject": "math",    "label": "Division facts",               "minGrade": "3" },
-    { "id": "math.fractions_unit",               "subject": "math",    "label": "Identify unit fractions",      "minGrade": "3" },
-    { "id": "math.multi_digit_mult",             "subject": "math",    "label": "Multi-digit multiplication",   "minGrade": "4" },
-    { "id": "math.area_perimeter",               "subject": "math",    "label": "Area and perimeter",           "minGrade": "4" },
-    { "id": "math.fractions_add_sub_like",       "subject": "math",    "label": "Add/sub fractions (like)",     "minGrade": "5" },
-    { "id": "math.decimals",                     "subject": "math",    "label": "Decimal place value",          "minGrade": "5" },
-    { "id": "math.ratios_percent",               "subject": "math",    "label": "Ratios and percentages",       "minGrade": "6" },
-    { "id": "math.order_of_operations",          "subject": "math",    "label": "Order of operations (BEDMAS)", "minGrade": "6" }
+    {
+      "id": "phonemic_awareness.rhyming",
+      "subject": "reading",
+      "label": "Rhyming words",
+      "minGrade": "K",
+      "prerequisiteIds": [],
+      "terms": [
+        "rhym",
+        "sound",
+        "oral language"
+      ]
+    },
+    {
+      "id": "phonemic_awareness.segmenting",
+      "subject": "reading",
+      "label": "Segmenting sounds in a word",
+      "minGrade": "K",
+      "prerequisiteIds": [
+        "phonemic_awareness.rhyming"
+      ],
+      "terms": [
+        "segment",
+        "phoneme",
+        "syllable",
+        "blend"
+      ]
+    },
+    {
+      "id": "phonics.cvc",
+      "subject": "reading",
+      "label": "Reading CVC words",
+      "minGrade": "K",
+      "prerequisiteIds": [
+        "phonemic_awareness.segmenting"
+      ],
+      "terms": [
+        "letter-sound",
+        "grapheme",
+        "decod",
+        "short vowel",
+        "CVC"
+      ]
+    },
+    {
+      "id": "phonics.digraphs",
+      "subject": "reading",
+      "label": "Reading digraphs (sh, ch, th)",
+      "minGrade": "1",
+      "prerequisiteIds": [
+        "phonics.cvc"
+      ],
+      "terms": [
+        "digraph",
+        "consonant"
+      ]
+    },
+    {
+      "id": "phonics.blends",
+      "subject": "reading",
+      "label": "Reading consonant blends",
+      "minGrade": "1",
+      "prerequisiteIds": [
+        "phonics.digraphs"
+      ],
+      "terms": [
+        "blend",
+        "consonant cluster"
+      ]
+    },
+    {
+      "id": "phonics.silent_e",
+      "subject": "reading",
+      "label": "Silent e words",
+      "minGrade": "1",
+      "prerequisiteIds": [
+        "phonics.blends"
+      ],
+      "terms": [
+        "silent e",
+        "long vowel",
+        "vowel-consonant-e"
+      ]
+    },
+    {
+      "id": "phonics.vowel_teams",
+      "subject": "reading",
+      "label": "Vowel team words",
+      "minGrade": "2",
+      "prerequisiteIds": [
+        "phonics.silent_e"
+      ],
+      "terms": [
+        "vowel team",
+        "vowel digraph",
+        "diphthong"
+      ]
+    },
+    {
+      "id": "phonics.r_controlled",
+      "subject": "reading",
+      "label": "R-controlled vowels",
+      "minGrade": "2",
+      "prerequisiteIds": [
+        "phonics.vowel_teams"
+      ],
+      "terms": [
+        "r-controlled",
+        "vowel-r"
+      ]
+    },
+    {
+      "id": "phonics.multisyllabic",
+      "subject": "reading",
+      "label": "Multisyllabic words",
+      "minGrade": "3",
+      "prerequisiteIds": [
+        "phonics.r_controlled"
+      ],
+      "terms": [
+        "multisyllabic",
+        "syllable",
+        "morpheme",
+        "affix"
+      ]
+    },
+    {
+      "id": "fluency.expression",
+      "subject": "reading",
+      "label": "Reading with expression",
+      "minGrade": "1",
+      "prerequisiteIds": [
+        "phonics.cvc"
+      ],
+      "terms": [
+        "fluency",
+        "expression",
+        "phrasing",
+        "read aloud",
+        "accuracy"
+      ]
+    },
+    {
+      "id": "vocabulary.context_clues",
+      "subject": "reading",
+      "label": "Using context for meaning",
+      "minGrade": "2",
+      "prerequisiteIds": [
+        "fluency.expression"
+      ],
+      "terms": [
+        "vocabulary",
+        "word meaning",
+        "context"
+      ]
+    },
+    {
+      "id": "comprehension.main_idea",
+      "subject": "reading",
+      "label": "Main idea of a passage",
+      "minGrade": "2",
+      "prerequisiteIds": [
+        "vocabulary.context_clues"
+      ],
+      "terms": [
+        "main idea",
+        "central idea",
+        "summar",
+        "comprehen"
+      ]
+    },
+    {
+      "id": "comprehension.inference",
+      "subject": "reading",
+      "label": "Making an inference",
+      "minGrade": "3",
+      "prerequisiteIds": [
+        "comprehension.main_idea"
+      ],
+      "terms": [
+        "inference",
+        "infer",
+        "implied",
+        "conclusion"
+      ]
+    },
+    {
+      "id": "writing.sentence_structure",
+      "subject": "writing",
+      "label": "Complete sentences",
+      "minGrade": "1",
+      "prerequisiteIds": [],
+      "terms": [
+        "sentence",
+        "punctuation",
+        "capital"
+      ]
+    },
+    {
+      "id": "writing.paragraph",
+      "subject": "writing",
+      "label": "Topic + supporting sentences",
+      "minGrade": "3",
+      "prerequisiteIds": [
+        "writing.sentence_structure"
+      ],
+      "terms": [
+        "paragraph",
+        "topic sentence",
+        "supporting"
+      ]
+    },
+    {
+      "id": "writing.opinion_piece",
+      "subject": "writing",
+      "label": "Opinion piece with reasons",
+      "minGrade": "5",
+      "prerequisiteIds": [
+        "writing.paragraph"
+      ],
+      "terms": [
+        "opinion",
+        "persuas",
+        "argument",
+        "point of view"
+      ]
+    },
+    {
+      "id": "math.addition_within_20",
+      "subject": "math",
+      "label": "Add within 20",
+      "minGrade": "1",
+      "prerequisiteIds": [],
+      "terms": [
+        "addition",
+        "add",
+        "sum"
+      ]
+    },
+    {
+      "id": "math.subtraction_within_20",
+      "subject": "math",
+      "label": "Subtract within 20",
+      "minGrade": "1",
+      "prerequisiteIds": [
+        "math.addition_within_20"
+      ],
+      "terms": [
+        "subtraction",
+        "subtract",
+        "difference"
+      ]
+    },
+    {
+      "id": "math.place_value_100",
+      "subject": "math",
+      "label": "Place value to 100",
+      "minGrade": "1",
+      "prerequisiteIds": [],
+      "terms": [
+        "place value",
+        "tens",
+        "ones",
+        "whole numbers"
+      ]
+    },
+    {
+      "id": "math.addition_within_100",
+      "subject": "math",
+      "label": "Add within 100",
+      "minGrade": "2",
+      "prerequisiteIds": [
+        "math.place_value_100",
+        "math.addition_within_20"
+      ],
+      "terms": [
+        "addition",
+        "regroup",
+        "two-digit"
+      ]
+    },
+    {
+      "id": "math.subtraction_within_100",
+      "subject": "math",
+      "label": "Subtract within 100",
+      "minGrade": "2",
+      "prerequisiteIds": [
+        "math.place_value_100",
+        "math.subtraction_within_20"
+      ],
+      "terms": [
+        "subtraction",
+        "regroup",
+        "two-digit"
+      ]
+    },
+    {
+      "id": "math.multiplication_facts",
+      "subject": "math",
+      "label": "Multiplication facts",
+      "minGrade": "3",
+      "prerequisiteIds": [
+        "math.addition_within_20"
+      ],
+      "terms": [
+        "multiplication",
+        "multiply",
+        "times table",
+        "product"
+      ]
+    },
+    {
+      "id": "math.division_facts",
+      "subject": "math",
+      "label": "Division facts",
+      "minGrade": "3",
+      "prerequisiteIds": [
+        "math.multiplication_facts"
+      ],
+      "terms": [
+        "division",
+        "divide",
+        "quotient"
+      ]
+    },
+    {
+      "id": "math.fractions_unit",
+      "subject": "math",
+      "label": "Identify unit fractions",
+      "minGrade": "3",
+      "prerequisiteIds": [
+        "math.division_facts"
+      ],
+      "terms": [
+        "fraction",
+        "unit fraction",
+        "numerator",
+        "denominator"
+      ]
+    },
+    {
+      "id": "math.multi_digit_mult",
+      "subject": "math",
+      "label": "Multi-digit multiplication",
+      "minGrade": "4",
+      "prerequisiteIds": [
+        "math.multiplication_facts",
+        "math.place_value_100"
+      ],
+      "terms": [
+        "multiplication",
+        "multi-digit",
+        "algorithm"
+      ]
+    },
+    {
+      "id": "math.area_perimeter",
+      "subject": "math",
+      "label": "Area and perimeter",
+      "minGrade": "4",
+      "prerequisiteIds": [
+        "math.multiplication_facts"
+      ],
+      "terms": [
+        "area",
+        "perimeter",
+        "rectangle"
+      ]
+    },
+    {
+      "id": "math.fractions_add_sub_like",
+      "subject": "math",
+      "label": "Add/sub fractions (like)",
+      "minGrade": "5",
+      "prerequisiteIds": [
+        "math.fractions_unit"
+      ],
+      "terms": [
+        "fraction",
+        "equivalent",
+        "denominator"
+      ]
+    },
+    {
+      "id": "math.decimals",
+      "subject": "math",
+      "label": "Decimal place value",
+      "minGrade": "5",
+      "prerequisiteIds": [
+        "math.place_value_100",
+        "math.fractions_unit"
+      ],
+      "terms": [
+        "decimal",
+        "tenths",
+        "hundredths"
+      ]
+    },
+    {
+      "id": "math.ratios_percent",
+      "subject": "math",
+      "label": "Ratios and percentages",
+      "minGrade": "6",
+      "prerequisiteIds": [
+        "math.fractions_add_sub_like",
+        "math.decimals"
+      ],
+      "terms": [
+        "ratio",
+        "percent",
+        "rate",
+        "proportion"
+      ]
+    },
+    {
+      "id": "math.order_of_operations",
+      "subject": "math",
+      "label": "Order of operations (BEDMAS)",
+      "minGrade": "6",
+      "prerequisiteIds": [
+        "math.multiplication_facts",
+        "math.division_facts"
+      ],
+      "terms": [
+        "order of operations",
+        "expression",
+        "bracket"
+      ]
+    }
   ]
 }
