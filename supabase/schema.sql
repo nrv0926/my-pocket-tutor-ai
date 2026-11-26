@@ -177,8 +177,17 @@ create table if not exists public.item_observations (
   max_points               int,
   attempt                  smallint not null default 1 check (attempt >= 1),
   exclude_from_adaptation  boolean not null default false,
+  -- Open responses (0008). A rubric item is not evidence until a person
+  -- has confirmed it; the suggestion is kept beside the confirmation so
+  -- the two can be compared later.
+  rubric_scores            jsonb,
+  suggested_score          int,
+  confirmed_at             timestamptz,
   created_at               timestamptz not null default now(),
 
+  constraint item_obs_rubric_confirmed check (
+    rubric_scores is null or status <> 'scored' or confirmed_at is not null
+  ),
   constraint item_obs_session_child_fk
     foreign key (session_id, child_id)
     references public.learning_sessions (id, child_id) on delete cascade,

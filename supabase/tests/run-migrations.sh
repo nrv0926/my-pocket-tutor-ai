@@ -98,13 +98,13 @@ BEFORE_N=$(psql -tAc "select count(*) from public.progress_records where complet
 echo "    before: true=$BEFORE_T false=$BEFORE_F null=$BEFORE_N"
 
 echo "==> applying 0004 .. 0007"
-for m in 0004_mode_of_support 0005_session_close 0006_item_observations 0007_worksheet_item_ids; do
+for m in 0004_mode_of_support 0005_session_close 0006_item_observations 0007_worksheet_item_ids 0008_rubrics; do
   psql -f "$SQL_DIR/migrations/$m.sql"
   echo "    $m ok"
 done
 
 echo "==> applying them a second time (idempotence)"
-for m in 0004_mode_of_support 0005_session_close 0006_item_observations 0007_worksheet_item_ids; do
+for m in 0004_mode_of_support 0005_session_close 0006_item_observations 0007_worksheet_item_ids 0008_rubrics; do
   psql -f "$SQL_DIR/migrations/$m.sql"
 done
 echo "    re-run clean"
@@ -177,8 +177,34 @@ begin
     raise exception 'the rewrite lost question content: %', j; end if;
   raise notice 'ok: question content survives the rewrite';
 
+  -- 0008: a rubric item is not evidence until a person confirmed it
+  begin
+    insert into public.item_observations
+      (child_id, session_id, item_id, mode_of_support, status, score, max_points,
+       rubric_scores)
+    values ('00000000-0000-0000-0000-0000000000c1','00000000-0000-0000-0000-0000000000a1',
+            'r1','independent','scored',2,3,'{"answer":1,"prove":1,"explain":0}'::jsonb);
+    raise exception 'a confirmed rubric score was accepted with no confirmed_at';
+  exception when check_violation then
+    raise notice 'ok: a scored rubric item must say who confirmed it';
+  end;
+
+  insert into public.item_observations
+    (child_id, session_id, item_id, mode_of_support, status, rubric_scores)
+  values ('00000000-0000-0000-0000-0000000000c1','00000000-0000-0000-0000-0000000000a1',
+          'r2','independent','pending_review','{"answer":1}'::jsonb);
+  raise notice 'ok: an unreviewed rubric item sits at pending_review with no score';
+
+  insert into public.item_observations
+    (child_id, session_id, item_id, mode_of_support, status, score, max_points,
+     rubric_scores, suggested_score, confirmed_at)
+  values ('00000000-0000-0000-0000-0000000000c1','00000000-0000-0000-0000-0000000000a1',
+          'r3','independent','scored',2,3,'{"answer":1,"prove":1,"explain":0}'::jsonb,
+          3, now());
+  raise notice 'ok: a confirmed rubric item keeps the suggestion beside it';
+
   raise notice '=========================================';
-  raise notice 'MIGRATION 0004-0007 CHECKS PASSED';
+  raise notice 'MIGRATION 0004-0008 CHECKS PASSED';
   raise notice '=========================================';
 end $$;
 CHECK
