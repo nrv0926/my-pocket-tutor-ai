@@ -30,8 +30,9 @@ export default function DemoLoopPage() {
           a database, so a reload clears it.
         </p>
         <p className="mt-2 max-w-prose text-sm text-pop-night/60">
-          The three learners sit on real gaps from the October check-ups. For
-          the rendering of every component on its own, see{" "}
+          The three cases are illustrative — this page is public, so no real
+          learner appears on it. For the rendering of every component on its
+          own, see{" "}
           <Link href="/qa-preview" className="text-pop-magenta underline">
             /qa-preview
           </Link>

@@ -1,16 +1,27 @@
 import type { Worksheet } from "@/types/session";
 
 /**
- * Three learners, each sitting on a real gap from the October check-ups,
- * so the loop is exercised on the cases it was built for rather than on
- * invented ones. The skill ids are real entries in data/skill-map.json.
+ * Three illustrative cases, one per band the engine has to handle.
+ *
+ * NO REAL LEARNER APPEARS HERE, and none should. /demo/loop is a public
+ * route — it is deliberately outside PROTECTED_PREFIXES so the loop can
+ * be exercised without signing in — so anything in this file is readable
+ * by anyone who can reach the deployment. A first name beside a grade and
+ * a named difficulty identifies a child in a small family, and CLAUDE.md
+ * §3 is explicit that names and PII stay out.
+ *
+ * The cases are chosen to exercise the engine, not to describe anybody:
+ * one early reader, one mid-primary regrouping case, one multi-digit
+ * multiplication case. The skill ids are real entries in
+ * data/skill-map.json, which is how the prerequisite graph gets hit.
  */
 export interface DemoLearner {
   id: string;
+  /** A case, not a person. */
   name: string;
   grade: string;
   skillId: string;
-  /** Why this skill, in one line. */
+  /** What this case is for, in one line. */
   because: string;
   worksheet: Worksheet;
   answerKey: { questionId: string; answer: string }[];
@@ -34,7 +45,7 @@ const sheet = (
   answerKey: rows.map(([, answer], i) => ({ questionId: `q${i + 1}`, answer })),
 });
 
-const leo = sheet("Digraphs: sh, ch, th", [
+const earlyReader = sheet("Digraphs: sh, ch, th", [
   ["Read aloud: ship", "ship"],
   ["Read aloud: chat", "chat"],
   ["Read aloud: thin", "thin"],
@@ -43,7 +54,7 @@ const leo = sheet("Digraphs: sh, ch, th", [
   ["Read the sentence: Chad has a fish.", "read without guessing"],
 ]);
 
-const iliana = sheet("Subtracting with a trade", [
+const regrouping = sheet("Subtracting with a trade", [
   ["64 − 28 = ?", "36"],
   ["52 − 17 = ?", "35"],
   ["71 − 46 = ?", "25"],
@@ -52,7 +63,7 @@ const iliana = sheet("Subtracting with a trade", [
   ["90 − 35 = ?", "55"],
 ]);
 
-const penny = sheet(
+const multiplying = sheet(
   "Multiplying by breaking apart",
   [
     ["20 × 4 = ?", "80"],
@@ -67,27 +78,27 @@ const penny = sheet(
 
 export const LEARNERS: DemoLearner[] = [
   {
-    id: "leo",
-    name: "Leo",
+    id: "early-reader",
+    name: "Grade 1 · digraphs",
     grade: "1",
     skillId: "phonics.digraphs",
-    because: "Missed the sight word “have”; working through sh, ch, th.",
-    ...leo,
+    because: "An early reader partway through sh, ch and th.",
+    ...earlyReader,
   },
   {
-    id: "iliana",
-    name: "Iliana",
+    id: "regrouping",
+    name: "Grade 3 · regrouping",
     grade: "3",
     skillId: "math.subtraction_within_100",
-    because: "2 of 10 on adding with a trade. Subtraction was clicking.",
-    ...iliana,
+    because: "Trading across a ten. Rests on place value underneath.",
+    ...regrouping,
   },
   {
-    id: "penny",
-    name: "Penny",
+    id: "multiplying",
+    name: "Grade 5 · multiplying",
     grade: "5",
     skillId: "math.multi_digit_mult",
-    because: "1 of 12 on two-digit times one-digit. Said 20 × 4 = 4000.",
-    ...penny,
+    because: "Two digits by one, by breaking the number apart.",
+    ...multiplying,
   },
 ];

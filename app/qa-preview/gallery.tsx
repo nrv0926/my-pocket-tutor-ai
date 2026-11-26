@@ -269,8 +269,9 @@ export default function PreviewGallery() {
 
       <Block label="ContinueCard — the thread, picked back up">
         <div className="grid gap-3 sm:grid-cols-2">
-          <ContinueCard nickname="Iliana" grade="3" kind="student" continuity={THREAD} />
-          <ContinueCard nickname="Penelope" grade="5" kind="student" continuity={THREAD_NO_FEEDBACK} />
+          {/* Placeholder names only: /qa-preview is public. */}
+          <ContinueCard nickname="Avery" grade="3" kind="student" continuity={THREAD} />
+          <ContinueCard nickname="Jordan" grade="5" kind="student" continuity={THREAD_NO_FEEDBACK} />
           <ContinueCard nickname="Grade 4 Math" grade="4" kind="class" continuity={THREAD_FRESH} />
         </div>
       </Block>

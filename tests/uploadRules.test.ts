@@ -77,7 +77,7 @@ describe("storagePath", () => {
   });
 
   it("strips characters that have no business in a key", () => {
-    const p = storagePath(USER, UP, "Iliana's report (term 2).pdf");
+    const p = storagePath(USER, UP, "A child's report (term 2).pdf");
     expect(p).not.toMatch(/[ '()]/);
     expect(p).toMatch(/\.pdf$/);
   });
