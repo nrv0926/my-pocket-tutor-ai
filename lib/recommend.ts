@@ -123,10 +123,20 @@ export function qualifies(row: ObservationRow, cutoff: Date): boolean {
   return new Date(row.sessionClosedAt) >= cutoff;
 }
 
-export function recommend(
+interface EligibleGroup {
+  key: string;
+  items: ObservationRow[];
+  percent: number;
+}
+
+/**
+ * Everything both entry points need: the config, the rows that counted,
+ * and the groups with enough evidence to decide from — weakest first.
+ */
+function assemble(
   observations: ObservationRow[],
-  options: RecommendOptions = {},
-): Recommendation {
+  options: RecommendOptions,
+): { cfg: AssessmentConfig; counted: ObservationRow[]; eligible: EligibleGroup[] } {
   const cfg: AssessmentConfig = { ...ASSESSMENT_DEFAULTS, ...options };
   const now = options.now ?? new Date();
   const cutoff = new Date(now.getTime() - cfg.windowDays * 86_400_000);
@@ -144,7 +154,7 @@ export function recommend(
 
   // A group is eligible only if enough separate closed sessions each
   // carried enough items. One good day is not evidence.
-  const eligible: { key: string; items: ObservationRow[]; percent: number }[] = [];
+  const eligible: EligibleGroup[] = [];
   for (const [key, items] of groups) {
     const perSession = new Map<string, ObservationRow[]>();
     for (const row of items) {
@@ -160,18 +170,6 @@ export function recommend(
     eligible.push({ key, items: used, percent: score / maxPoints });
   }
 
-  if (eligible.length === 0) {
-    return {
-      decision: "collect_more_evidence",
-      skillKey: null,
-      evidence: emptyEvidence(counted),
-      reason:
-        counted.length === 0
-          ? "Nothing has been recorded yet that they did on their own in a finished session."
-          : `Not enough yet. Two finished sessions with at least ${cfg.minItemsPerSession} questions each are needed before this can suggest a next step.`,
-    };
-  }
-
   // Weakest first: where a child is struggling is where to start. Ties
   // broken by most recent, then by name, so the answer is deterministic.
   eligible.sort(
@@ -182,7 +180,15 @@ export function recommend(
       a.key.localeCompare(b.key),
   );
 
-  const pick = eligible[0];
+  return { cfg, counted, eligible };
+}
+
+/** The decision for one group. Thresholds applied, nothing chosen. */
+function decide(
+  pick: EligibleGroup,
+  cfg: AssessmentConfig,
+  options: RecommendOptions,
+): Recommendation {
   const score = pick.items.reduce((n, i) => n + (i.score ?? 0), 0);
   const maxPoints = pick.items.reduce((n, i) => n + (i.maxPoints ?? 0), 0);
   const evidence: Evidence = {
@@ -237,4 +243,43 @@ export function recommend(
   }
 
   return { decision: "practise_same_skill", skillKey: pick.key, evidence };
+}
+
+/**
+ * One decision per skill with enough evidence, weakest first.
+ *
+ * A session can carry two skills, and they are not the same question: a
+ * child can be at 25% on regrouping and 100% on addition facts in the very
+ * same sitting. recommend() answers "what next" with one step, which is
+ * what the page shows an adult at 9pm; this answers "where does each skill
+ * stand", which is what a report or a planner needs. Empty when nothing
+ * qualifies yet — there is no decision to report, not a weak one.
+ */
+export function recommendAll(
+  observations: ObservationRow[],
+  options: RecommendOptions = {},
+): Recommendation[] {
+  const { cfg, eligible } = assemble(observations, options);
+  return eligible.map((pick) => decide(pick, cfg, options));
+}
+
+export function recommend(
+  observations: ObservationRow[],
+  options: RecommendOptions = {},
+): Recommendation {
+  const { cfg, counted, eligible } = assemble(observations, options);
+
+  if (eligible.length === 0) {
+    return {
+      decision: "collect_more_evidence",
+      skillKey: null,
+      evidence: emptyEvidence(counted),
+      reason:
+        counted.length === 0
+          ? "Nothing has been recorded yet that they did on their own in a finished session."
+          : `Not enough yet. Two finished sessions with at least ${cfg.minItemsPerSession} questions each are needed before this can suggest a next step.`,
+    };
+  }
+
+  return decide(eligible[0], cfg, options);
 }
